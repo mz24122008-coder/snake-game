@@ -17,104 +17,59 @@
             -webkit-user-select: none;
             touch-action: manipulation;
         }
-        body {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 8px;
-        }
+        body { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 8px; }
 
         .screen { display: none; flex-direction: column; align-items: center; width: 100%; height: 100%; justify-content: center; }
         .screen.active { display: flex; }
 
-        /* ПРОФИЛЬ */
         #userBox {
-            display: none;
-            align-items: center;
-            gap: 10px;
-            padding: 8px 14px;
-            background: rgba(74, 222, 128, 0.08);
+            display: none; align-items: center; gap: 10px;
+            padding: 8px 14px; background: rgba(74, 222, 128, 0.08);
             border: 1px solid rgba(74, 222, 128, 0.3);
-            border-radius: 40px;
-            margin-bottom: 20px;
-            font-size: 14px;
-            color: #cbd5e1;
+            border-radius: 40px; margin-bottom: 20px; font-size: 14px; color: #cbd5e1;
         }
         #userBox.show { display: flex; }
         #userAvatar {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background: #4ade80;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            color: #0f0f1a;
-            font-size: 14px;
+            width: 32px; height: 32px; border-radius: 50%;
+            background: #4ade80; display: flex; align-items: center; justify-content: center;
+            font-weight: bold; color: #0f0f1a; font-size: 14px;
         }
         #userName { font-weight: 600; color: #4ade80; }
 
-        /* МЕНЮ */
         h1 {
-            font-size: 46px;
-            font-weight: 900;
+            font-size: 46px; font-weight: 900;
             background: linear-gradient(135deg, #4ade80, #22d3ee);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            letter-spacing: -2px;
-            margin-bottom: 6px;
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text; letter-spacing: -2px; margin-bottom: 6px;
         }
         .subtitle { color: #94a3b8; margin-bottom: 32px; font-size: 13px; letter-spacing: 3px; }
 
         .menu-btn {
-            width: 250px;
-            padding: 18px;
-            margin: 6px 0;
+            width: 250px; padding: 18px; margin: 6px 0;
             background: rgba(74, 222, 128, 0.08);
-            border: 2px solid #4ade80;
-            color: #4ade80;
-            font-size: 17px;
-            font-weight: 700;
-            border-radius: 16px;
-            transition: transform 0.06s, background 0.1s;
-            cursor: pointer;
+            border: 2px solid #4ade80; color: #4ade80;
+            font-size: 17px; font-weight: 700; border-radius: 16px;
+            transition: transform 0.06s, background 0.1s; cursor: pointer;
         }
-        .menu-btn:active { background: #4ade80; color: #0f0f1a; transform: scale(0.96); }
+        .menu-btn:active, .menu-btn.pressed { background: #4ade80; color: #0f0f1a; transform: scale(0.96); }
         .menu-btn.primary { background: #4ade80; color: #0f0f1a; }
-        .menu-btn.primary:active { background: #22c55e; }
+        .menu-btn.primary:active, .menu-btn.primary.pressed { background: #22c55e; }
 
-        .high-score {
-            margin-top: 24px;
-            color: #facc15;
-            font-size: 14px;
-            letter-spacing: 1px;
-        }
+        .high-score { margin-top: 24px; color: #facc15; font-size: 14px; letter-spacing: 1px; }
 
-        /* ИГРА */
         #hud {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            width: 100%;
-            max-width: 500px;
-            padding: 0 10px 8px;
-            font-size: 14px;
-            font-weight: 700;
+            display: flex; justify-content: space-between; align-items: center;
+            width: 100%; max-width: 500px; padding: 0 10px 8px;
+            font-size: 14px; font-weight: 700;
         }
         #scoreHud { color: #4ade80; }
         #speedHud { color: #22d3ee; }
         #fpsHud { color: #64748b; font-size: 12px; }
 
         #game {
-            background: #0a0a14;
-            border-radius: 16px;
+            background: #0a0a14; border-radius: 16px;
             box-shadow: 0 0 40px rgba(74, 222, 128, 0.18), inset 0 0 0 1px rgba(74, 222, 128, 0.2);
-            touch-action: none;
-            display: block;
-            transition: transform 0.05s;
+            touch-action: none; display: block; transition: transform 0.05s;
         }
         #game.shake { transform: translate(1px, 1px); }
 
@@ -128,28 +83,62 @@
         .btn {
             background: linear-gradient(180deg, rgba(74,222,128,0.14), rgba(74,222,128,0.06));
             border: 2px solid rgba(74, 222, 128, 0.7);
-            color: #4ade80;
-            font-size: 32px;
-            font-weight: bold;
-            border-radius: 18px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            color: #4ade80; font-size: 32px; font-weight: bold; border-radius: 18px;
+            display: flex; align-items: center; justify-content: center;
             transition: transform 0.06s, background 0.1s;
-            box-shadow: 0 4px 0 rgba(34, 197, 94, 0.3);
-            cursor: pointer;
+            box-shadow: 0 4px 0 rgba(34, 197, 94, 0.3); cursor: pointer;
         }
         .btn.pressed {
-            background: #4ade80;
-            color: #0f0f1a;
-            transform: translateY(2px);
-            box-shadow: 0 2px 0 rgba(34, 197, 94, 0.5);
+            background: #4ade80; color: #0f0f1a;
+            transform: translateY(2px); box-shadow: 0 2px 0 rgba(34, 197, 94, 0.5);
         }
 
-        /* GAME OVER */
         #overTitle { font-size: 36px; color: #ef4444; margin-bottom: 10px; font-weight: 900; letter-spacing: -1px; }
         #overScore { font-size: 22px; color: #4ade80; margin-bottom: 6px; font-weight: 700; }
         #overHigh { font-size: 14px; color: #facc15; margin-bottom: 24px; min-height: 20px; }
+        #submitStatus { font-size: 12px; color: #64748b; min-height: 16px; margin-bottom: 8px; }
+
+        /* РЕЙТИНГ */
+        #lbTitle {
+            font-size: 32px; font-weight: 900; margin-bottom: 16px;
+            background: linear-gradient(135deg, #facc15, #4ade80);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        #lbList {
+            width: 100%; max-width: 380px;
+            background: rgba(10, 10, 20, 0.6);
+            border: 1px solid rgba(74, 222, 128, 0.2);
+            border-radius: 16px; padding: 8px;
+            max-height: 55vh; overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        .lbRow {
+            display: flex; align-items: center; gap: 10px;
+            padding: 10px 12px; border-radius: 10px;
+            font-size: 15px; margin-bottom: 2px;
+        }
+        .lbRow.me {
+            background: rgba(74, 222, 128, 0.15);
+            border: 1px solid rgba(74, 222, 128, 0.4);
+        }
+        .lbRank {
+            width: 34px; font-weight: 900; color: #94a3b8;
+            text-align: center; flex-shrink: 0;
+        }
+        .lbRank.top1 { color: #facc15; font-size: 18px; }
+        .lbRank.top2 { color: #cbd5e1; font-size: 17px; }
+        .lbRank.top3 { color: #f59e0b; font-size: 17px; }
+        .lbName { flex: 1; color: #e2e8f0; font-weight: 600;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .lbScore { color: #4ade80; font-weight: 900; font-size: 16px; }
+        #lbStatus { color: #64748b; font-size: 14px; padding: 40px 20px; text-align: center; }
+        #lbRefresh {
+            margin-top: 16px; padding: 12px 28px;
+            background: rgba(74, 222, 128, 0.1);
+            border: 2px solid rgba(74, 222, 128, 0.5);
+            color: #4ade80; border-radius: 12px; font-weight: 700; font-size: 14px;
+        }
     </style>
 </head>
 <body>
@@ -163,9 +152,9 @@
         <h1>ЗМЕЙКА</h1>
         <div class="subtitle">BATTLE EDITION</div>
         <button class="menu-btn primary" data-action="play">▶  Играть</button>
+        <button class="menu-btn" data-action="leaderboard">🏆  Рейтинг</button>
         <button class="menu-btn" data-action="share">📤  Поделиться</button>
-        <button class="menu-btn" data-action="skins">Скины (скоро)</button>
-        <button class="menu-btn" data-action="leaderboard">Рейтинг (скоро)</button>
+        <button class="menu-btn" data-action="skins">🎨  Скины (скоро)</button>
         <div class="high-score">Рекорд: <span id="menuHigh">0</span></div>
     </div>
 
@@ -192,28 +181,36 @@
         <div id="overTitle">ИГРА ОКОНЧЕНА</div>
         <div id="overScore">Счёт: 0</div>
         <div id="overHigh"></div>
+        <div id="submitStatus"></div>
         <button class="menu-btn primary" data-action="play">🔄  Ещё раз</button>
+        <button class="menu-btn" data-action="leaderboard">🏆  Рейтинг</button>
         <button class="menu-btn" data-action="menu">🏠  Меню</button>
     </div>
 
+    <!-- РЕЙТИНГ -->
+    <div id="leaderboardScreen" class="screen">
+        <div id="lbTitle">🏆  ТОП ИГРОКОВ</div>
+        <div id="lbList"><div id="lbStatus">Загрузка...</div></div>
+        <button id="lbRefresh" data-action="lbRefresh">🔄  Обновить</button>
+        <button class="menu-btn" data-action="menu" style="margin-top:10px;">🏠  В меню</button>
+    </div>
+
 <script>
+// ================== КОНФИГ ==================
+const BIN_ID = '6aa93256ac6210605acffcdf';
+const MASTER_KEY = '$2a$10$3jAxvBubFU/n15BoFgKVS.SIL5E/j1fcLADrALJEk3hrvhiOXvNvi';
+const API_BASE = 'https://api.jsonbin.io/v3/b/';
+
 // ================== TELEGRAM ==================
 const tg = window.Telegram ? window.Telegram.WebApp : null;
 let tgUser = null;
-
 if (tg) {
-    try {
-        tg.ready();
-        tg.expand();
-        tgUser = tg.initDataUnsafe && tg.initDataUnsafe.user;
-    } catch(e) { console.warn('TG init error', e); }
+    try { tg.ready(); tg.expand(); tgUser = tg.initDataUnsafe && tg.initDataUnsafe.user; }
+    catch(e) { console.warn(e); }
 }
 
-// ================== НАСТРОЙКИ ==================
-const GRID = 20;
-const BASE_SPEED = 200;
-const MIN_SPEED = 70;
-const SPEED_STEP = 4;
+// ================== НАСТРОЙКИ ИГРЫ ==================
+const GRID = 20, BASE_SPEED = 200, MIN_SPEED = 70, SPEED_STEP = 4;
 
 // ================== СОСТОЯНИЕ ==================
 let canvas, ctx, cellSize, dpr, canvasSize;
@@ -222,19 +219,18 @@ let lastTick, lastFrameTime, rafId, running;
 let particles = [];
 let frameCount = 0, fpsLastUpdate = 0, fps = 60;
 let highScore = parseInt(localStorage.getItem('snakeHigh') || '0', 10);
+let leaderboardOpen = false, lbInterval = null;
 
 // ================== CANVAS ==================
 function initCanvas() {
     canvas = document.getElementById('game');
     ctx = canvas.getContext('2d');
     dpr = Math.min(window.devicePixelRatio || 1, 3);
-
     const availW = window.innerWidth - 24;
     const availH = window.innerHeight - 320;
     let size = Math.min(availW, availH, 500);
     size = Math.floor(size / GRID) * GRID;
     canvasSize = size;
-
     canvas.style.width = size + 'px';
     canvas.style.height = size + 'px';
     canvas.width = size * dpr;
@@ -254,17 +250,17 @@ function setupUser() {
 
 // ================== CLOUD STORAGE ==================
 function loadCloudHighScore(cb) {
-    if (!tg || !tg.CloudStorage) { cb(); return; }
+    if (!tg || !tg.CloudStorage) { cb && cb(); return; }
     tg.CloudStorage.getItem('snakeHighScore', (err, val) => {
         if (!err && val) {
-            const cloudScore = parseInt(val, 10);
-            if (cloudScore > highScore) {
-                highScore = cloudScore;
+            const cs = parseInt(val, 10);
+            if (cs > highScore) {
+                highScore = cs;
                 localStorage.setItem('snakeHigh', String(highScore));
                 document.getElementById('menuHigh').textContent = highScore;
             }
         }
-        cb();
+        cb && cb();
     });
 }
 function saveCloudHighScore() {
@@ -272,52 +268,129 @@ function saveCloudHighScore() {
     tg.CloudStorage.setItem('snakeHighScore', String(highScore), () => {});
 }
 
+// ================== JSONBIN API ==================
+async function fetchScores() {
+    const res = await fetch(API_BASE + BIN_ID + '/latest', {
+        headers: { 'X-Master-Key': MASTER_KEY, 'X-Bin-Meta': 'false' }
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    return (data && data.scores) ? data.scores : [];
+}
+
+async function saveScores(scores) {
+    const res = await fetch(API_BASE + BIN_ID, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'X-Master-Key': MASTER_KEY },
+        body: JSON.stringify({ scores })
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    return await res.json();
+}
+
+async function submitScore(finalScore) {
+    if (!tgUser || finalScore <= 0) return;
+    const statusEl = document.getElementById('submitStatus');
+    statusEl.textContent = '⏳ Отправка в рейтинг...';
+    try {
+        const scores = await fetchScores();
+        const myId = String(tgUser.id);
+        const myName = tgUser.first_name || tgUser.username || 'игрок';
+        const existing = scores.find(s => s.id === myId);
+
+        if (existing) {
+            if (finalScore > existing.score) {
+                existing.score = finalScore;
+                existing.name = myName;
+                existing.date = Date.now();
+            } else {
+                statusEl.textContent = '✓ В рейтинге уже есть твой рекорд';
+                return;
+            }
+        } else {
+            scores.push({ id: myId, name: myName, score: finalScore, date: Date.now() });
+        }
+
+        scores.sort((a, b) => b.score - a.score);
+        const trimmed = scores.slice(0, 100);
+        await saveScores(trimmed);
+        statusEl.textContent = '✓ Результат отправлен в рейтинг!';
+    } catch (e) {
+        console.warn('submit failed', e);
+        statusEl.textContent = '⚠ Не удалось отправить (проверь интернет)';
+    }
+}
+
+// ================== РЕЙТИНГ UI ==================
+async function renderLeaderboard() {
+    const listEl = document.getElementById('lbList');
+    listEl.innerHTML = '<div id="lbStatus">Загрузка...</div>';
+    try {
+        const scores = await fetchScores();
+        if (!scores.length) {
+            listEl.innerHTML = '<div id="lbStatus">Пока никто не играл.<br>Стань первым! 🐍</div>';
+            return;
+        }
+        const myId = tgUser ? String(tgUser.id) : null;
+        const top = scores.slice(0, 10);
+        const medals = ['🥇', '🥈', '🥉'];
+        let html = '';
+        top.forEach((s, i) => {
+            const isMe = myId && s.id === myId;
+            const rankCls = i === 0 ? 'top1' : i === 1 ? 'top2' : i === 2 ? 'top3' : '';
+            const rankContent = i < 3 ? medals[i] : '#' + (i + 1);
+            const safeName = String(s.name || 'игрок').replace(/[<>&]/g, '');
+            html += `<div class="lbRow${isMe ? ' me' : ''}">
+                <div class="lbRank ${rankCls}">${rankContent}</div>
+                <div class="lbName">${safeName}${isMe ? ' (ты)' : ''}</div>
+                <div class="lbScore">${s.score}</div>
+            </div>`;
+        });
+        listEl.innerHTML = html;
+    } catch (e) {
+        console.warn('lb failed', e);
+        listEl.innerHTML = '<div id="lbStatus">⚠ Не удалось загрузить рейтинг.<br>Проверь интернет и попробуй снова.</div>';
+    }
+}
+
 // ================== ЭКРАНЫ ==================
 function showScreen(id) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById(id).classList.add('active');
+
+    leaderboardOpen = (id === 'leaderboardScreen');
+    if (lbInterval) { clearInterval(lbInterval); lbInterval = null; }
+
     if (id === 'menuScreen') document.getElementById('menuHigh').textContent = highScore;
+    if (id === 'leaderboardScreen') {
+        renderLeaderboard();
+        lbInterval = setInterval(() => { if (leaderboardOpen) renderLeaderboard(); }, 60000);
+    }
 }
-function showSkinInfo() { 
-    if (tg) tg.showAlert('Скины появятся после подключения Stars 🎨');
-    else alert('Скины появятся после подключения Stars 🎨');
-}
-function showLeaderboard() { 
-    if (tg) tg.showAlert('Рейтинг появится после подключения бэкенда 🏆');
-    else alert('Рейтинг появится после подключения бэкенда 🏆');
+
+function showSkinInfo() {
+    const msg = 'Скины появятся после подключения Telegram Stars 🎨';
+    if (tg) tg.showAlert(msg); else alert(msg);
 }
 function shareScore() {
     const text = `🐍 Я набрал ${highScore} очков в Змейка Баттл! Попробуй побить мой рекорд:`;
     const url = 'https://t.me/BattleSnakes_bot';
     if (tg) {
         tg.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`);
-    } else {
-        alert(text + ' ' + url);
-    }
+    } else { alert(text + ' ' + url); }
 }
 
 // ================== ИГРА ==================
 function startGame() {
     initCanvas();
     showScreen('gameScreen');
-
     snake = [{x: 9, y: 10}, {x: 8, y: 10}, {x: 7, y: 10}];
     oldSnake = snake.map(s => ({x: s.x, y: s.y}));
-    dir = {x: 1, y: 0};
-    nextDir = {x: 1, y: 0};
-    score = 0;
-    foodEaten = 0;
-    speed = BASE_SPEED;
-    running = true;
-    lastTick = 0;
-    lastFrameTime = 0;
-    particles = [];
-    frameCount = 0;
-    fpsLastUpdate = 0;
-
-    placeFood();
-    updateHud();
-
+    dir = {x: 1, y: 0}; nextDir = {x: 1, y: 0};
+    score = 0; foodEaten = 0; speed = BASE_SPEED; running = true;
+    lastTick = 0; lastFrameTime = 0; particles = [];
+    frameCount = 0; fpsLastUpdate = 0;
+    placeFood(); updateHud();
     if (rafId) cancelAnimationFrame(rafId);
     rafId = requestAnimationFrame(loop);
 }
@@ -325,80 +398,52 @@ function startGame() {
 function loop(timestamp) {
     if (!running) return;
     if (!lastFrameTime) lastFrameTime = timestamp;
-
-    // FPS
     frameCount++;
     if (!fpsLastUpdate) fpsLastUpdate = timestamp;
     if (timestamp - fpsLastUpdate > 500) {
         fps = Math.round(frameCount * 1000 / (timestamp - fpsLastUpdate));
-        frameCount = 0;
-        fpsLastUpdate = timestamp;
+        frameCount = 0; fpsLastUpdate = timestamp;
         document.getElementById('fpsHud').textContent = fps + ' FPS';
     }
-
     if (!lastTick) lastTick = timestamp;
-    if (timestamp - lastTick >= speed) {
-        lastTick = timestamp;
-        tick();
-    }
-
+    if (timestamp - lastTick >= speed) { lastTick = timestamp; tick(); }
     const progress = Math.min(1, (timestamp - lastTick) / speed);
-    const dt = 16.67;
-
-    updateParticles(dt);
+    updateParticles(16.67);
     render(progress);
-
     rafId = requestAnimationFrame(loop);
 }
 
 function tick() {
     oldSnake = snake.map(s => ({x: s.x, y: s.y}));
-
     dir = {x: nextDir.x, y: nextDir.y};
     const head = {x: snake[0].x + dir.x, y: snake[0].y + dir.y};
-
     if (head.x < 0 || head.x >= GRID || head.y < 0 || head.y >= GRID) return endGame();
     for (let i = 0; i < snake.length; i++) {
         if (snake[i].x === head.x && snake[i].y === head.y) return endGame();
     }
-
     snake.unshift(head);
-
     if (head.x === food.x && head.y === food.y) {
-        score += food.points;
-        foodEaten++;
+        score += food.points; foodEaten++;
         speed = Math.max(MIN_SPEED, BASE_SPEED - foodEaten * SPEED_STEP);
-        updateHud();
-        haptic('light');
-
+        updateHud(); haptic('light');
         canvas.classList.add('shake');
         setTimeout(() => canvas.classList.remove('shake'), 80);
-
         const cx = food.x * cellSize + cellSize / 2;
         const cy = food.y * cellSize + cellSize / 2;
         spawnParticles(cx, cy, food.golden ? '#facc15' : '#ef4444');
-
         placeFood();
-    } else {
-        snake.pop();
-    }
+    } else { snake.pop(); }
 }
 
 function placeFood() {
     while (true) {
-        const f = {
-            x: Math.floor(Math.random() * GRID),
-            y: Math.floor(Math.random() * GRID)
-        };
+        const f = { x: Math.floor(Math.random() * GRID), y: Math.floor(Math.random() * GRID) };
         let busy = false;
-        for (const s of snake) {
-            if (s.x === f.x && s.y === f.y) { busy = true; break; }
-        }
+        for (const s of snake) if (s.x === f.x && s.y === f.y) { busy = true; break; }
         if (!busy) {
             f.golden = Math.random() < 0.15;
             f.points = f.golden ? 5 : 1;
-            food = f;
-            return;
+            food = f; return;
         }
     }
 }
@@ -408,25 +453,15 @@ function spawnParticles(x, y, color) {
     for (let i = 0; i < 12; i++) {
         const a = Math.random() * Math.PI * 2;
         const sp = 0.5 + Math.random() * 2.5;
-        particles.push({
-            x, y,
-            vx: Math.cos(a) * sp,
-            vy: Math.sin(a) * sp,
-            life: 1,
-            color,
-            size: 2 + Math.random() * 3
-        });
+        particles.push({ x, y, vx: Math.cos(a)*sp, vy: Math.sin(a)*sp, life: 1, color, size: 2 + Math.random()*3 });
     }
 }
 function updateParticles(dt) {
     const k = dt / 16.67;
     for (let i = particles.length - 1; i >= 0; i--) {
         const p = particles[i];
-        p.x += p.vx * k;
-        p.y += p.vy * k;
-        p.vx *= 0.93;
-        p.vy *= 0.93;
-        p.life -= 0.03 * k;
+        p.x += p.vx * k; p.y += p.vy * k;
+        p.vx *= 0.93; p.vy *= 0.93; p.life -= 0.03 * k;
         if (p.life <= 0) particles.splice(i, 1);
     }
 }
@@ -434,12 +469,8 @@ function updateParticles(dt) {
 // ================== РЕНДЕР ==================
 function render(progress) {
     const w = canvasSize, h = canvasSize;
-
-    ctx.fillStyle = '#0a0a14';
-    ctx.fillRect(0, 0, w, h);
-
-    ctx.strokeStyle = 'rgba(74, 222, 128, 0.05)';
-    ctx.lineWidth = 1;
+    ctx.fillStyle = '#0a0a14'; ctx.fillRect(0, 0, w, h);
+    ctx.strokeStyle = 'rgba(74, 222, 128, 0.05)'; ctx.lineWidth = 1;
     ctx.beginPath();
     for (let i = 1; i < GRID; i++) {
         const p = i * cellSize;
@@ -448,64 +479,47 @@ function render(progress) {
     }
     ctx.stroke();
 
-    // еда
     const pulse = 1 + Math.sin(performance.now() / 180) * 0.18;
     const fx = food.x * cellSize + cellSize / 2;
     const fy = food.y * cellSize + cellSize / 2;
     const fr = (cellSize / 2 - 1.5) * pulse;
-
     ctx.shadowColor = food.golden ? '#facc15' : '#ef4444';
     ctx.shadowBlur = food.golden ? 15 : 10;
     ctx.fillStyle = food.golden ? '#facc15' : '#ef4444';
-    ctx.beginPath();
-    ctx.arc(fx, fy, fr, 0, Math.PI * 2);
-    ctx.fill();
+    ctx.beginPath(); ctx.arc(fx, fy, fr, 0, Math.PI * 2); ctx.fill();
     ctx.shadowBlur = 0;
 
-    // змейка
     const len = snake.length;
     for (let i = len - 1; i >= 0; i--) {
         const newP = snake[i];
         const oldP = oldSnake[i] || newP;
-
         let ox = oldP.x, oy = oldP.y;
         if (Math.abs(newP.x - oldP.x) > 2) ox = newP.x;
         if (Math.abs(newP.y - oldP.y) > 2) oy = newP.y;
-
         const x = ox + (newP.x - ox) * progress;
         const y = oy + (newP.y - oy) * progress;
 
         if (i === 0) {
-            ctx.fillStyle = '#4ade80';
-            ctx.shadowColor = '#4ade80';
-            ctx.shadowBlur = 14;
+            ctx.fillStyle = '#4ade80'; ctx.shadowColor = '#4ade80'; ctx.shadowBlur = 14;
         } else {
             const t = i / Math.max(1, len);
             const r = Math.floor(34 + (74 - 34) * (1 - t));
             const g = Math.floor(197 + (222 - 197) * (1 - t));
             const b = Math.floor(94 + (128 - 94) * (1 - t));
-            ctx.fillStyle = `rgb(${r},${g},${b})`;
-            ctx.shadowBlur = 0;
+            ctx.fillStyle = `rgb(${r},${g},${b})`; ctx.shadowBlur = 0;
         }
-
         const pad = i === 0 ? 0.6 : 1.4;
-        const px = x * cellSize + pad;
-        const py = y * cellSize + pad;
-        const ps = cellSize - pad * 2;
-
+        const px = x * cellSize + pad, py = y * cellSize + pad, ps = cellSize - pad * 2;
         ctx.beginPath();
         const rad = i === 0 ? ps * 0.35 : ps * 0.2;
         roundRect(ctx, px, py, ps, ps, rad);
         ctx.fill();
     }
     ctx.shadowBlur = 0;
-
     for (const p of particles) {
         ctx.globalAlpha = p.life;
         ctx.fillStyle = p.color;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.size * p.life, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.beginPath(); ctx.arc(p.x, p.y, p.size * p.life, 0, Math.PI * 2); ctx.fill();
     }
     ctx.globalAlpha = 1;
 }
@@ -524,39 +538,30 @@ function roundRect(ctx, x, y, w, h, r) {
 
 function updateHud() {
     document.getElementById('scoreHud').textContent = 'Счёт: ' + score;
-    const mult = (BASE_SPEED / speed).toFixed(1);
-    document.getElementById('speedHud').textContent = 'x' + mult;
+    document.getElementById('speedHud').textContent = 'x' + (BASE_SPEED / speed).toFixed(1);
 }
 
 function endGame() {
     running = false;
     if (rafId) cancelAnimationFrame(rafId);
     haptic('medium');
-
     const isNewRecord = score > highScore;
     if (isNewRecord) {
         highScore = score;
         localStorage.setItem('snakeHigh', String(highScore));
         saveCloudHighScore();
     }
-
     document.getElementById('overScore').textContent = 'Счёт: ' + score;
-    document.getElementById('overHigh').textContent = isNewRecord
-        ? '🎉 НОВЫЙ РЕКОРД!'
-        : 'Рекорд: ' + highScore;
-
+    document.getElementById('overHigh').textContent = isNewRecord ? '🎉 НОВЫЙ РЕКОРД!' : 'Рекорд: ' + highScore;
+    document.getElementById('submitStatus').textContent = '';
     showScreen('overScreen');
+    if (score > 0) submitScore(score);
 }
 
 // ================== УПРАВЛЕНИЕ ==================
 function setDir(d) {
     if (!running) return;
-    const dirs = {
-        up:    {x: 0,  y: -1},
-        down:  {x: 0,  y: 1},
-        left:  {x: -1, y: 0},
-        right: {x: 1,  y: 0}
-    };
+    const dirs = { up:{x:0,y:-1}, down:{x:0,y:1}, left:{x:-1,y:0}, right:{x:1,y:0} };
     const nd = dirs[d];
     if (!nd) return;
     if (nd.x === -dir.x && nd.y === -dir.y) return;
@@ -566,13 +571,10 @@ function setDir(d) {
 }
 
 function haptic(type) {
-    try {
-        if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred(type || 'light');
-    } catch(e) {}
+    try { if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred(type || 'light'); } catch(e){}
 }
 
-// ================== МГНОВЕННЫЕ КНОПКИ ==================
-// Вместо click используем touchstart/pointerdown — нулевая задержка на iOS
+// Быстрые кнопки (мгновенный отклик)
 function bindFastPress(el, handler) {
     let pressed = false;
     const down = (e) => {
@@ -582,45 +584,35 @@ function bindFastPress(el, handler) {
         el.classList.add('pressed');
         handler();
     };
-    const up = () => {
-        pressed = false;
-        el.classList.remove('pressed');
-    };
+    const up = () => { pressed = false; el.classList.remove('pressed'); };
     el.addEventListener('touchstart', down, {passive: false});
     el.addEventListener('touchend', up);
     el.addEventListener('touchcancel', up);
-    // fallback для мыши/десктопа
     el.addEventListener('mousedown', down);
     el.addEventListener('mouseup', up);
     el.addEventListener('mouseleave', up);
 }
 
-// кнопки направления
 document.querySelectorAll('.btn').forEach(btn => {
     bindFastPress(btn, () => setDir(btn.dataset.dir));
 });
 
-// кнопки меню и game over
-document.querySelectorAll('.menu-btn').forEach(btn => {
+document.querySelectorAll('[data-action]').forEach(btn => {
     bindFastPress(btn, () => {
-        const action = btn.dataset.action;
-        if (action === 'play') startGame();
-        else if (action === 'menu') showScreen('menuScreen');
-        else if (action === 'share') shareScore();
-        else if (action === 'skins') showSkinInfo();
-        else if (action === 'leaderboard') showLeaderboard();
+        const a = btn.dataset.action;
+        if (a === 'play') startGame();
+        else if (a === 'menu') showScreen('menuScreen');
+        else if (a === 'share') shareScore();
+        else if (a === 'skins') showSkinInfo();
+        else if (a === 'leaderboard') showScreen('leaderboardScreen');
+        else if (a === 'lbRefresh') renderLeaderboard();
     });
 });
 
-// свайпы
 let touchX = null, touchY = null;
 document.getElementById('gameScreen').addEventListener('touchstart', e => {
-    if (e.target.id === 'game') {
-        touchX = e.touches[0].clientX;
-        touchY = e.touches[0].clientY;
-    }
+    if (e.target.id === 'game') { touchX = e.touches[0].clientX; touchY = e.touches[0].clientY; }
 }, {passive: true});
-
 document.getElementById('gameScreen').addEventListener('touchend', e => {
     if (touchX === null) return;
     const dx = e.changedTouches[0].clientX - touchX;
@@ -633,7 +625,7 @@ document.getElementById('gameScreen').addEventListener('touchend', e => {
 }, {passive: true});
 
 document.addEventListener('keydown', e => {
-    const map = {ArrowUp:'up', ArrowDown:'down', ArrowLeft:'left', ArrowRight:'right'};
+    const map = {ArrowUp:'up',ArrowDown:'down',ArrowLeft:'left',ArrowRight:'right'};
     if (map[e.key]) { e.preventDefault(); setDir(map[e.key]); }
 });
 
