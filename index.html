@@ -7,80 +7,197 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
-        html, body { height: 100%; overflow: hidden; background: radial-gradient(circle at 50% 0%, #1e1b4b 0%, #0f0f1a 70%); color: white; font-family: -apple-system, sans-serif; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
-        body { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 8px; }
-        .screen { display: none; flex-direction: column; align-items: center; width: 100%; height: 100%; justify-content: center; }
+        html, body { height: 100%; overflow: hidden; background: #0a0a14; color: white; font-family: -apple-system, sans-serif; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
+
+        /* Анимированный фон */
+        body::before {
+            content: ''; position: fixed; top: -50%; left: -50%; width: 200%; height: 200%;
+            background: radial-gradient(circle at 30% 20%, rgba(74, 222, 128, 0.12) 0%, transparent 40%),
+                        radial-gradient(circle at 70% 80%, rgba(34, 211, 238, 0.1) 0%, transparent 40%),
+                        radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.08) 0%, transparent 50%);
+            animation: bgFloat 20s ease-in-out infinite; z-index: 0; pointer-events: none;
+        }
+        @keyframes bgFloat {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            50% { transform: translate(3%, -3%) rotate(5deg); }
+        }
+
+        body { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 8px; position: relative; }
+        .screen { display: none; flex-direction: column; align-items: center; width: 100%; height: 100%; justify-content: center; position: relative; z-index: 1; }
         .screen.active { display: flex; }
-        #userBox { display: none; align-items: center; gap: 10px; padding: 8px 14px; background: rgba(74, 222, 128, 0.08); border: 1px solid rgba(74, 222, 128, 0.3); border-radius: 40px; margin-bottom: 20px; font-size: 14px; color: #cbd5e1; }
+
+        /* USER */
+        #userBox { display: none; align-items: center; gap: 10px; padding: 8px 14px; background: rgba(74, 222, 128, 0.08); border: 1px solid rgba(74, 222, 128, 0.3); border-radius: 40px; margin-bottom: 18px; font-size: 14px; color: #cbd5e1; backdrop-filter: blur(10px); }
         #userBox.show { display: flex; }
-        #userAvatar { width: 32px; height: 32px; border-radius: 50%; background: #4ade80; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #0f0f1a; font-size: 14px; }
+        #userAvatar { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #4ade80, #22d3ee); display: flex; align-items: center; justify-content: center; font-weight: bold; color: #0f0f1a; font-size: 14px; }
         #userName { font-weight: 600; color: #4ade80; }
-        h1 { font-size: 46px; font-weight: 900; background: linear-gradient(135deg, #4ade80, #22d3ee); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; letter-spacing: -2px; margin-bottom: 6px; }
-        .subtitle { color: #94a3b8; margin-bottom: 32px; font-size: 13px; letter-spacing: 3px; }
-        .menu-btn { width: 250px; padding: 18px; margin: 6px 0; background: rgba(74, 222, 128, 0.08); border: 2px solid #4ade80; color: #4ade80; font-size: 17px; font-weight: 700; border-radius: 16px; cursor: pointer; -webkit-appearance: none; appearance: none; font-family: inherit; }
-        .menu-btn:active, .menu-btn.pressed { background: #4ade80; color: #0f0f1a; transform: scale(0.96); }
-        .menu-btn.primary { background: #4ade80; color: #0f0f1a; }
-        .menu-btn.primary:active, .menu-btn.primary.pressed { background: #22c55e; }
-        .buy-btn { width: 250px; padding: 18px; margin: 6px 0; background: rgba(250, 204, 21, 0.1); border: 2px solid #facc15; color: #facc15; font-size: 17px; font-weight: 700; border-radius: 16px; cursor: pointer; -webkit-appearance: none; appearance: none; font-family: inherit; }
-        .buy-btn:active, .buy-btn.pressed { background: #facc15; color: #0f0f1a; transform: scale(0.96); }
-        .high-score { margin-top: 24px; color: #facc15; font-size: 14px; letter-spacing: 1px; }
+
+        /* MENU */
+        h1 {
+            font-size: 52px; font-weight: 900;
+            background: linear-gradient(135deg, #4ade80 0%, #22d3ee 50%, #8b5cf6 100%);
+            background-size: 200% 200%;
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+            letter-spacing: -3px; margin-bottom: 4px;
+            animation: gradientShift 4s ease-in-out infinite;
+            filter: drop-shadow(0 0 30px rgba(74, 222, 128, 0.4));
+        }
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        .subtitle { color: #94a3b8; margin-bottom: 28px; font-size: 12px; letter-spacing: 4px; }
+
+        .menu-btn {
+            width: 260px; padding: 16px; margin: 5px 0;
+            background: rgba(74, 222, 128, 0.06);
+            border: 2px solid rgba(74, 222, 128, 0.6);
+            color: #4ade80; font-size: 16px; font-weight: 700;
+            border-radius: 14px; cursor: pointer;
+            -webkit-appearance: none; appearance: none; font-family: inherit;
+            transition: all 0.15s;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            backdrop-filter: blur(10px);
+        }
+        .menu-btn:active { background: #4ade80; color: #0f0f1a; transform: scale(0.97); }
+        .menu-btn.primary {
+            background: linear-gradient(135deg, #4ade80, #22c55e);
+            color: #0f0f1a; border-color: transparent;
+            box-shadow: 0 6px 20px rgba(74, 222, 128, 0.35);
+        }
+        .menu-btn.primary:active { background: #22c55e; }
+        .menu-btn.premium {
+            background: linear-gradient(135deg, rgba(250, 204, 21, 0.15), rgba(245, 158, 11, 0.08));
+            border-color: #facc15; color: #facc15;
+        }
+        .menu-btn.premium:active { background: #facc15; color: #0f0f1a; }
+
+        .high-score { margin-top: 20px; color: #facc15; font-size: 14px; letter-spacing: 1px; display: flex; align-items: center; gap: 6px; }
+
+        /* HUD */
         #hud { display: flex; justify-content: space-between; align-items: center; width: 100%; max-width: 500px; padding: 0 10px 8px; font-size: 14px; font-weight: 700; }
         #scoreHud { color: #4ade80; }
         #speedHud { color: #22d3ee; }
         #fpsHud { color: #64748b; font-size: 12px; }
         #game { background: #0a0a14; border-radius: 16px; box-shadow: 0 0 40px rgba(74, 222, 128, 0.18), inset 0 0 0 1px rgba(74, 222, 128, 0.2); touch-action: none; display: block; }
         #controls { margin-top: 14px; display: grid; grid-template-columns: repeat(3, 78px); grid-template-rows: repeat(2, 78px); gap: 10px; }
-        .btn { background: linear-gradient(180deg, rgba(74,222,128,0.14), rgba(74,222,128,0.06)); border: 2px solid rgba(74, 222, 128, 0.7); color: #4ade80; font-size: 32px; font-weight: bold; border-radius: 18px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 0 rgba(34, 197, 94, 0.3); cursor: pointer; -webkit-appearance: none; appearance: none; font-family: inherit; }
+        .btn {
+            background: linear-gradient(180deg, rgba(74,222,128,0.14), rgba(74,222,128,0.06));
+            border: 2px solid rgba(74, 222, 128, 0.7); color: #4ade80;
+            font-size: 32px; font-weight: bold; border-radius: 18px;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 0 rgba(34, 197, 94, 0.3); cursor: pointer;
+            -webkit-appearance: none; appearance: none; font-family: inherit;
+        }
         .btn.pressed { background: #4ade80; color: #0f0f1a; transform: translateY(2px); box-shadow: 0 2px 0 rgba(34, 197, 94, 0.5); }
-        #overTitle { font-size: 36px; color: #ef4444; margin-bottom: 10px; font-weight: 900; letter-spacing: -1px; }
-        #overScore { font-size: 22px; color: #4ade80; margin-bottom: 4px; font-weight: 700; }
+
+        /* GAME OVER */
+        #overTitle { font-size: 34px; color: #ef4444; margin-bottom: 10px; font-weight: 900; letter-spacing: -1px; text-shadow: 0 0 30px rgba(239, 68, 68, 0.5); }
+        #overScore { font-size: 24px; color: #4ade80; margin-bottom: 4px; font-weight: 900; }
         #overInfo { font-size: 13px; color: #94a3b8; margin-bottom: 8px; }
-        #overHigh { font-size: 14px; color: #facc15; margin-bottom: 16px; min-height: 20px; }
-        #submitStatus { font-size: 12px; color: #64748b; min-height: 16px; margin-bottom: 12px; }
-        #lbTitle { font-size: 30px; font-weight: 900; margin-bottom: 8px; background: linear-gradient(135deg, #facc15, #4ade80); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-        #lbRules { font-size: 11px; color: #64748b; margin-bottom: 14px; text-align: center; line-height: 1.5; }
-        #lbList { width: 100%; max-width: 380px; background: rgba(10, 10, 20, 0.6); border: 1px solid rgba(74, 222, 128, 0.2); border-radius: 16px; padding: 8px; max-height: 50vh; overflow-y: auto; -webkit-overflow-scrolling: touch; }
-        .lbRow { display: flex; align-items: center; gap: 8px; padding: 10px 10px; border-radius: 10px; font-size: 14px; margin-bottom: 3px; }
+        #overHigh { font-size: 14px; color: #facc15; margin-bottom: 14px; min-height: 20px; font-weight: 700; }
+        #submitStatus { font-size: 12px; color: #64748b; min-height: 16px; margin-bottom: 10px; }
+        .buy-btn {
+            width: 260px; padding: 16px; margin: 5px 0;
+            background: linear-gradient(135deg, rgba(250, 204, 21, 0.2), rgba(245, 158, 11, 0.1));
+            border: 2px solid #facc15; color: #facc15;
+            font-size: 16px; font-weight: 800; border-radius: 14px;
+            cursor: pointer; -webkit-appearance: none; appearance: none; font-family: inherit;
+            box-shadow: 0 6px 20px rgba(250, 204, 21, 0.2);
+        }
+        .buy-btn:active { background: #facc15; color: #0f0f1a; transform: scale(0.97); }
+
+        /* LEADERBOARD */
+        #lbTitle { font-size: 28px; font-weight: 900; margin-bottom: 6px; background: linear-gradient(135deg, #facc15, #4ade80); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        #lbRules { font-size: 11px; color: #64748b; margin-bottom: 12px; text-align: center; line-height: 1.5; }
+
+        /* ПОДИУМ */
+        #podium { display: flex; align-items: flex-end; justify-content: center; gap: 6px; margin-bottom: 14px; min-height: 130px; width: 100%; max-width: 380px; }
+        .podium-place { display: flex; flex-direction: column; align-items: center; flex: 1; }
+        .podium-avatar { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 18px; color: #0f0f1a; margin-bottom: 6px; border: 3px solid; }
+        .podium-1 .podium-avatar { border-color: #facc15; background: linear-gradient(135deg, #facc15, #f59e0b); box-shadow: 0 0 20px rgba(250, 204, 21, 0.5); }
+        .podium-2 .podium-avatar { border-color: #cbd5e1; background: linear-gradient(135deg, #cbd5e1, #94a3b8); }
+        .podium-3 .podium-avatar { border-color: #f59e0b; background: linear-gradient(135deg, #f59e0b, #b45309); }
+        .podium-name { font-size: 11px; color: #e2e8f0; font-weight: 700; max-width: 90px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: center; margin-bottom: 3px; }
+        .podium-score { font-size: 16px; font-weight: 900; color: #4ade80; margin-bottom: 4px; }
+        .podium-info { font-size: 10px; color: #64748b; text-align: center; }
+        .podium-bar { width: 100%; border-radius: 8px 8px 0 0; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 900; color: #0f0f1a; }
+        .podium-1 .podium-bar { height: 60px; background: linear-gradient(180deg, #facc15, #f59e0b); box-shadow: 0 0 30px rgba(250, 204, 21, 0.4); }
+        .podium-2 .podium-bar { height: 45px; background: linear-gradient(180deg, #cbd5e1, #94a3b8); }
+        .podium-3 .podium-bar { height: 35px; background: linear-gradient(180deg, #f59e0b, #b45309); }
+
+        #lbList { width: 100%; max-width: 380px; background: rgba(10, 10, 20, 0.6); border: 1px solid rgba(74, 222, 128, 0.2); border-radius: 16px; padding: 6px; max-height: 35vh; overflow-y: auto; -webkit-overflow-scrolling: touch; backdrop-filter: blur(10px); }
+        .lbRow { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 10px; font-size: 14px; margin-bottom: 2px; }
         .lbRow.me { background: rgba(74, 222, 128, 0.15); border: 1px solid rgba(74, 222, 128, 0.4); }
         .lbRank { width: 30px; font-weight: 900; color: #94a3b8; text-align: center; flex-shrink: 0; }
-        .lbRank.top1 { color: #facc15; font-size: 18px; }
-        .lbRank.top2 { color: #cbd5e1; font-size: 17px; }
-        .lbRank.top3 { color: #f59e0b; font-size: 17px; }
         .lbMain { flex: 1; min-width: 0; }
-        .lbName { color: #e2e8f0; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 14px; }
-        .lbSub { color: #64748b; font-size: 11px; margin-top: 2px; }
-        .lbScore { color: #4ade80; font-weight: 900; font-size: 18px; text-align: right; }
-        #lbStatus { color: #64748b; font-size: 14px; padding: 40px 20px; text-align: center; }
-        #lbRefresh { margin-top: 14px; padding: 12px 28px; background: rgba(74, 222, 128, 0.1); border: 2px solid rgba(74, 222, 128, 0.5); color: #4ade80; border-radius: 12px; font-weight: 700; font-size: 14px; cursor: pointer; -webkit-appearance: none; appearance: none; font-family: inherit; }
-        #lbCacheInfo { color: #475569; font-size: 11px; margin-top: 8px; min-height: 14px; }
+        .lbName { color: #e2e8f0; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 13px; }
+        .lbSub { color: #64748b; font-size: 10px; margin-top: 2px; }
+        .lbScore { color: #4ade80; font-weight: 900; font-size: 16px; text-align: right; }
+        #lbStatus { color: #64748b; font-size: 14px; padding: 30px 20px; text-align: center; }
+        #lbRefresh { margin-top: 12px; padding: 10px 24px; background: rgba(74, 222, 128, 0.1); border: 2px solid rgba(74, 222, 128, 0.5); color: #4ade80; border-radius: 12px; font-weight: 700; font-size: 13px; cursor: pointer; -webkit-appearance: none; appearance: none; font-family: inherit; }
+        #lbCacheInfo { color: #475569; font-size: 11px; margin-top: 6px; min-height: 14px; }
+
+        /* СКИНЫ */
+        #shopTitle { font-size: 30px; font-weight: 900; margin-bottom: 4px; background: linear-gradient(135deg, #8b5cf6, #22d3ee); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        #shopSub { font-size: 12px; color: #94a3b8; margin-bottom: 16px; text-align: center; }
+        #skinGrid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; width: 100%; max-width: 380px; margin-bottom: 14px; }
+        .skin-card {
+            padding: 12px; border-radius: 14px;
+            background: rgba(10, 10, 20, 0.6);
+            border: 2px solid rgba(74, 222, 128, 0.2);
+            display: flex; flex-direction: column; align-items: center;
+            cursor: pointer; -webkit-appearance: none; appearance: none; font-family: inherit;
+            transition: all 0.15s;
+        }
+        .skin-card.locked { opacity: 0.55; }
+        .skin-card.selected { border-color: #4ade80; box-shadow: 0 0 20px rgba(74, 222, 128, 0.4); }
+        .skin-preview { width: 50px; height: 50px; border-radius: 12px; margin-bottom: 8px; display: flex; align-items: center; justify-content: center; }
+        .skin-preview svg { width: 40px; height: 40px; }
+        .skin-name { color: #e2e8f0; font-size: 12px; font-weight: 700; margin-bottom: 3px; }
+        .skin-req { color: #94a3b8; font-size: 10px; text-align: center; }
+        .skin-req.done { color: #4ade80; font-weight: 700; }
+
+        /* COUNTDOWN */
         #countdown {
             position: fixed; top: 0; left: 0; right: 0; bottom: 0;
             display: none; align-items: center; justify-content: center;
-            background: rgba(0,0,0,0.8); z-index: 1000;
+            background: rgba(0,0,0,0.85); z-index: 1000;
             font-size: 140px; font-weight: 900; color: #4ade80;
             text-shadow: 0 0 40px #4ade80, 0 0 80px #22c55e;
         }
         #countdown.show { display: flex; }
         #countdown.pulse { animation: pulse 0.9s ease-out; }
         @keyframes pulse {
-            0% { transform: scale(1.6); opacity: 0.3; }
-            60% { transform: scale(0.95); opacity: 1; }
+            0% { transform: scale(1.8); opacity: 0.2; }
+            60% { transform: scale(0.92); opacity: 1; }
             100% { transform: scale(1); opacity: 1; }
         }
-        #errorBox {
-            position: fixed; top: 0; left: 0; right: 0;
-            background: #ef4444; color: white;
-            padding: 12px; font-size: 12px;
-            z-index: 9999; display: none;
-            word-break: break-all; max-height: 40vh; overflow-y: auto;
+
+        /* ERROR */
+        #errorBox { position: fixed; top: 0; left: 0; right: 0; background: #ef4444; color: white; padding: 12px; font-size: 12px; z-index: 9999; display: none; word-break: break-all; max-height: 40vh; overflow-y: auto; }
+
+        /* TOAST */
+        #toast {
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px);
+            background: rgba(30, 41, 59, 0.95); color: white;
+            padding: 12px 24px; border-radius: 12px;
+            font-size: 14px; font-weight: 600; z-index: 9998;
+            border: 1px solid rgba(74, 222, 128, 0.4);
+            transition: transform 0.3s ease-out;
+            max-width: 90vw; text-align: center;
+            backdrop-filter: blur(10px);
         }
+        #toast.show { transform: translateX(-50%) translateY(0); }
     </style>
 </head>
 <body>
 
     <div id="errorBox"></div>
     <div id="countdown"></div>
+    <div id="toast"></div>
 
+    <!-- МЕНЮ -->
     <div id="menuScreen" class="screen active">
         <div id="userBox">
             <div id="userAvatar">?</div>
@@ -90,11 +207,13 @@
         <div class="subtitle">BATTLE EDITION</div>
         <button class="menu-btn primary" onclick="startGame()">▶  Играть</button>
         <button class="menu-btn" onclick="showScreen('leaderboardScreen')">🏆  Рейтинг</button>
+        <button class="menu-btn" onclick="showScreen('shopScreen')">🎨  Скины</button>
         <button class="menu-btn" onclick="shareScore()">📤  Поделиться</button>
-        <button class="menu-btn" onclick="showSkinInfo()">🎨  Скины (скоро)</button>
-        <div class="high-score">Рекорд: <span id="menuHigh">0</span></div>
+        <button class="menu-btn premium" onclick="openStarsShop()">⭐  Магазин звёзд</button>
+        <div class="high-score">🏅 Рекорд: <span id="menuHigh">0</span></div>
     </div>
 
+    <!-- ИГРА -->
     <div id="gameScreen" class="screen">
         <div id="hud">
             <span id="scoreHud">Счёт: 0</span>
@@ -112,6 +231,7 @@
         </div>
     </div>
 
+    <!-- GAME OVER -->
     <div id="overScreen" class="screen">
         <div id="overTitle">ИГРА ОКОНЧЕНА</div>
         <div id="overScore">Счёт: 0</div>
@@ -124,25 +244,29 @@
         <button class="menu-btn" onclick="showScreen('menuScreen')">🏠  Меню</button>
     </div>
 
+    <!-- РЕЙТИНГ -->
     <div id="leaderboardScreen" class="screen">
         <div id="lbTitle">🏆  ТОП ИГРОКОВ</div>
-        <div id="lbRules">
-            1️⃣ Больше очков &nbsp;•&nbsp; 2️⃣ Меньше возрождений &nbsp;•&nbsp; 3️⃣ Меньше времени
-        </div>
+        <div id="lbRules">1️⃣ Больше очков • 2️⃣ Меньше возрождений • 3️⃣ Меньше времени</div>
+        <div id="podium"></div>
         <div id="lbList"><div id="lbStatus">Загрузка...</div></div>
         <div id="lbCacheInfo"></div>
         <button id="lbRefresh" onclick="renderLeaderboard(true)">🔄  Обновить</button>
-        <button class="menu-btn" onclick="showScreen('menuScreen')" style="margin-top:10px;">🏠  В меню</button>
+        <button class="menu-btn" onclick="showScreen('menuScreen')" style="margin-top:8px;">🏠  В меню</button>
+    </div>
+
+    <!-- МАГАЗИН СКИНОВ -->
+    <div id="shopScreen" class="screen">
+        <div id="shopTitle">🎨  СКИНЫ</div>
+        <div id="shopSub">Разблокируй скины, побивая рекорды</div>
+        <div id="skinGrid"></div>
+        <button class="menu-btn" onclick="showScreen('menuScreen')">🏠  В меню</button>
     </div>
 
 <script>
-// ================== ОТЛОВ ОШИБОК ==================
-window.onerror = function(msg, url, line, col, error) {
+window.onerror = function(msg, url, line) {
     var box = document.getElementById('errorBox');
-    if (box) {
-        box.style.display = 'block';
-        box.textContent = 'ОШИБКА: ' + msg + ' (строка ' + line + ')';
-    }
+    if (box) { box.style.display = 'block'; box.textContent = 'ОШИБКА: ' + msg + ' (строка ' + line + ')'; }
     return false;
 };
 
@@ -152,10 +276,26 @@ var MASTER_KEY = '$2a$10$3jAxvBubFU/n15BoFgKVS.SIL5E/j1fcLADrALJEk3hrvhiOXvNvi';
 var API_BASE = 'https://api.jsonbin.io/v3/b/';
 
 var CACHE_TTL = 3 * 60 * 1000;
-var scoresCache = null;
-var scoresCacheTime = 0;
-var lastSubmitTime = 0;
+var scoresCache = null, scoresCacheTime = 0, lastSubmitTime = 0;
 var SUBMIT_COOLDOWN = 5000;
+
+// ================== СКИНЫ ==================
+var SKINS = [
+    { id: 'classic', name: 'Классик',   req: 0,    head: '#4ade80', body: '#22c55e', glow: '#4ade80' },
+    { id: 'ocean',   name: 'Океан',     req: 50,   head: '#22d3ee', body: '#0891b2', glow: '#22d3ee' },
+    { id: 'violet',  name: 'Фиолет',    req: 150,  head: '#a78bfa', body: '#7c3aed', glow: '#a78bfa' },
+    { id: 'fire',    name: 'Огонь',     req: 300,  head: '#f87171', body: '#dc2626', glow: '#f87171' },
+    { id: 'gold',    name: 'Золото',    req: 500,  head: '#facc15', body: '#f59e0b', glow: '#facc15' },
+    { id: 'rainbow', name: 'Радуга',    req: 1000, head: 'rainbow', body: 'rainbow', glow: '#8b5cf6' }
+];
+
+var selectedSkinId = localStorage.getItem('snakeSkin') || 'classic';
+
+function getSkin() {
+    for (var i = 0; i < SKINS.length; i++) if (SKINS[i].id === selectedSkinId) return SKINS[i];
+    return SKINS[0];
+}
+function isSkinUnlocked(skin) { return highScore >= skin.req; }
 
 // ================== TELEGRAM ==================
 var tg = window.Telegram ? window.Telegram.WebApp : null;
@@ -177,11 +317,9 @@ var frameCount = 0, fpsLastUpdate = 0, fps = 60;
 var highScore = parseInt(localStorage.getItem('snakeHigh') || '0', 10);
 var leaderboardOpen = false, lbInterval = null;
 var isBuyingLife = false;
-
-// Текущая партия
 var gameStartTime = 0, gameTime = 0, reviveCount = 0, savedState = null;
+var deathAnim = null; // анимация смерти
 
-// ================== INIT CANVAS ==================
 function initCanvas() {
     canvas = document.getElementById('game');
     ctx = canvas.getContext('2d');
@@ -199,31 +337,31 @@ function initCanvas() {
     cellSize = size / GRID;
 }
 
-// ================== USER ==================
 function setupUser() {
     if (!tgUser) return;
-    var box = document.getElementById('userBox');
-    box.classList.add('show');
+    document.getElementById('userBox').classList.add('show');
     var name = tgUser.first_name || tgUser.username || 'игрок';
     document.getElementById('userName').textContent = name;
     document.getElementById('userAvatar').textContent = name.charAt(0).toUpperCase();
 }
 
-// ================== UTILS ==================
 function formatTime(sec) {
     sec = Math.floor(sec);
     if (sec < 60) return sec + ' сек';
-    var m = Math.floor(sec / 60);
-    var s = sec % 60;
-    return m + ' мин' + (s > 0 ? ' ' + s + ' сек' : '');
+    return Math.floor(sec/60) + ' мин' + (sec%60 > 0 ? ' ' + (sec%60) + ' сек' : '');
+}
+
+function showToast(msg, ms) {
+    var t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(function() { t.classList.remove('show'); }, ms || 2200);
 }
 
 // ================== API ==================
 function fetchScores(forceRefresh) {
     var now = Date.now();
-    if (!forceRefresh && scoresCache && (now - scoresCacheTime) < CACHE_TTL) {
-        return Promise.resolve(scoresCache);
-    }
+    if (!forceRefresh && scoresCache && (now - scoresCacheTime) < CACHE_TTL) return Promise.resolve(scoresCache);
     return fetch(API_BASE + BIN_ID + '/latest', {
         headers: { 'X-Master-Key': MASTER_KEY, 'X-Bin-Meta': 'false' }
     }).then(function(res) {
@@ -254,8 +392,7 @@ function sortScores(arr) {
         if (b.score !== a.score) return b.score - a.score;
         var aR = a.revives || 0, bR = b.revives || 0;
         if (aR !== bR) return aR - bR;
-        var aT = a.time || 0, bT = b.time || 0;
-        return aT - bT;
+        return (a.time || 0) - (b.time || 0);
     });
     return arr;
 }
@@ -272,9 +409,7 @@ function submitScore(finalScore, finalTime, finalRevives) {
         var myId = String(tgUser.id);
         var myName = (tgUser.first_name || tgUser.username || 'игрок').substring(0, 30);
         var existing = null;
-        for (var i = 0; i < scores.length; i++) {
-            if (scores[i].id === myId) { existing = scores[i]; break; }
-        }
+        for (var i = 0; i < scores.length; i++) if (scores[i].id === myId) { existing = scores[i]; break; }
 
         if (existing) {
             var better = false;
@@ -283,21 +418,15 @@ function submitScore(finalScore, finalTime, finalRevives) {
                 if (finalRevives < (existing.revives || 0)) better = true;
                 else if (finalRevives === (existing.revives || 0) && finalTime < (existing.time || 99999)) better = true;
             }
-            if (!better) {
-                statusEl.textContent = '✓ Твой рекорд в рейтинге: ' + existing.score;
-                return;
-            }
-            existing.score = finalScore;
-            existing.name = myName;
-            existing.time = Math.round(finalTime);
-            existing.revives = finalRevives;
-            existing.date = now;
+            if (!better) { statusEl.textContent = '✓ Твой рекорд: ' + existing.score; return; }
+            existing.score = finalScore; existing.name = myName;
+            existing.time = Math.round(finalTime); existing.revives = finalRevives; existing.date = now;
         } else {
             scores.push({ id: myId, name: myName, score: finalScore, time: Math.round(finalTime), revives: finalRevives, date: now });
         }
         sortScores(scores);
         return saveScores(scores.slice(0, 100)).then(function() {
-            statusEl.textContent = '✓ Результат отправлен в рейтинг!';
+            statusEl.textContent = '✓ Результат отправлен!';
         });
     }).catch(function(e) {
         console.warn('submit failed', e);
@@ -308,16 +437,16 @@ function submitScore(finalScore, finalTime, finalRevives) {
 // ================== LEADERBOARD ==================
 function renderLeaderboard(forceRefresh) {
     var listEl = document.getElementById('lbList');
+    var podiumEl = document.getElementById('podium');
     var cacheEl = document.getElementById('lbCacheInfo');
 
     if (!forceRefresh && scoresCache && (Date.now() - scoresCacheTime) < CACHE_TTL) {
         drawLeaderboard(scoresCache);
-        var age = Math.round((Date.now() - scoresCacheTime) / 1000);
-        cacheEl.textContent = 'данные из кэша (' + age + ' сек назад)';
+        cacheEl.textContent = 'данные из кэша (' + Math.round((Date.now() - scoresCacheTime)/1000) + ' сек назад)';
         return;
     }
-
     listEl.innerHTML = '<div id="lbStatus">Загрузка...</div>';
+    podiumEl.innerHTML = '';
     cacheEl.textContent = '';
 
     fetchScores(forceRefresh).then(function(scores) {
@@ -336,25 +465,56 @@ function renderLeaderboard(forceRefresh) {
 
 function drawLeaderboard(scores) {
     var listEl = document.getElementById('lbList');
+    var podiumEl = document.getElementById('podium');
+    podiumEl.innerHTML = '';
+
     if (!scores.length) {
         listEl.innerHTML = '<div id="lbStatus">Пока никто не играл.<br>Стань первым! 🐍</div>';
         return;
     }
     sortScores(scores);
     var myId = tgUser ? String(tgUser.id) : null;
-    var top = scores.slice(0, 10);
-    var medals = ['🥇', '🥈', '🥉'];
-    var html = '';
-    for (var i = 0; i < top.length; i++) {
-        var s = top[i];
+
+    // ПОДИУМ топ-3
+    if (scores.length >= 1) {
+        var order = [1, 0, 2]; // 2 место, 1 место, 3 место
+        var html = '';
+        for (var k = 0; k < 3; k++) {
+            var idx = order[k];
+            var s = scores[idx];
+            if (!s) {
+                html += '<div class="podium-place podium-' + (idx+1) + '" style="visibility:hidden"></div>';
+                continue;
+            }
+            var isMe = myId && s.id === myId;
+            var safeName = String(s.name || 'игрок').replace(/[<>&]/g, '').substring(0, 10);
+            var initial = safeName.charAt(0).toUpperCase();
+            html += '<div class="podium-place podium-' + (idx+1) + '">' +
+                '<div class="podium-avatar">' + initial + '</div>' +
+                '<div class="podium-name">' + safeName + (isMe ? ' ★' : '') + '</div>' +
+                '<div class="podium-score">' + s.score + '</div>' +
+                '<div class="podium-info">⏱ ' + (s.time ? formatTime(s.time) : '—') + '</div>' +
+                '<div class="podium-bar">' + (idx+1) + '</div>' +
+                '</div>';
+        }
+        podiumEl.innerHTML = html;
+    }
+
+    // ТОП 4-10
+    var rest = scores.slice(3, 10);
+    if (!rest.length) {
+        listEl.innerHTML = '<div id="lbStatus" style="padding:20px">Остальные места свободны 🎯</div>';
+        return;
+    }
+    var html2 = '';
+    for (var i = 0; i < rest.length; i++) {
+        var s = rest[i];
         var isMe = myId && s.id === myId;
-        var rankCls = i === 0 ? 'top1' : i === 1 ? 'top2' : i === 2 ? 'top3' : '';
-        var rankContent = i < 3 ? medals[i] : '#' + (i + 1);
         var safeName = String(s.name || 'игрок').replace(/[<>&]/g, '');
         var timeStr = s.time ? formatTime(s.time) : '—';
         var revStr = (s.revives !== undefined) ? (s.revives + ' возр.') : '—';
-        html += '<div class="lbRow' + (isMe ? ' me' : '') + '">' +
-            '<div class="lbRank ' + rankCls + '">' + rankContent + '</div>' +
+        html2 += '<div class="lbRow' + (isMe ? ' me' : '') + '">' +
+            '<div class="lbRank">#' + (i + 4) + '</div>' +
             '<div class="lbMain">' +
                 '<div class="lbName">' + safeName + (isMe ? ' (ты)' : '') + '</div>' +
                 '<div class="lbSub">⏱ ' + timeStr + ' · 🔄 ' + revStr + '</div>' +
@@ -362,7 +522,7 @@ function drawLeaderboard(scores) {
             '<div class="lbScore">' + s.score + '</div>' +
             '</div>';
     }
-    listEl.innerHTML = html;
+    listEl.innerHTML = html2;
 }
 
 // ================== SCREENS ==================
@@ -377,22 +537,84 @@ function showScreen(id) {
         renderLeaderboard(false);
         lbInterval = setInterval(function() { if (leaderboardOpen) renderLeaderboard(false); }, CACHE_TTL);
     }
-}
-
-function showSkinInfo() {
-    var msg = 'Скины появятся после подключения Telegram Stars 🎨';
-    if (tg) tg.showAlert(msg); else alert(msg);
+    if (id === 'shopScreen') renderShop();
 }
 
 function shareScore() {
     var text = '🐍 Я набрал ' + highScore + ' очков в Змейка Баттл! Попробуй побить мой рекорд:';
     var url = 'https://t.me/BattleSnakes_bot';
-    if (tg) {
-        tg.openTelegramLink('https://t.me/share/url?url=' + encodeURIComponent(url) + '&text=' + encodeURIComponent(text));
-    } else { alert(text + ' ' + url); }
+    if (tg) tg.openTelegramLink('https://t.me/share/url?url=' + encodeURIComponent(url) + '&text=' + encodeURIComponent(text));
+    else alert(text + ' ' + url);
 }
 
-// ================== GAME ==================
+// ================== МАГАЗИН ЗВЁЗД ==================
+function openStarsShop() {
+    var msg = '⭐ МАГАЗИН ЗВЁЗД\n\n' +
+              '💚 Вторая жизнь — 15⭐\n' +
+              '⚡ Ускорение x2 на 1 партию — 25⭐\n' +
+              '🎨 Эксклюзивный скин «Космос» — 50⭐\n' +
+              '💰 +50% очков на 1 партию — 20⭐\n\n' +
+              '⚠ Настоящая оплата заработает после подключения бэкенда. Пока всё работает за внутриигровые очки.';
+    if (tg) tg.showAlert(msg); else alert(msg);
+}
+
+// ================== СКИНЫ UI ==================
+function renderShop() {
+    var grid = document.getElementById('skinGrid');
+    var html = '';
+    for (var i = 0; i < SKINS.length; i++) {
+        var s = SKINS[i];
+        var unlocked = isSkinUnlocked(s);
+        var selected = s.id === selectedSkinId;
+        var cls = 'skin-card' + (unlocked ? '' : ' locked') + (selected ? ' selected' : '');
+        var preview = renderSkinPreview(s);
+        var reqText = unlocked ? (selected ? '✓ Выбран' : 'Разблокирован') : '🏅 Рекорд: ' + s.req;
+        var reqCls = unlocked ? 'skin-req done' : 'skin-req';
+        html += '<button class="' + cls + '" onclick="selectSkin(\'' + s.id + '\')">' +
+            '<div class="skin-preview">' + preview + '</div>' +
+            '<div class="skin-name">' + s.name + '</div>' +
+            '<div class="' + reqCls + '">' + reqText + '</div>' +
+            '</button>';
+    }
+    grid.innerHTML = html;
+}
+
+function renderSkinPreview(s) {
+    var c1 = s.head === 'rainbow' ? '#f87171' : s.head;
+    var c2 = s.body === 'rainbow' ? '#22d3ee' : s.body;
+    var gradId = 'g_' + s.id;
+    var grad = s.id === 'rainbow'
+        ? '<linearGradient id="' + gradId + '" x1="0%" y1="0%" x2="100%" y2="100%">' +
+          '<stop offset="0%" stop-color="#f87171"/>' +
+          '<stop offset="50%" stop-color="#facc15"/>' +
+          '<stop offset="100%" stop-color="#22d3ee"/></linearGradient>'
+        : '<linearGradient id="' + gradId + '" x1="0%" y1="0%" x2="100%" y2="100%">' +
+          '<stop offset="0%" stop-color="' + c1 + '"/>' +
+          '<stop offset="100%" stop-color="' + c2 + '"/></linearGradient>';
+    return '<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">' +
+        '<defs>' + grad + '</defs>' +
+        '<rect x="2" y="14" width="10" height="10" rx="3" fill="url(#' + gradId + ')"/>' +
+        '<rect x="13" y="14" width="10" height="10" rx="2" fill="url(#' + gradId + ')" opacity="0.8"/>' +
+        '<rect x="24" y="14" width="10" height="10" rx="2" fill="url(#' + gradId + ')" opacity="0.6"/>' +
+        '</svg>';
+}
+
+function selectSkin(id) {
+    var skin = null;
+    for (var i = 0; i < SKINS.length; i++) if (SKINS[i].id === id) { skin = SKINS[i]; break; }
+    if (!skin) return;
+    if (!isSkinUnlocked(skin)) {
+        showToast('🔒 Набери рекорд ' + skin.req + ' очков');
+        return;
+    }
+    selectedSkinId = id;
+    localStorage.setItem('snakeSkin', id);
+    renderShop();
+    showToast('✓ Скин «' + skin.name + '» выбран');
+    haptic('light');
+}
+
+// ================== ИГРА ==================
 function startGame() {
     initCanvas();
     showScreen('gameScreen');
@@ -404,9 +626,8 @@ function startGame() {
     lastTick = 0; lastFrameTime = 0; particles = [];
     frameCount = 0; fpsLastUpdate = 0;
     gameStartTime = performance.now();
-    gameTime = 0;
-    reviveCount = 0;
-    savedState = null;
+    gameTime = 0; reviveCount = 0; savedState = null;
+    deathAnim = null;
     placeFood();
     updateHud();
     if (rafId) cancelAnimationFrame(rafId);
@@ -414,7 +635,6 @@ function startGame() {
 }
 
 function loop(timestamp) {
-    if (!running) return;
     if (!lastFrameTime) lastFrameTime = timestamp;
     frameCount++;
     if (!fpsLastUpdate) fpsLastUpdate = timestamp;
@@ -424,6 +644,19 @@ function loop(timestamp) {
         var fpsEl = document.getElementById('fpsHud');
         if (fpsEl) fpsEl.textContent = fps + ' FPS';
     }
+
+    // Анимация смерти
+    if (deathAnim) {
+        deathAnim.t += 16;
+        updateParticles(16.67);
+        render(0);
+        if (deathAnim.t < deathAnim.max) {
+            rafId = requestAnimationFrame(loop);
+        }
+        return;
+    }
+
+    if (!running) return;
     if (!lastTick) lastTick = timestamp;
     if (timestamp - lastTick >= speed) { lastTick = timestamp; tick(); }
     var progress = Math.min(1, (timestamp - lastTick) / speed);
@@ -449,7 +682,7 @@ function tick() {
         haptic('light');
         var cx = food.x * cellSize + cellSize / 2;
         var cy = food.y * cellSize + cellSize / 2;
-        spawnParticles(cx, cy, food.golden ? '#facc15' : '#ef4444');
+        spawnParticles(cx, cy, food.golden ? '#facc15' : '#ef4444', 12);
         placeFood();
     } else { snake.pop(); }
 }
@@ -458,9 +691,7 @@ function placeFood() {
     while (true) {
         var f = { x: Math.floor(Math.random() * GRID), y: Math.floor(Math.random() * GRID) };
         var busy = false;
-        for (var i = 0; i < snake.length; i++) {
-            if (snake[i].x === f.x && snake[i].y === f.y) { busy = true; break; }
-        }
+        for (var i = 0; i < snake.length; i++) if (snake[i].x === f.x && snake[i].y === f.y) { busy = true; break; }
         if (!busy) {
             f.golden = Math.random() < 0.15;
             f.points = f.golden ? 5 : 1;
@@ -469,8 +700,8 @@ function placeFood() {
     }
 }
 
-function spawnParticles(x, y, color) {
-    for (var i = 0; i < 12; i++) {
+function spawnParticles(x, y, color, count) {
+    for (var i = 0; i < count; i++) {
         var a = Math.random() * Math.PI * 2;
         var sp = 0.5 + Math.random() * 2.5;
         particles.push({ x: x, y: y, vx: Math.cos(a)*sp, vy: Math.sin(a)*sp, life: 1, color: color, size: 2 + Math.random()*3 });
@@ -482,9 +713,21 @@ function updateParticles(dt) {
     for (var i = particles.length - 1; i >= 0; i--) {
         var p = particles[i];
         p.x += p.vx * k; p.y += p.vy * k;
-        p.vx *= 0.93; p.vy *= 0.93; p.life -= 0.03 * k;
+        p.vx *= 0.94; p.vy *= 0.94;
+        p.life -= 0.025 * k;
         if (p.life <= 0) particles.splice(i, 1);
     }
+}
+
+function getSnakeColors(i, len) {
+    var skin = getSkin();
+    if (skin.id === 'rainbow') {
+        var hue = ((i * 30) + performance.now()/15) % 360;
+        return { head: 'hsl(' + hue + ', 85%, 65%)', body: 'hsl(' + ((hue+30)%360) + ', 75%, 55%)', glow: 'hsl(' + hue + ', 85%, 65%)' };
+    }
+    if (i === 0) return { head: skin.head, body: skin.head, glow: skin.glow };
+    // Градиент для тела
+    return { head: skin.head, body: skin.body, glow: skin.glow };
 }
 
 function render(progress) {
@@ -499,42 +742,56 @@ function render(progress) {
     }
     ctx.stroke();
 
-    var pulse = 1 + Math.sin(performance.now() / 180) * 0.18;
-    var fx = food.x * cellSize + cellSize / 2;
-    var fy = food.y * cellSize + cellSize / 2;
-    var fr = (cellSize / 2 - 1.5) * pulse;
-    ctx.shadowColor = food.golden ? '#facc15' : '#ef4444';
-    ctx.shadowBlur = food.golden ? 15 : 10;
-    ctx.fillStyle = food.golden ? '#facc15' : '#ef4444';
-    ctx.beginPath(); ctx.arc(fx, fy, fr, 0, Math.PI * 2); ctx.fill();
-    ctx.shadowBlur = 0;
-
-    var len = snake.length;
-    for (var i = len - 1; i >= 0; i--) {
-        var newP = snake[i];
-        var oldP = oldSnake[i] || newP;
-        var ox = oldP.x, oy = oldP.y;
-        if (Math.abs(newP.x - oldP.x) > 2) ox = newP.x;
-        if (Math.abs(newP.y - oldP.y) > 2) oy = newP.y;
-        var x = ox + (newP.x - ox) * progress;
-        var y = oy + (newP.y - oy) * progress;
-        if (i === 0) {
-            ctx.fillStyle = '#4ade80'; ctx.shadowColor = '#4ade80'; ctx.shadowBlur = 14;
-        } else {
-            var t = i / Math.max(1, len);
-            var r = Math.floor(34 + (74 - 34) * (1 - t));
-            var g = Math.floor(197 + (222 - 197) * (1 - t));
-            var b = Math.floor(94 + (128 - 94) * (1 - t));
-            ctx.fillStyle = 'rgb(' + r + ',' + g + ',' + b + ')'; ctx.shadowBlur = 0;
-        }
-        var pad = i === 0 ? 0.6 : 1.4;
-        var px = x * cellSize + pad, py = y * cellSize + pad, ps = cellSize - pad * 2;
-        ctx.beginPath();
-        var rad = i === 0 ? ps * 0.35 : ps * 0.2;
-        roundRect(ctx, px, py, ps, ps, rad);
-        ctx.fill();
+    // Еда
+    if (food) {
+        var pulse = 1 + Math.sin(performance.now() / 180) * 0.18;
+        var fx = food.x * cellSize + cellSize / 2;
+        var fy = food.y * cellSize + cellSize / 2;
+        var fr = (cellSize / 2 - 1.5) * pulse;
+        ctx.shadowColor = food.golden ? '#facc15' : '#ef4444';
+        ctx.shadowBlur = food.golden ? 15 : 10;
+        ctx.fillStyle = food.golden ? '#facc15' : '#ef4444';
+        ctx.beginPath(); ctx.arc(fx, fy, fr, 0, Math.PI * 2); ctx.fill();
+        ctx.shadowBlur = 0;
     }
-    ctx.shadowBlur = 0;
+
+    // Змейка
+    if (snake) {
+        var len = snake.length;
+        for (var i = len - 1; i >= 0; i--) {
+            var newP = snake[i];
+            var oldP = oldSnake[i] || newP;
+            var ox = oldP.x, oy = oldP.y;
+            if (Math.abs(newP.x - oldP.x) > 2) ox = newP.x;
+            if (Math.abs(newP.y - oldP.y) > 2) oy = newP.y;
+            var x = ox + (newP.x - ox) * progress;
+            var y = oy + (newP.y - oy) * progress;
+
+            var colors = getSnakeColors(i, len);
+            if (i === 0) {
+                ctx.fillStyle = colors.head;
+                ctx.shadowColor = colors.glow;
+                ctx.shadowBlur = 14;
+            } else {
+                ctx.fillStyle = colors.body;
+                // затемнение к хвосту
+                if (getSkin().id !== 'rainbow') {
+                    var t = i / Math.max(1, len);
+                    var darkness = 1 - t * 0.4;
+                    ctx.fillStyle = shadeColor(colors.body, darkness);
+                }
+                ctx.shadowBlur = 0;
+            }
+            var pad = i === 0 ? 0.6 : 1.4;
+            var px = x * cellSize + pad, py = y * cellSize + pad, ps = cellSize - pad * 2;
+            ctx.beginPath();
+            var rad = i === 0 ? ps * 0.35 : ps * 0.2;
+            roundRect(ctx, px, py, ps, ps, rad);
+            ctx.fill();
+        }
+        ctx.shadowBlur = 0;
+    }
+
     for (var i = 0; i < particles.length; i++) {
         var p = particles[i];
         ctx.globalAlpha = p.life;
@@ -542,6 +799,15 @@ function render(progress) {
         ctx.beginPath(); ctx.arc(p.x, p.y, p.size * p.life, 0, Math.PI * 2); ctx.fill();
     }
     ctx.globalAlpha = 1;
+}
+
+function shadeColor(hex, factor) {
+    if (hex.indexOf('hsl') === 0 || hex.indexOf('rgb') === 0) return hex;
+    var r = parseInt(hex.slice(1,3), 16);
+    var g = parseInt(hex.slice(3,5), 16);
+    var b = parseInt(hex.slice(5,7), 16);
+    r = Math.floor(r * factor); g = Math.floor(g * factor); b = Math.floor(b * factor);
+    return 'rgb(' + r + ',' + g + ',' + b + ')';
 }
 
 function roundRect(ctx, x, y, w, h, r) {
@@ -563,29 +829,42 @@ function updateHud() {
 
 function endGame() {
     running = false;
-    if (rafId) cancelAnimationFrame(rafId);
-    haptic('medium');
+    haptic('heavy');
 
     gameTime = (performance.now() - gameStartTime) / 1000;
+    savedState = { score: score, foodEaten: foodEaten, snakeLen: snake.length };
 
-    savedState = {
-        score: score,
-        foodEaten: foodEaten,
-        snakeLen: snake.length
-    };
-
-    var isNewRecord = score > highScore;
-    if (isNewRecord) {
-        highScore = score;
-        localStorage.setItem('snakeHigh', String(highScore));
-        if (tg && tg.CloudStorage) tg.CloudStorage.setItem('snakeHighScore', String(highScore), function(){});
+    // Анимация смерти — змейка разлетается
+    if (snake) {
+        for (var i = 0; i < snake.length; i++) {
+            var cx = snake[i].x * cellSize + cellSize / 2;
+            var cy = snake[i].y * cellSize + cellSize / 2;
+            var skin = getSkin();
+            spawnParticles(cx, cy, skin.head === 'rainbow' ? '#22d3ee' : skin.head, 4);
+        }
     }
-    document.getElementById('overScore').textContent = 'Счёт: ' + score;
-    document.getElementById('overInfo').textContent = '⏱ ' + formatTime(gameTime) + ' · 🔄 Возрождений: ' + reviveCount;
-    document.getElementById('overHigh').textContent = isNewRecord ? '🎉 НОВЫЙ РЕКОРД!' : 'Рекорд: ' + highScore;
-    document.getElementById('submitStatus').textContent = '';
-    showScreen('overScreen');
-    if (score > 0) submitScore(score, gameTime, reviveCount);
+    snake = null;
+    deathAnim = { t: 0, max: 800 };
+    if (rafId) cancelAnimationFrame(rafId);
+    rafId = requestAnimationFrame(loop);
+
+    setTimeout(function() {
+        deathAnim = null;
+        running = false;
+
+        var isNewRecord = score > highScore;
+        if (isNewRecord) {
+            highScore = score;
+            localStorage.setItem('snakeHigh', String(highScore));
+            if (tg && tg.CloudStorage) tg.CloudStorage.setItem('snakeHighScore', String(highScore), function(){});
+        }
+        document.getElementById('overScore').textContent = 'Счёт: ' + score;
+        document.getElementById('overInfo').textContent = '⏱ ' + formatTime(gameTime) + ' · 🔄 Возрождений: ' + reviveCount;
+        document.getElementById('overHigh').textContent = isNewRecord ? '🎉 НОВЫЙ РЕКОРД!' : 'Рекорд: ' + highScore;
+        document.getElementById('submitStatus').textContent = '';
+        showScreen('overScreen');
+        if (score > 0) submitScore(score, gameTime, reviveCount);
+    }, 800);
 }
 
 function setDir(d) {
@@ -603,13 +882,14 @@ function haptic(type) {
     try { if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred(type || 'light'); } catch(e){}
 }
 
-// ================== BUY LIFE ==================
+// ================== ЗВЁЗДЫ ==================
 function buyLife() {
     if (isBuyingLife || !savedState) return;
     isBuyingLife = true;
     var btn = document.getElementById('buyLifeBtn');
     btn.textContent = '⏳ Создание счёта...';
 
+    // ЗАГЛУШКА — реальная оплата после бэкенда
     setTimeout(function() {
         btn.textContent = '💚 Вторая жизнь за 15⭐';
         isBuyingLife = false;
@@ -624,19 +904,15 @@ function startCountdown(callback) {
     var el = document.getElementById('countdown');
     el.classList.add('show');
     var count = 3;
-
     function tickCount() {
         el.textContent = count > 0 ? String(count) : 'GO!';
         el.classList.remove('pulse');
         void el.offsetWidth;
         el.classList.add('pulse');
         haptic('medium');
-
         if (count < 0) {
-            el.classList.remove('show');
-            el.classList.remove('pulse');
-            callback();
-            return;
+            el.classList.remove('show'); el.classList.remove('pulse');
+            callback(); return;
         }
         count--;
         setTimeout(tickCount, 1000);
@@ -646,28 +922,19 @@ function startCountdown(callback) {
 
 function reviveSnake() {
     if (!savedState) return;
-
     var len = Math.min(savedState.snakeLen, 10);
     snake = [];
-    var startX = 10, startY = 10;
-    for (var i = 0; i < len; i++) {
-        snake.push({ x: startX - i, y: startY });
-    }
+    for (var i = 0; i < len; i++) snake.push({ x: 10 - i, y: 10 });
     oldSnake = [];
     for (var i = 0; i < snake.length; i++) oldSnake.push({x: snake[i].x, y: snake[i].y});
 
     score = savedState.score;
     foodEaten = savedState.foodEaten;
     reviveCount++;
-
-    dir = {x: 1, y: 0};
-    nextDir = {x: 1, y: 0};
-
+    dir = {x: 1, y: 0}; nextDir = {x: 1, y: 0};
     speed = Math.min(BASE_SPEED, Math.max(MIN_SPEED, BASE_SPEED - foodEaten * SPEED_STEP + 30));
-
     running = true;
-    lastTick = 0;
-    lastFrameTime = 0;
+    lastTick = 0; lastFrameTime = 0;
     particles = [];
     placeFood();
     updateHud();
@@ -676,7 +943,7 @@ function reviveSnake() {
     rafId = requestAnimationFrame(loop);
 }
 
-// ================== DIRECTION BUTTONS ==================
+// ================== КНОПКИ ==================
 function bindDirButton(el) {
     var pressed = false;
     function down(e) {
@@ -686,10 +953,7 @@ function bindDirButton(el) {
         el.classList.add('pressed');
         setDir(el.dataset.dir);
     }
-    function up() {
-        pressed = false;
-        el.classList.remove('pressed');
-    }
+    function up() { pressed = false; el.classList.remove('pressed'); }
     el.addEventListener('touchstart', down, {passive: false});
     el.addEventListener('touchend', up);
     el.addEventListener('touchcancel', up);
@@ -697,16 +961,14 @@ function bindDirButton(el) {
     el.addEventListener('mouseup', up);
     el.addEventListener('mouseleave', up);
 }
-
 var dirBtns = document.querySelectorAll('.btn');
 for (var i = 0; i < dirBtns.length; i++) bindDirButton(dirBtns[i]);
 
-// ================== SWIPES ==================
+// Свайпы
 var touchX = null, touchY = null;
 document.getElementById('gameScreen').addEventListener('touchstart', function(e) {
     if (e.target.id === 'game') { touchX = e.touches[0].clientX; touchY = e.touches[0].clientY; }
 }, {passive: true});
-
 document.getElementById('gameScreen').addEventListener('touchend', function(e) {
     if (touchX === null) return;
     var dx = e.changedTouches[0].clientX - touchX;
@@ -725,7 +987,7 @@ document.addEventListener('keydown', function(e) {
 
 window.addEventListener('resize', function() { if (running) initCanvas(); });
 
-// ================== START ==================
+// ================== СТАРТ ==================
 setupUser();
 if (tg && tg.CloudStorage) {
     tg.CloudStorage.getItem('snakeHighScore', function(err, val) {
