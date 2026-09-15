@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Змейка Баттл</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
         html, body {
@@ -27,6 +28,34 @@
         .screen { display: none; flex-direction: column; align-items: center; width: 100%; height: 100%; justify-content: center; }
         .screen.active { display: flex; }
 
+        /* ПРОФИЛЬ */
+        #userBox {
+            display: none;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 14px;
+            background: rgba(74, 222, 128, 0.08);
+            border: 1px solid rgba(74, 222, 128, 0.3);
+            border-radius: 40px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #cbd5e1;
+        }
+        #userBox.show { display: flex; }
+        #userAvatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #4ade80;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #0f0f1a;
+            font-size: 14px;
+        }
+        #userName { font-weight: 600; color: #4ade80; }
+
         /* МЕНЮ */
         h1 {
             font-size: 46px;
@@ -38,26 +67,27 @@
             letter-spacing: -2px;
             margin-bottom: 6px;
         }
-        .subtitle { color: #94a3b8; margin-bottom: 44px; font-size: 13px; letter-spacing: 3px; }
+        .subtitle { color: #94a3b8; margin-bottom: 32px; font-size: 13px; letter-spacing: 3px; }
 
         .menu-btn {
             width: 250px;
             padding: 18px;
-            margin: 7px 0;
+            margin: 6px 0;
             background: rgba(74, 222, 128, 0.08);
             border: 2px solid #4ade80;
             color: #4ade80;
             font-size: 17px;
             font-weight: 700;
             border-radius: 16px;
-            transition: transform 0.08s, background 0.15s;
+            transition: transform 0.06s, background 0.1s;
+            cursor: pointer;
         }
         .menu-btn:active { background: #4ade80; color: #0f0f1a; transform: scale(0.96); }
         .menu-btn.primary { background: #4ade80; color: #0f0f1a; }
         .menu-btn.primary:active { background: #22c55e; }
 
         .high-score {
-            margin-top: 28px;
+            margin-top: 24px;
             color: #facc15;
             font-size: 14px;
             letter-spacing: 1px;
@@ -88,7 +118,6 @@
         }
         #game.shake { transform: translate(1px, 1px); }
 
-        /* КНОПКИ УПРАВЛЕНИЯ */
         #controls {
             margin-top: 14px;
             display: grid;
@@ -108,8 +137,9 @@
             justify-content: center;
             transition: transform 0.06s, background 0.1s;
             box-shadow: 0 4px 0 rgba(34, 197, 94, 0.3);
+            cursor: pointer;
         }
-        .btn:active {
+        .btn.pressed {
             background: #4ade80;
             color: #0f0f1a;
             transform: translateY(2px);
@@ -119,18 +149,23 @@
         /* GAME OVER */
         #overTitle { font-size: 36px; color: #ef4444; margin-bottom: 10px; font-weight: 900; letter-spacing: -1px; }
         #overScore { font-size: 22px; color: #4ade80; margin-bottom: 6px; font-weight: 700; }
-        #overHigh { font-size: 14px; color: #facc15; margin-bottom: 32px; min-height: 20px; }
+        #overHigh { font-size: 14px; color: #facc15; margin-bottom: 24px; min-height: 20px; }
     </style>
 </head>
 <body>
 
     <!-- МЕНЮ -->
     <div id="menuScreen" class="screen active">
+        <div id="userBox">
+            <div id="userAvatar">?</div>
+            <span>Привет, <span id="userName">игрок</span>!</span>
+        </div>
         <h1>ЗМЕЙКА</h1>
         <div class="subtitle">BATTLE EDITION</div>
-        <button class="menu-btn primary" onclick="startGame()">▶  Играть</button>
-        <button class="menu-btn" onclick="showSkinInfo()">Скины (скоро)</button>
-        <button class="menu-btn" onclick="showLeaderboard()">Рейтинг (скоро)</button>
+        <button class="menu-btn primary" data-action="play">▶  Играть</button>
+        <button class="menu-btn" data-action="share">📤  Поделиться</button>
+        <button class="menu-btn" data-action="skins">Скины (скоро)</button>
+        <button class="menu-btn" data-action="leaderboard">Рейтинг (скоро)</button>
         <div class="high-score">Рекорд: <span id="menuHigh">0</span></div>
     </div>
 
@@ -157,11 +192,23 @@
         <div id="overTitle">ИГРА ОКОНЧЕНА</div>
         <div id="overScore">Счёт: 0</div>
         <div id="overHigh"></div>
-        <button class="menu-btn primary" onclick="startGame()">🔄  Ещё раз</button>
-        <button class="menu-btn" onclick="showScreen('menuScreen')">🏠  Меню</button>
+        <button class="menu-btn primary" data-action="play">🔄  Ещё раз</button>
+        <button class="menu-btn" data-action="menu">🏠  Меню</button>
     </div>
 
 <script>
+// ================== TELEGRAM ==================
+const tg = window.Telegram ? window.Telegram.WebApp : null;
+let tgUser = null;
+
+if (tg) {
+    try {
+        tg.ready();
+        tg.expand();
+        tgUser = tg.initDataUnsafe && tg.initDataUnsafe.user;
+    } catch(e) { console.warn('TG init error', e); }
+}
+
 // ================== НАСТРОЙКИ ==================
 const GRID = 20;
 const BASE_SPEED = 200;
@@ -196,14 +243,58 @@ function initCanvas() {
     cellSize = size / GRID;
 }
 
+// ================== ПРОФИЛЬ ==================
+function setupUser() {
+    if (!tgUser) return;
+    document.getElementById('userBox').classList.add('show');
+    const name = tgUser.first_name || tgUser.username || 'игрок';
+    document.getElementById('userName').textContent = name;
+    document.getElementById('userAvatar').textContent = name.charAt(0).toUpperCase();
+}
+
+// ================== CLOUD STORAGE ==================
+function loadCloudHighScore(cb) {
+    if (!tg || !tg.CloudStorage) { cb(); return; }
+    tg.CloudStorage.getItem('snakeHighScore', (err, val) => {
+        if (!err && val) {
+            const cloudScore = parseInt(val, 10);
+            if (cloudScore > highScore) {
+                highScore = cloudScore;
+                localStorage.setItem('snakeHigh', String(highScore));
+                document.getElementById('menuHigh').textContent = highScore;
+            }
+        }
+        cb();
+    });
+}
+function saveCloudHighScore() {
+    if (!tg || !tg.CloudStorage) return;
+    tg.CloudStorage.setItem('snakeHighScore', String(highScore), () => {});
+}
+
 // ================== ЭКРАНЫ ==================
 function showScreen(id) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById(id).classList.add('active');
     if (id === 'menuScreen') document.getElementById('menuHigh').textContent = highScore;
 }
-function showSkinInfo() { alert('Скины появятся после подключения Telegram Stars'); }
-function showLeaderboard() { alert('Рейтинг появится после подключения бэкенда'); }
+function showSkinInfo() { 
+    if (tg) tg.showAlert('Скины появятся после подключения Stars 🎨');
+    else alert('Скины появятся после подключения Stars 🎨');
+}
+function showLeaderboard() { 
+    if (tg) tg.showAlert('Рейтинг появится после подключения бэкенда 🏆');
+    else alert('Рейтинг появится после подключения бэкенда 🏆');
+}
+function shareScore() {
+    const text = `🐍 Я набрал ${highScore} очков в Змейка Баттл! Попробуй побить мой рекорд:`;
+    const url = 'https://t.me/BattleSnakes_bot';
+    if (tg) {
+        tg.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`);
+    } else {
+        alert(text + ' ' + url);
+    }
+}
 
 // ================== ИГРА ==================
 function startGame() {
@@ -234,8 +325,6 @@ function startGame() {
 function loop(timestamp) {
     if (!running) return;
     if (!lastFrameTime) lastFrameTime = timestamp;
-    const dt = timestamp - lastFrameTime;
-    lastFrameTime = timestamp;
 
     // FPS
     frameCount++;
@@ -247,15 +336,14 @@ function loop(timestamp) {
         document.getElementById('fpsHud').textContent = fps + ' FPS';
     }
 
-    // физика
     if (!lastTick) lastTick = timestamp;
     if (timestamp - lastTick >= speed) {
         lastTick = timestamp;
         tick();
     }
 
-    // прогресс для плавной интерполяции
     const progress = Math.min(1, (timestamp - lastTick) / speed);
+    const dt = 16.67;
 
     updateParticles(dt);
     render(progress);
@@ -264,7 +352,6 @@ function loop(timestamp) {
 }
 
 function tick() {
-    // сохраняем прошлое состояние для интерполяции
     oldSnake = snake.map(s => ({x: s.x, y: s.y}));
 
     dir = {x: nextDir.x, y: nextDir.y};
@@ -284,11 +371,9 @@ function tick() {
         updateHud();
         haptic('light');
 
-        // вспышка
         canvas.classList.add('shake');
         setTimeout(() => canvas.classList.remove('shake'), 80);
 
-        // частицы
         const cx = food.x * cellSize + cellSize / 2;
         const cy = food.y * cellSize + cellSize / 2;
         spawnParticles(cx, cy, food.golden ? '#facc15' : '#ef4444');
@@ -334,7 +419,7 @@ function spawnParticles(x, y, color) {
     }
 }
 function updateParticles(dt) {
-    const k = dt / 16.67; // нормализация к 60 FPS
+    const k = dt / 16.67;
     for (let i = particles.length - 1; i >= 0; i--) {
         const p = particles[i];
         p.x += p.vx * k;
@@ -348,14 +433,11 @@ function updateParticles(dt) {
 
 // ================== РЕНДЕР ==================
 function render(progress) {
-    const w = canvasSize;
-    const h = canvasSize;
+    const w = canvasSize, h = canvasSize;
 
-    // фон
     ctx.fillStyle = '#0a0a14';
     ctx.fillRect(0, 0, w, h);
 
-    // сетка
     ctx.strokeStyle = 'rgba(74, 222, 128, 0.05)';
     ctx.lineWidth = 1;
     ctx.beginPath();
@@ -380,13 +462,12 @@ function render(progress) {
     ctx.fill();
     ctx.shadowBlur = 0;
 
-    // змейка — плавная интерполяция
+    // змейка
     const len = snake.length;
     for (let i = len - 1; i >= 0; i--) {
         const newP = snake[i];
         const oldP = oldSnake[i] || newP;
 
-        // не даём «телепортироваться» через весь экран (например, при повороте)
         let ox = oldP.x, oy = oldP.y;
         if (Math.abs(newP.x - oldP.x) > 2) ox = newP.x;
         if (Math.abs(newP.y - oldP.y) > 2) oy = newP.y;
@@ -419,7 +500,6 @@ function render(progress) {
     }
     ctx.shadowBlur = 0;
 
-    // частицы
     for (const p of particles) {
         ctx.globalAlpha = p.life;
         ctx.fillStyle = p.color;
@@ -457,6 +537,7 @@ function endGame() {
     if (isNewRecord) {
         highScore = score;
         localStorage.setItem('snakeHigh', String(highScore));
+        saveCloudHighScore();
     }
 
     document.getElementById('overScore').textContent = 'Счёт: ' + score;
@@ -486,15 +567,49 @@ function setDir(d) {
 
 function haptic(type) {
     try {
-        if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.HapticFeedback) {
-            window.Telegram.WebApp.HapticFeedback.impactOccurred(type || 'light');
-        }
+        if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred(type || 'light');
     } catch(e) {}
 }
 
-document.getElementById('controls').addEventListener('click', e => {
-    const btn = e.target.closest('.btn');
-    if (btn) setDir(btn.dataset.dir);
+// ================== МГНОВЕННЫЕ КНОПКИ ==================
+// Вместо click используем touchstart/pointerdown — нулевая задержка на iOS
+function bindFastPress(el, handler) {
+    let pressed = false;
+    const down = (e) => {
+        e.preventDefault();
+        if (pressed) return;
+        pressed = true;
+        el.classList.add('pressed');
+        handler();
+    };
+    const up = () => {
+        pressed = false;
+        el.classList.remove('pressed');
+    };
+    el.addEventListener('touchstart', down, {passive: false});
+    el.addEventListener('touchend', up);
+    el.addEventListener('touchcancel', up);
+    // fallback для мыши/десктопа
+    el.addEventListener('mousedown', down);
+    el.addEventListener('mouseup', up);
+    el.addEventListener('mouseleave', up);
+}
+
+// кнопки направления
+document.querySelectorAll('.btn').forEach(btn => {
+    bindFastPress(btn, () => setDir(btn.dataset.dir));
+});
+
+// кнопки меню и game over
+document.querySelectorAll('.menu-btn').forEach(btn => {
+    bindFastPress(btn, () => {
+        const action = btn.dataset.action;
+        if (action === 'play') startGame();
+        else if (action === 'menu') showScreen('menuScreen');
+        else if (action === 'share') shareScore();
+        else if (action === 'skins') showSkinInfo();
+        else if (action === 'leaderboard') showLeaderboard();
+    });
 });
 
 // свайпы
@@ -524,6 +639,9 @@ document.addEventListener('keydown', e => {
 
 window.addEventListener('resize', () => { if (running) initCanvas(); });
 
+// ================== СТАРТ ==================
+setupUser();
+loadCloudHighScore();
 document.getElementById('menuHigh').textContent = highScore;
 </script>
 </body>
