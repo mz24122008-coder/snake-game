@@ -6,84 +6,399 @@
 <title>Змейка Баттл</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
+:root {
+    --bg: #030308;
+    --card: rgba(20, 25, 40, 0.7);
+    --card-border: rgba(74, 222, 128, 0.15);
+    --green: #4ade80;
+    --cyan: #22d3ee;
+    --purple: #a78bfa;
+    --gold: #facc15;
+    --red: #ef4444;
+    --pink: #f472b6;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --radius: 18px;
+    --radius-lg: 22px;
+}
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
-html, body { height: 100%; overflow: hidden; background: #030308; color: white; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
+html, body { height: 100%; overflow: hidden; background: var(--bg); color: #fff; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
 
-.orb { position: fixed; border-radius: 50%; filter: blur(60px); pointer-events: none; z-index: 0; opacity: 0.45; }
-.orb-1 { width: 280px; height: 280px; background: #4ade80; top: -80px; left: -60px; animation: orb1 18s ease-in-out infinite; }
-.orb-2 { width: 240px; height: 240px; background: #22d3ee; bottom: -80px; right: -60px; animation: orb2 22s ease-in-out infinite; }
-.orb-3 { width: 200px; height: 200px; background: #a78bfa; top: 40%; right: -100px; animation: orb3 20s ease-in-out infinite; opacity: 0.3; }
+.orb { position: fixed; border-radius: 50%; filter: blur(70px); pointer-events: none; z-index: 0; opacity: 0.4; }
+.orb-1 { width: 300px; height: 300px; background: var(--green); top: -100px; left: -80px; animation: orb1 20s ease-in-out infinite; }
+.orb-2 { width: 260px; height: 260px; background: var(--cyan); bottom: -100px; right: -80px; animation: orb2 24s ease-in-out infinite; }
+.orb-3 { width: 220px; height: 220px; background: var(--purple); top: 40%; right: -120px; animation: orb3 22s ease-in-out infinite; opacity: 0.28; }
 @keyframes orb1 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(80px, 100px) scale(1.15); } }
 @keyframes orb2 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(-100px, -60px) scale(1.2); } }
 @keyframes orb3 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(-60px, 80px) scale(0.9); } }
 
 body { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 8px; position: relative; min-height: 100vh; }
 
-.screen { display: none; flex-direction: column; align-items: center; justify-content: flex-start; width: 100%; max-width: 440px; height: 100%; position: relative; z-index: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 8px 0; }
-.screen.active { display: flex; animation: fadeSlide 0.35s cubic-bezier(0.34, 1.2, 0.64, 1); }
-@keyframes fadeSlide { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+.screen { display: none; flex-direction: column; align-items: center; justify-content: flex-start; width: 100%; max-width: 440px; height: 100%; position: relative; z-index: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 10px 4px; }
+.screen.active { display: flex; animation: fadeSlide 0.3s cubic-bezier(0.34, 1.2, 0.64, 1); }
+@keyframes fadeSlide { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
 
-/* КАРТОЧКА ИГРОКА */
-.hero-card { width: 100%; padding: 14px; background: linear-gradient(135deg, rgba(74, 222, 128, 0.12), rgba(34, 211, 238, 0.06), rgba(20, 25, 40, 0.7)); border: 1.5px solid rgba(74, 222, 128, 0.25); border-radius: 20px; backdrop-filter: blur(30px); box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.08); margin-bottom: 12px; position: relative; overflow: hidden; }
-.hero-card::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: linear-gradient(45deg, transparent 40%, rgba(74, 222, 128, 0.08) 50%, transparent 60%); animation: shine 6s ease-in-out infinite; pointer-events: none; }
+/* ==================== ОБЩИЕ ЭЛЕМЕНТЫ ==================== */
+.card { width: 100%; background: var(--card); border: 1.5px solid var(--card-border); border-radius: var(--radius); backdrop-filter: blur(24px); box-shadow: 0 8px 32px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.05); }
+.screen-title { font-size: 26px; font-weight: 900; margin-bottom: 4px; letter-spacing: -1px; }
+.screen-title.gold { background: linear-gradient(135deg, var(--gold), #f59e0b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.screen-title.purple { background: linear-gradient(135deg, var(--purple), var(--cyan)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.screen-title.green { background: linear-gradient(135deg, var(--green), var(--cyan)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.screen-sub { font-size: 11px; color: var(--muted); margin-bottom: 14px; text-align: center; line-height: 1.4; }
+
+.back-btn {
+    align-self: flex-start; margin-bottom: 12px;
+    padding: 8px 14px;
+    background: rgba(20, 25, 40, 0.65);
+    border: 1.5px solid rgba(74, 222, 128, 0.2);
+    color: #94a3b8; border-radius: 12px;
+    font-size: 12px; font-weight: 700;
+    cursor: pointer; font-family: inherit;
+    display: flex; align-items: center; gap: 6px;
+}
+.back-btn:active { background: rgba(74, 222, 128, 0.1); color: var(--green); }
+
+.btn-wide {
+    width: 100%; max-width: 320px;
+    padding: 13px 16px;
+    background: rgba(20, 25, 40, 0.65);
+    border: 1.5px solid rgba(74, 222, 128, 0.3);
+    color: var(--text); border-radius: var(--radius);
+    cursor: pointer; font-family: inherit;
+    font-size: 13px; font-weight: 800;
+    margin: 5px 0;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    backdrop-filter: blur(20px);
+    transition: all 0.15s;
+}
+.btn-wide:active { background: rgba(74, 222, 128, 0.15); border-color: rgba(74, 222, 128, 0.6); }
+.btn-wide.green { background: linear-gradient(135deg, var(--green), #22c55e); color: #052e16; border-color: transparent; box-shadow: 0 8px 25px rgba(74, 222, 128, 0.35); }
+
+/* ==================== МЕНЮ ==================== */
+.hero-card {
+    width: 100%; padding: 14px;
+    background: linear-gradient(135deg, rgba(74, 222, 128, 0.14), rgba(34, 211, 238, 0.06), rgba(20, 25, 40, 0.75));
+    border: 1.5px solid rgba(74, 222, 128, 0.25);
+    border-radius: var(--radius-lg);
+    backdrop-filter: blur(30px);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.08);
+    margin-bottom: 12px;
+    position: relative; overflow: hidden;
+}
+.hero-card::before {
+    content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+    background: linear-gradient(45deg, transparent 40%, rgba(74, 222, 128, 0.08) 50%, transparent 60%);
+    animation: shine 7s ease-in-out infinite; pointer-events: none;
+}
 @keyframes shine { 0%, 100% { transform: translateX(-100%); } 50% { transform: translateX(100%); } }
+
 .hero-top { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; position: relative; z-index: 1; }
-.hero-avatar { width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg, #4ade80, #22d3ee); display: flex; align-items: center; justify-content: center; font-weight: 900; color: #0a0a14; font-size: 18px; box-shadow: 0 0 25px rgba(74, 222, 128, 0.6); border: 2px solid rgba(255, 255, 255, 0.2); }
+.hero-avatar {
+    width: 44px; height: 44px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--green), var(--cyan));
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 900; color: #0a0a14; font-size: 18px;
+    box-shadow: 0 0 25px rgba(74, 222, 128, 0.6);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+}
 .hero-name { flex: 1; min-width: 0; }
-.hero-greet { font-size: 11px; color: #94a3b8; margin-bottom: 2px; }
-.hero-nick { font-size: 16px; font-weight: 800; color: #e2e8f0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.hero-level-badge { padding: 5px 11px; background: linear-gradient(135deg, #facc15, #f59e0b); color: #422006; font-weight: 900; font-size: 12px; border-radius: 50px; box-shadow: 0 4px 15px rgba(250, 204, 21, 0.4); }
+.hero-greet { font-size: 10px; color: #94a3b8; margin-bottom: 2px; letter-spacing: 0.3px; }
+.hero-nick { font-size: 16px; font-weight: 800; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hero-level-badge {
+    padding: 5px 11px;
+    background: linear-gradient(135deg, var(--gold), #f59e0b);
+    color: #422006; font-weight: 900; font-size: 12px;
+    border-radius: 50px;
+    box-shadow: 0 4px 15px rgba(250, 204, 21, 0.4);
+}
 .hero-stats { display: flex; gap: 6px; position: relative; z-index: 1; }
-.hero-stat { flex: 1; padding: 8px 6px; background: rgba(0, 0, 0, 0.25); border-radius: 12px; text-align: center; border: 1px solid rgba(255,255,255,0.04); }
-.hero-stat .v { font-size: 15px; font-weight: 900; color: #4ade80; line-height: 1; margin-bottom: 3px; }
-.hero-stat .l { font-size: 8px; color: #64748b; letter-spacing: 0.4px; text-transform: uppercase; font-weight: 700; }
+.hero-stat {
+    flex: 1; padding: 8px 4px;
+    background: rgba(0, 0, 0, 0.28);
+    border-radius: 12px; text-align: center;
+    border: 1px solid rgba(255,255,255,0.04);
+}
+.hero-stat .v { font-size: 14px; font-weight: 900; color: var(--green); line-height: 1; margin-bottom: 3px; }
+.hero-stat.coins .v { color: var(--gold); }
+.hero-stat .l { font-size: 8px; color: var(--muted); letter-spacing: 0.4px; text-transform: uppercase; font-weight: 700; }
+
 .hero-progress { margin-top: 10px; position: relative; z-index: 1; }
-.hero-progress-info { display: flex; justify-content: space-between; font-size: 9px; color: #64748b; margin-bottom: 4px; letter-spacing: 0.4px; font-weight: 700; }
+.hero-progress-info { display: flex; justify-content: space-between; font-size: 9px; color: var(--muted); margin-bottom: 4px; letter-spacing: 0.4px; font-weight: 700; }
 .hero-progress-bar { height: 5px; background: rgba(0, 0, 0, 0.4); border-radius: 3px; overflow: hidden; }
-.hero-progress-fill { height: 100%; background: linear-gradient(90deg, #4ade80, #22d3ee); border-radius: 3px; transition: width 0.6s cubic-bezier(0.34, 1.2, 0.64, 1); box-shadow: 0 0 15px rgba(74, 222, 128, 0.6); }
+.hero-progress-fill {
+    height: 100%; background: linear-gradient(90deg, var(--green), var(--cyan));
+    border-radius: 3px; transition: width 0.6s cubic-bezier(0.34, 1.2, 0.64, 1);
+    box-shadow: 0 0 15px rgba(74, 222, 128, 0.6);
+}
 
 .logo-wrap { text-align: center; margin-bottom: 14px; }
-h1 { font-size: 42px; font-weight: 900; letter-spacing: -2px; background: linear-gradient(135deg, #4ade80 0%, #22d3ee 50%, #a78bfa 100%); background-size: 200% 200%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; animation: gradientShift 5s ease-in-out infinite; line-height: 1; }
+h1 {
+    font-size: 42px; font-weight: 900; letter-spacing: -2px;
+    background: linear-gradient(135deg, var(--green) 0%, var(--cyan) 50%, var(--purple) 100%);
+    background-size: 200% 200%;
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    animation: gradientShift 5s ease-in-out infinite; line-height: 1;
+}
 @keyframes gradientShift { 0%, 100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
 .logo-sub { color: #475569; font-size: 9px; letter-spacing: 6px; font-weight: 800; margin-top: 4px; }
 
-.btn-play { width: 100%; padding: 18px; margin-bottom: 10px; background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%); color: #052e16; font-size: 19px; font-weight: 900; letter-spacing: 0.5px; border: none; border-radius: 20px; cursor: pointer; -webkit-appearance: none; appearance: none; font-family: inherit; box-shadow: 0 15px 50px rgba(74, 222, 128, 0.4), inset 0 1px 0 rgba(255,255,255,0.35); transition: transform 0.1s; display: flex; align-items: center; justify-content: center; gap: 10px; position: relative; overflow: hidden; }
-.btn-play::after { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 30% 0%, rgba(255,255,255,0.35), transparent 55%); pointer-events: none; }
+.btn-play {
+    width: 100%; padding: 18px; margin-bottom: 10px;
+    background: linear-gradient(135deg, var(--green) 0%, #22c55e 100%);
+    color: #052e16; font-size: 19px; font-weight: 900; letter-spacing: 0.5px;
+    border: none; border-radius: 20px;
+    cursor: pointer; font-family: inherit;
+    box-shadow: 0 15px 50px rgba(74, 222, 128, 0.4), inset 0 1px 0 rgba(255,255,255,0.35);
+    transition: transform 0.1s;
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    position: relative; overflow: hidden;
+}
+.btn-play::after {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(circle at 30% 0%, rgba(255,255,255,0.35), transparent 55%);
+    pointer-events: none;
+}
 .btn-play:active { transform: scale(0.97); }
-.btn-play .play-icon { width: 30px; height: 30px; background: rgba(0,0,0,0.15); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; }
+.btn-play .play-icon {
+    width: 30px; height: 30px;
+    background: rgba(0,0,0,0.15); border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px;
+}
 
 .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 100%; }
-.btn-tile { padding: 14px 10px; background: rgba(20, 25, 40, 0.6); border: 1.5px solid rgba(74, 222, 128, 0.15); color: #e2e8f0; border-radius: 18px; cursor: pointer; -webkit-appearance: none; appearance: none; font-family: inherit; display: flex; align-items: center; gap: 8px; backdrop-filter: blur(20px); transition: all 0.15s; box-shadow: 0 4px 20px rgba(0,0,0,0.25); text-align: left; position: relative; }
+.btn-tile {
+    padding: 13px 10px;
+    background: rgba(20, 25, 40, 0.65);
+    border: 1.5px solid rgba(74, 222, 128, 0.15);
+    color: var(--text); border-radius: var(--radius);
+    cursor: pointer; font-family: inherit;
+    display: flex; align-items: center; gap: 8px;
+    backdrop-filter: blur(20px);
+    transition: all 0.15s;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.25);
+    text-align: left;
+    position: relative;
+}
 .btn-tile:active { transform: scale(0.96); background: rgba(74, 222, 128, 0.1); border-color: rgba(74, 222, 128, 0.4); }
-.btn-tile .ti-wrap { width: 32px; height: 32px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 17px; flex-shrink: 0; background: rgba(74, 222, 128, 0.12); border: 1px solid rgba(74, 222, 128, 0.15); }
+.btn-tile .ti-wrap {
+    width: 32px; height: 32px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 17px; flex-shrink: 0;
+    background: rgba(74, 222, 128, 0.12);
+    border: 1px solid rgba(74, 222, 128, 0.15);
+}
 .btn-tile .tt { font-size: 12px; font-weight: 800; }
 .btn-tile.premium { border-color: rgba(250, 204, 21, 0.3); }
 .btn-tile.premium .ti-wrap { background: rgba(250, 204, 21, 0.15); }
-.btn-tile.premium .tt { color: #facc15; }
-.badge-dot { position: absolute; top: -4px; right: -4px; min-width: 18px; height: 18px; padding: 0 5px; background: #ef4444; color: #fff; font-size: 10px; font-weight: 900; border-radius: 10px; display: flex; align-items: center; justify-content: center; box-shadow: 0 3px 10px rgba(239, 68, 68, 0.5); }
+.btn-tile.premium .tt { color: var(--gold); }
+.badge-dot {
+    position: absolute; top: -4px; right: -4px;
+    min-width: 18px; height: 18px; padding: 0 5px;
+    background: var(--red); color: #fff;
+    font-size: 10px; font-weight: 900; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 3px 10px rgba(239, 68, 68, 0.5);
+}
 
-/* ИГРА */
+/* ==================== ИГРА ==================== */
 #gameScreen { justify-content: flex-start; padding-top: 0; overflow: hidden; }
 #hud { display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 0 4px 6px; gap: 5px; }
 .hud-item { padding: 6px 10px; border-radius: 11px; background: rgba(20, 25, 40, 0.75); border: 1px solid rgba(74, 222, 128, 0.18); font-size: 12px; font-weight: 800; backdrop-filter: blur(10px); }
-#scoreHud { color: #4ade80; }
-#speedHud { color: #22d3ee; }
+#scoreHud { color: var(--green); }
+#speedHud { color: var(--cyan); }
 #fpsHud { color: #475569; font-size: 10px; }
-#game { border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.7), 0 0 0 1px rgba(74, 222, 128, 0.15); touch-action: none; display: block; background: #030308; }
+#game { border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.7), 0 0 0 1px rgba(74, 222, 128, 0.15); touch-action: none; display: block; background: var(--bg); }
 #game.shake { animation: shake 0.15s; }
 @keyframes shake { 0%, 100% { transform: translate(0,0); } 25% { transform: translate(-2px, 1px); } 50% { transform: translate(2px, -1px); } 75% { transform: translate(-1px, -2px); } }
 #controls { margin-top: 12px; display: grid; grid-template-columns: repeat(3, 84px); grid-template-rows: repeat(2, 84px); gap: 8px; }
-.btn { background: rgba(20, 25, 40, 0.85); border: 2px solid rgba(74, 222, 128, 0.45); color: #4ade80; font-size: 36px; font-weight: 300; border-radius: 22px; display: flex; align-items: center; justify-content: center; cursor: pointer; -webkit-appearance: none; appearance: none; font-family: inherit; backdrop-filter: blur(10px); box-shadow: 0 8px 22px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255,255,255,0.06); transition: all 0.08s; }
-.btn.pressed { background: #4ade80; color: #0a0a14; transform: scale(0.93); box-shadow: 0 0 35px rgba(74, 222, 128, 0.7); }
+.btn {
+    background: rgba(20, 25, 40, 0.85);
+    border: 2px solid rgba(74, 222, 128, 0.45);
+    color: var(--green); font-size: 36px; font-weight: 300;
+    border-radius: 22px; display: flex; align-items: center; justify-content: center;
+    cursor: pointer; font-family: inherit;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255,255,255,0.06);
+    transition: all 0.08s;
+}
+.btn.pressed { background: var(--green); color: #0a0a14; transform: scale(0.93); box-shadow: 0 0 35px rgba(74, 222, 128, 0.7); }
 
-/* КНОПКА НАЗАД */
-.back-btn { align-self: flex-start; margin-bottom: 10px; padding: 8px 14px; background: rgba(20, 25, 40, 0.6); border: 1.5px solid rgba(74, 222, 128, 0.2); color: #94a3b8; border-radius: 12px; font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit; }
-.back-btn:active { background: rgba(74, 222, 128, 0.1); }
+/* ==================== GAME OVER ==================== */
+#overScreen { justify-content: center; }
+#overTitle {
+    font-size: 30px; font-weight: 900; letter-spacing: -1.5px;
+    background: linear-gradient(135deg, var(--red), var(--pink));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    margin-bottom: 8px;
+}
+#overScore { font-size: 60px; color: var(--green); font-weight: 900; line-height: 1; margin-bottom: 8px; text-shadow: 0 0 50px rgba(74, 222, 128, 0.6); }
+#overInfo { font-size: 11px; color: #94a3b8; margin-bottom: 8px; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+#overInfo span { padding: 5px 11px; background: rgba(20,25,40,0.7); border-radius: 50px; border: 1px solid rgba(74,222,128,0.15); }
+#overHigh { font-size: 13px; color: var(--gold); margin-bottom: 14px; min-height: 18px; font-weight: 800; }
+#submitStatus { font-size: 11px; color: var(--muted); min-height: 14px; margin-bottom: 12px; }
 
-/* ВЫБОР КАРТЫ */
-.map-title { font-size: 26px; font-weight: 900; margin-bottom: 4px; background: linear-gradient(135deg, #22d3ee, #4ade80); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; letter-spacing: -1px; }
-.map-sub { font-size: 11px; color: #64748b; margin-bottom: 16px; }
-.map-card { width: 100%; padding: 16px; margin-bottom: 10px; background: rgba(20, 25, 40, 0.65); border: 1.5px solid rgba(74, 222, 128, 0.15); border-radius: 20px; cursor: pointer; -webkit-appearance: none; appearance: none; font-family: inherit; display: flex; align-items: center; gap: 14px; transition: all 0.15s; backdrop-filter: blur(20px); text-align: left; }
+.buy-btn {
+    width: 100%; max-width: 320px; padding: 15px; margin: 5px 0;
+    background: linear-gradient(135deg, var(--gold) 0%, #f59e0b 100%);
+    color: #422006; font-size: 14px; font-weight: 900;
+    border: none; border-radius: var(--radius);
+    cursor: pointer; font-family: inherit;
+    box-shadow: 0 10px 35px rgba(250, 204, 21, 0.4);
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.buy-btn:active { transform: scale(0.97); }
+
+/* ==================== РЕЙТИНГ ==================== */
+#lbRules { font-size: 10px; color: var(--muted); margin-bottom: 12px; text-align: center; }
+#podium { display: flex; align-items: flex-end; justify-content: center; gap: 8px; margin-bottom: 12px; min-height: 130px; width: 100%; padding: 0 10px; }
+.podium-place { display: flex; flex-direction: column; align-items: center; flex: 1; position: relative; }
+.podium-avatar {
+    width: 46px; height: 46px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 900; font-size: 17px; color: #0a0a14;
+    margin-bottom: 5px; border: 3px solid; position: relative;
+}
+.podium-1 .podium-avatar { border-color: var(--gold); background: linear-gradient(135deg, var(--gold), #f59e0b); box-shadow: 0 0 30px rgba(250, 204, 21, 0.6); }
+.podium-2 .podium-avatar { border-color: #cbd5e1; background: linear-gradient(135deg, #e2e8f0, #94a3b8); }
+.podium-3 .podium-avatar { border-color: #f59e0b; background: linear-gradient(135deg, #fb923c, #b45309); }
+.podium-avatar .crown { position: absolute; top: -12px; font-size: 16px; }
+.podium-name { font-size: 10px; color: var(--text); font-weight: 800; max-width: 80px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: center; margin-bottom: 3px; }
+.podium-score { font-size: 14px; font-weight: 900; color: var(--green); margin-bottom: 5px; }
+.podium-bar { width: 100%; border-radius: 8px 8px 0 0; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 900; color: #0a0a14; }
+.podium-1 .podium-bar { height: 56px; background: linear-gradient(180deg, var(--gold), #f59e0b); box-shadow: 0 0 30px rgba(250, 204, 21, 0.4); }
+.podium-2 .podium-bar { height: 42px; background: linear-gradient(180deg, #e2e8f0, #94a3b8); }
+.podium-3 .podium-bar { height: 32px; background: linear-gradient(180deg, #fb923c, #b45309); }
+#lbList { width: 100%; background: rgba(20, 25, 40, 0.55); border: 1.5px solid var(--card-border); border-radius: var(--radius); padding: 6px; max-height: 35vh; overflow-y: auto; backdrop-filter: blur(20px); }
+.lbRow { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 12px; font-size: 13px; margin-bottom: 2px; }
+.lbRow.me { background: rgba(74, 222, 128, 0.1); border: 1px solid rgba(74, 222, 128, 0.25); }
+.lbRank { width: 28px; font-weight: 900; color: var(--muted); text-align: center; flex-shrink: 0; font-size: 12px; }
+.lbMain { flex: 1; min-width: 0; }
+.lbName { color: var(--text); font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 12px; }
+.lbSub { color: var(--muted); font-size: 10px; margin-top: 2px; }
+.lbScore { color: var(--green); font-weight: 900; font-size: 15px; text-align: right; }
+#lbStatus { color: var(--muted); font-size: 13px; padding: 28px 20px; text-align: center; }
+#lbCacheInfo { color: #475569; font-size: 10px; margin-top: 6px; min-height: 12px; text-align: center; }
+
+/* ==================== МАГАЗИН ==================== */
+#shopTabs { display: flex; gap: 3px; margin-bottom: 12px; width: 100%; }
+.shop-tab {
+    flex: 1; padding: 9px 2px;
+    background: rgba(20, 25, 40, 0.65);
+    border: 1.5px solid rgba(74, 222, 128, 0.1);
+    color: var(--muted); border-radius: 12px;
+    font-size: 8px; font-weight: 800;
+    cursor: pointer; font-family: inherit;
+    transition: all 0.15s; backdrop-filter: blur(10px);
+}
+.shop-tab.active {
+    background: linear-gradient(135deg, rgba(74, 222, 128, 0.2), rgba(34, 211, 238, 0.08));
+    border-color: var(--green); color: var(--green);
+    box-shadow: 0 4px 15px rgba(74, 222, 128, 0.2);
+}
+.shop-tab .icon { display: block; font-size: 15px; margin-bottom: 2px; }
+#shopContent { width: 100%; max-height: 58vh; overflow-y: auto; padding: 2px; }
+
+.shop-card {
+    display: flex; flex-direction: column; gap: 10px;
+    padding: 12px; margin-bottom: 8px;
+    background: rgba(20, 25, 40, 0.65);
+    border: 1.5px solid rgba(74, 222, 128, 0.12);
+    border-radius: var(--radius);
+    font-family: inherit;
+    transition: all 0.15s; text-align: left; width: 100%;
+    backdrop-filter: blur(20px);
+    position: relative;
+}
+.shop-card.selected { border-color: var(--green); box-shadow: 0 0 22px rgba(74, 222, 128, 0.25); background: rgba(74, 222, 128, 0.06); }
+.shop-card.locked { opacity: 0.75; }
+.shop-card.premium { border-color: rgba(250, 204, 21, 0.35); background: linear-gradient(135deg, rgba(250, 204, 21, 0.06), rgba(20, 25, 40, 0.65)); }
+.shop-card.donate { border-color: rgba(244, 114, 182, 0.35); background: linear-gradient(135deg, rgba(244, 114, 182, 0.06), rgba(20, 25, 40, 0.65)); }
+
+.rarity { position: absolute; top: 8px; right: 8px; font-size: 7px; font-weight: 900; letter-spacing: 0.6px; padding: 2px 6px; border-radius: 50px; text-transform: uppercase; }
+.rarity.common { background: rgba(100, 116, 139, 0.3); color: #cbd5e1; }
+.rarity.rare { background: rgba(34, 211, 238, 0.25); color: var(--cyan); }
+.rarity.epic { background: rgba(168, 85, 247, 0.25); color: #c084fc; }
+.rarity.legendary { background: rgba(250, 204, 21, 0.25); color: var(--gold); }
+
+.shop-top { display: flex; align-items: center; gap: 12px; }
+.shop-icon { width: 50px; height: 50px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0; background: rgba(74, 222, 128, 0.08); border: 1px solid rgba(74, 222, 128, 0.15); }
+.shop-info { flex: 1; min-width: 0; padding-right: 50px; }
+.shop-name { font-size: 14px; font-weight: 800; color: var(--text); margin-bottom: 3px; }
+.shop-desc { font-size: 11px; color: #94a3b8; line-height: 1.4; }
+.shop-owned { color: var(--green); font-size: 22px; font-weight: 900; text-align: center; padding: 8px; }
+
+.buy-row { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.buy-option {
+    padding: 10px 8px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center; gap: 5px;
+    font-size: 12px; font-weight: 900;
+    cursor: pointer; font-family: inherit;
+    transition: all 0.1s;
+    border: none;
+}
+.buy-option.stars {
+    background: linear-gradient(135deg, rgba(250, 204, 21, 0.15), rgba(245, 158, 11, 0.08));
+    color: var(--gold); border: 1.5px solid rgba(250, 204, 21, 0.4);
+}
+.buy-option.stars:active { background: var(--gold); color: #422006; }
+.buy-option.coins {
+    background: linear-gradient(135deg, rgba(74, 222, 128, 0.15), rgba(34, 197, 94, 0.08));
+    color: var(--green); border: 1.5px solid rgba(74, 222, 128, 0.4);
+}
+.buy-option.coins:active { background: var(--green); color: #052e16; }
+.buy-option.disabled { opacity: 0.4; pointer-events: none; }
+.buy-option .em { font-size: 14px; }
+
+/* ==================== КВЕСТЫ ==================== */
+.quest-card {
+    width: 100%; padding: 13px; margin-bottom: 8px;
+    background: rgba(20, 25, 40, 0.65);
+    border: 1.5px solid rgba(74, 222, 128, 0.15);
+    border-radius: var(--radius);
+    backdrop-filter: blur(20px);
+    display: flex; align-items: center; gap: 12px;
+}
+.quest-card.done { border-color: var(--green); background: linear-gradient(135deg, rgba(74, 222, 128, 0.1), rgba(20, 25, 40, 0.65)); box-shadow: 0 0 20px rgba(74, 222, 128, 0.2); }
+.quest-icon { width: 44px; height: 44px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; background: rgba(74, 222, 128, 0.1); border: 1px solid rgba(74, 222, 128, 0.15); }
+.quest-info { flex: 1; min-width: 0; }
+.quest-name { font-size: 13px; font-weight: 800; color: var(--text); margin-bottom: 5px; }
+.quest-progress-bar { height: 6px; background: rgba(0,0,0,0.4); border-radius: 3px; overflow: hidden; margin-bottom: 5px; }
+.quest-progress-fill { height: 100%; background: linear-gradient(90deg, var(--green), var(--cyan)); border-radius: 3px; transition: width 0.5s; }
+.quest-status { font-size: 10px; color: var(--muted); }
+.quest-status.done { color: var(--green); }
+.claim-btn { padding: 10px 14px; background: linear-gradient(135deg, var(--green), #22c55e); color: #052e16; font-size: 11px; font-weight: 900; border: none; border-radius: 12px; cursor: pointer; font-family: inherit; box-shadow: 0 4px 15px rgba(74, 222, 128, 0.3); }
+
+/* ==================== ДОСТИЖЕНИЯ ==================== */
+.ach-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 100%; }
+.ach-card { padding: 12px 8px; background: rgba(20, 25, 40, 0.6); border: 1.5px solid rgba(74, 222, 128, 0.1); border-radius: var(--radius); display: flex; flex-direction: column; align-items: center; text-align: center; opacity: 0.4; backdrop-filter: blur(20px); transition: all 0.3s; }
+.ach-card.unlocked { opacity: 1; border-color: rgba(74, 222, 128, 0.4); box-shadow: 0 0 20px rgba(74, 222, 128, 0.15); }
+.ach-icon { font-size: 28px; margin-bottom: 6px; }
+.ach-name { font-size: 9px; font-weight: 900; color: var(--text); letter-spacing: 0.3px; line-height: 1.2; margin-bottom: 2px; }
+.ach-desc { font-size: 8px; color: var(--muted); line-height: 1.3; }
+
+/* ==================== РЕФЕРАЛКА ==================== */
+.ref-box { width: 100%; padding: 18px; background: linear-gradient(135deg, rgba(74, 222, 128, 0.1), rgba(34, 211, 238, 0.06), rgba(20, 25, 40, 0.7)); border: 1.5px solid rgba(74, 222, 128, 0.25); border-radius: var(--radius-lg); text-align: center; backdrop-filter: blur(20px); margin-bottom: 12px; }
+.ref-emoji { font-size: 44px; margin-bottom: 10px; }
+.ref-title { font-size: 17px; font-weight: 900; color: var(--text); margin-bottom: 8px; }
+.ref-desc { font-size: 11px; color: #94a3b8; line-height: 1.5; margin-bottom: 14px; }
+.ref-stats { display: flex; justify-content: center; gap: 24px; margin-bottom: 14px; }
+.ref-stat { text-align: center; }
+.ref-stat .v { font-size: 22px; font-weight: 900; color: var(--gold); }
+.ref-stat .l { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; margin-top: 2px; }
+.ref-btn { width: 100%; padding: 14px; background: linear-gradient(135deg, var(--green), #22c55e); color: #052e16; font-size: 14px; font-weight: 900; border: none; border-radius: 14px; cursor: pointer; font-family: inherit; box-shadow: 0 8px 25px rgba(74, 222, 128, 0.35); }
+
+/* ==================== КАРТЫ ==================== */
+.map-card {
+    width: 100%; padding: 16px; margin-bottom: 10px;
+    background: rgba(20, 25, 40, 0.65);
+    border: 1.5px solid rgba(74, 222, 128, 0.15);
+    border-radius: var(--radius-lg);
+    cursor: pointer; font-family: inherit;
+    display: flex; align-items: center; gap: 14px;
+    transition: all 0.15s; backdrop-filter: blur(20px); text-align: left;
+}
 .map-card:active { transform: scale(0.98); border-color: rgba(74, 222, 128, 0.5); }
 .map-card.m-small { border-color: rgba(34, 211, 238, 0.3); background: linear-gradient(135deg, rgba(34, 211, 238, 0.06), rgba(20, 25, 40, 0.65)); }
 .map-card.m-medium { border-color: rgba(74, 222, 128, 0.3); background: linear-gradient(135deg, rgba(74, 222, 128, 0.06), rgba(20, 25, 40, 0.65)); }
@@ -91,141 +406,34 @@ h1 { font-size: 42px; font-weight: 900; letter-spacing: -2px; background: linear
 .map-visual { width: 60px; height: 60px; border-radius: 14px; display: flex; align-items: center; justify-content: center; position: relative; flex-shrink: 0; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.06); }
 .map-visual .grid-mini { display: grid; gap: 1px; }
 .map-visual .cell { width: 4px; height: 4px; background: rgba(74, 222, 128, 0.25); border-radius: 1px; }
-.map-visual .cell.on { background: #4ade80; box-shadow: 0 0 4px #4ade80; }
+.map-visual .cell.on { background: var(--green); box-shadow: 0 0 4px var(--green); }
 .map-info { flex: 1; min-width: 0; }
-.map-name { font-size: 15px; font-weight: 900; color: #e2e8f0; margin-bottom: 3px; }
+.map-name { font-size: 15px; font-weight: 900; color: var(--text); margin-bottom: 3px; }
 .map-desc { font-size: 11px; color: #94a3b8; line-height: 1.4; }
-.map-best { margin-top: 4px; font-size: 10px; color: #facc15; font-weight: 700; }
+.map-best { margin-top: 4px; font-size: 10px; color: var(--gold); font-weight: 700; }
 
-/* GAME OVER */
-#overTitle { font-size: 30px; font-weight: 900; letter-spacing: -1.5px; background: linear-gradient(135deg, #ef4444, #f472b6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 6px; }
-#overScore { font-size: 60px; color: #4ade80; font-weight: 900; line-height: 1; margin-bottom: 6px; text-shadow: 0 0 50px rgba(74, 222, 128, 0.6); }
-#overInfo { font-size: 11px; color: #94a3b8; margin-bottom: 8px; display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
-#overInfo span { padding: 5px 10px; background: rgba(20,25,40,0.6); border-radius: 50px; border: 1px solid rgba(74,222,128,0.15); }
-#overHigh { font-size: 13px; color: #facc15; margin-bottom: 14px; min-height: 18px; font-weight: 800; }
-#submitStatus { font-size: 11px; color: #64748b; min-height: 14px; margin-bottom: 12px; }
-
-.buy-btn { width: 100%; max-width: 320px; padding: 15px; margin: 5px 0; background: linear-gradient(135deg, #facc15 0%, #f59e0b 100%); color: #422006; font-size: 14px; font-weight: 900; border: none; border-radius: 16px; cursor: pointer; -webkit-appearance: none; appearance: none; font-family: inherit; box-shadow: 0 10px 35px rgba(250, 204, 21, 0.4); display: flex; align-items: center; justify-content: center; gap: 8px; }
-.buy-btn:active { transform: scale(0.97); }
-
-.btn-wide { width: 100%; max-width: 320px; padding: 13px 16px; background: rgba(20, 25, 40, 0.6); border: 1.5px solid rgba(74, 222, 128, 0.3); color: #e2e8f0; border-radius: 16px; cursor: pointer; -webkit-appearance: none; appearance: none; font-family: inherit; font-size: 13px; font-weight: 800; margin: 5px 0; display: flex; align-items: center; justify-content: center; gap: 8px; backdrop-filter: blur(20px); transition: all 0.15s; }
-.btn-wide:active { background: rgba(74, 222, 128, 0.15); border-color: rgba(74, 222, 128, 0.6); }
-.btn-wide.green { background: linear-gradient(135deg, #4ade80, #22c55e); color: #052e16; border-color: transparent; box-shadow: 0 10px 30px rgba(74, 222, 128, 0.35); }
-
-/* ОБЩИЕ ЗАГОЛОВКИ ЭКРАНОВ */
-.screen-title { font-size: 26px; font-weight: 900; margin-bottom: 4px; letter-spacing: -1px; }
-.screen-title.gold { background: linear-gradient(135deg, #facc15, #f59e0b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-.screen-title.purple { background: linear-gradient(135deg, #a78bfa, #22d3ee); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-.screen-sub { font-size: 11px; color: #64748b; margin-bottom: 14px; text-align: center; }
-
-/* РЕЙТИНГ */
-#lbRules { font-size: 10px; color: #64748b; margin-bottom: 12px; text-align: center; }
-#podium { display: flex; align-items: flex-end; justify-content: center; gap: 8px; margin-bottom: 12px; min-height: 130px; width: 100%; padding: 0 10px; }
-.podium-place { display: flex; flex-direction: column; align-items: center; flex: 1; position: relative; }
-.podium-avatar { width: 46px; height: 46px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 17px; color: #0a0a14; margin-bottom: 5px; border: 3px solid; position: relative; }
-.podium-1 .podium-avatar { border-color: #facc15; background: linear-gradient(135deg, #facc15, #f59e0b); box-shadow: 0 0 30px rgba(250, 204, 21, 0.6); }
-.podium-2 .podium-avatar { border-color: #cbd5e1; background: linear-gradient(135deg, #e2e8f0, #94a3b8); }
-.podium-3 .podium-avatar { border-color: #f59e0b; background: linear-gradient(135deg, #fb923c, #b45309); }
-.podium-avatar .crown { position: absolute; top: -12px; font-size: 16px; }
-.podium-name { font-size: 10px; color: #e2e8f0; font-weight: 800; max-width: 80px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: center; margin-bottom: 3px; }
-.podium-score { font-size: 14px; font-weight: 900; color: #4ade80; margin-bottom: 5px; }
-.podium-bar { width: 100%; border-radius: 8px 8px 0 0; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 900; color: #0a0a14; }
-.podium-1 .podium-bar { height: 56px; background: linear-gradient(180deg, #facc15, #f59e0b); box-shadow: 0 0 30px rgba(250, 204, 21, 0.4); }
-.podium-2 .podium-bar { height: 42px; background: linear-gradient(180deg, #e2e8f0, #94a3b8); }
-.podium-3 .podium-bar { height: 32px; background: linear-gradient(180deg, #fb923c, #b45309); }
-#lbList { width: 100%; background: rgba(20, 25, 40, 0.5); border: 1px solid rgba(74, 222, 128, 0.12); border-radius: 18px; padding: 6px; max-height: 35vh; overflow-y: auto; backdrop-filter: blur(20px); }
-.lbRow { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 12px; font-size: 13px; margin-bottom: 2px; }
-.lbRow.me { background: rgba(74, 222, 128, 0.1); border: 1px solid rgba(74, 222, 128, 0.25); }
-.lbRank { width: 28px; font-weight: 900; color: #64748b; text-align: center; flex-shrink: 0; font-size: 12px; }
-.lbMain { flex: 1; min-width: 0; }
-.lbName { color: #e2e8f0; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 12px; }
-.lbSub { color: #64748b; font-size: 10px; margin-top: 2px; }
-.lbScore { color: #4ade80; font-weight: 900; font-size: 15px; text-align: right; }
-#lbStatus { color: #64748b; font-size: 13px; padding: 28px 20px; text-align: center; }
-#lbCacheInfo { color: #475569; font-size: 10px; margin-top: 6px; min-height: 12px; text-align: center; }
-
-/* МАГАЗИН */
-#shopTabs { display: flex; gap: 3px; margin-bottom: 12px; width: 100%; }
-.shop-tab { flex: 1; padding: 9px 2px; background: rgba(20, 25, 40, 0.6); border: 1.5px solid rgba(74, 222, 128, 0.1); color: #64748b; border-radius: 12px; font-size: 8px; font-weight: 800; cursor: pointer; -webkit-appearance: none; appearance: none; font-family: inherit; transition: all 0.15s; backdrop-filter: blur(10px); }
-.shop-tab.active { background: linear-gradient(135deg, rgba(74, 222, 128, 0.2), rgba(34, 211, 238, 0.08)); border-color: #4ade80; color: #4ade80; box-shadow: 0 4px 15px rgba(74, 222, 128, 0.2); }
-.shop-tab .icon { display: block; font-size: 15px; margin-bottom: 2px; }
-#shopContent { width: 100%; max-height: 56vh; overflow-y: auto; padding: 2px; }
-
-.shop-card { display: flex; align-items: center; gap: 10px; padding: 11px; margin-bottom: 7px; background: rgba(20, 25, 40, 0.65); border: 1.5px solid rgba(74, 222, 128, 0.12); border-radius: 16px; cursor: pointer; -webkit-appearance: none; appearance: none; font-family: inherit; transition: all 0.15s; text-align: left; width: 100%; backdrop-filter: blur(20px); position: relative; overflow: hidden; }
-.shop-card:active { transform: scale(0.98); border-color: rgba(74, 222, 128, 0.4); }
-.shop-card.selected { border-color: #4ade80; box-shadow: 0 0 20px rgba(74, 222, 128, 0.25); background: rgba(74, 222, 128, 0.06); }
-.shop-card.locked { opacity: 0.6; }
-.shop-card.premium { border-color: rgba(250, 204, 21, 0.35); background: linear-gradient(135deg, rgba(250, 204, 21, 0.06), rgba(20, 25, 40, 0.65)); }
-.shop-card.donate { border-color: rgba(244, 114, 182, 0.35); background: linear-gradient(135deg, rgba(244, 114, 182, 0.06), rgba(20, 25, 40, 0.65)); }
-
-.rarity { position: absolute; top: 6px; right: 6px; font-size: 7px; font-weight: 900; letter-spacing: 0.6px; padding: 2px 6px; border-radius: 50px; text-transform: uppercase; }
-.rarity.common { background: rgba(100, 116, 139, 0.3); color: #cbd5e1; }
-.rarity.rare { background: rgba(34, 211, 238, 0.25); color: #22d3ee; }
-.rarity.epic { background: rgba(168, 85, 247, 0.25); color: #c084fc; }
-.rarity.legendary { background: rgba(250, 204, 21, 0.25); color: #facc15; }
-
-.shop-icon { width: 48px; height: 48px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 23px; flex-shrink: 0; background: rgba(74, 222, 128, 0.08); border: 1px solid rgba(74, 222, 128, 0.15); }
-.shop-info { flex: 1; min-width: 0; }
-.shop-name { font-size: 13px; font-weight: 800; color: #e2e8f0; margin-bottom: 2px; }
-.shop-desc { font-size: 10px; color: #94a3b8; line-height: 1.35; }
-.shop-price { display: flex; flex-direction: column; align-items: flex-end; gap: 1px; flex-shrink: 0; }
-.shop-price-value { font-size: 15px; font-weight: 900; color: #facc15; }
-.shop-price-label { font-size: 8px; color: #64748b; letter-spacing: 0.4px; text-transform: uppercase; }
-.shop-owned { color: #4ade80; font-size: 20px; font-weight: 900; }
-
-/* ЗАДАНИЯ */
-.quest-card { width: 100%; padding: 14px; margin-bottom: 8px; background: rgba(20, 25, 40, 0.65); border: 1.5px solid rgba(74, 222, 128, 0.15); border-radius: 18px; backdrop-filter: blur(20px); display: flex; align-items: center; gap: 12px; }
-.quest-card.done { border-color: #4ade80; background: linear-gradient(135deg, rgba(74, 222, 128, 0.1), rgba(20, 25, 40, 0.65)); box-shadow: 0 0 20px rgba(74, 222, 128, 0.2); }
-.quest-icon { width: 44px; height: 44px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; background: rgba(74, 222, 128, 0.1); border: 1px solid rgba(74, 222, 128, 0.15); }
-.quest-info { flex: 1; min-width: 0; }
-.quest-name { font-size: 13px; font-weight: 800; color: #e2e8f0; margin-bottom: 4px; }
-.quest-progress-bar { height: 6px; background: rgba(0,0,0,0.4); border-radius: 3px; overflow: hidden; margin-bottom: 4px; }
-.quest-progress-fill { height: 100%; background: linear-gradient(90deg, #4ade80, #22d3ee); border-radius: 3px; transition: width 0.5s; }
-.quest-reward { font-size: 10px; color: #facc15; font-weight: 800; }
-.quest-status { font-size: 10px; color: #64748b; }
-.quest-status.done { color: #4ade80; }
-
-/* ДОСТИЖЕНИЯ */
-.ach-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 100%; }
-.ach-card { padding: 12px 8px; background: rgba(20, 25, 40, 0.6); border: 1.5px solid rgba(74, 222, 128, 0.1); border-radius: 16px; display: flex; flex-direction: column; align-items: center; text-align: center; opacity: 0.4; backdrop-filter: blur(20px); transition: all 0.3s; }
-.ach-card.unlocked { opacity: 1; border-color: rgba(74, 222, 128, 0.4); box-shadow: 0 0 20px rgba(74, 222, 128, 0.15); }
-.ach-icon { font-size: 28px; margin-bottom: 6px; }
-.ach-name { font-size: 9px; font-weight: 900; color: #e2e8f0; letter-spacing: 0.3px; line-height: 1.2; margin-bottom: 2px; }
-.ach-desc { font-size: 8px; color: #64748b; line-height: 1.3; }
-
-/* РЕФЕРАЛКА */
-.ref-box { width: 100%; padding: 16px; background: linear-gradient(135deg, rgba(74, 222, 128, 0.1), rgba(34, 211, 238, 0.06), rgba(20, 25, 40, 0.7)); border: 1.5px solid rgba(74, 222, 128, 0.25); border-radius: 20px; text-align: center; backdrop-filter: blur(20px); margin-bottom: 12px; }
-.ref-emoji { font-size: 42px; margin-bottom: 8px; }
-.ref-title { font-size: 16px; font-weight: 900; color: #e2e8f0; margin-bottom: 6px; }
-.ref-desc { font-size: 11px; color: #94a3b8; line-height: 1.5; margin-bottom: 12px; }
-.ref-stats { display: flex; justify-content: center; gap: 20px; margin-bottom: 12px; }
-.ref-stat { text-align: center; }
-.ref-stat .v { font-size: 20px; font-weight: 900; color: #4ade80; }
-.ref-stat .l { font-size: 9px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; }
-.ref-btn { width: 100%; padding: 13px; background: linear-gradient(135deg, #4ade80, #22c55e); color: #052e16; font-size: 13px; font-weight: 900; border: none; border-radius: 14px; cursor: pointer; font-family: inherit; box-shadow: 0 8px 25px rgba(74, 222, 128, 0.35); }
-
-/* COUNTDOWN */
+/* ==================== COUNTDOWN ==================== */
 #countdown { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; background: radial-gradient(circle at center, rgba(0,0,0,0.85), rgba(0,0,0,0.96)); z-index: 1000; }
 #countdown.show { display: flex; }
-#countdown-text { font-size: 140px; font-weight: 900; line-height: 1; background: linear-gradient(135deg, #4ade80, #22d3ee); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; filter: drop-shadow(0 0 40px rgba(74, 222, 128, 0.7)); }
+#countdown-text { font-size: 140px; font-weight: 900; line-height: 1; background: linear-gradient(135deg, var(--green), var(--cyan)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; filter: drop-shadow(0 0 40px rgba(74, 222, 128, 0.7)); }
 #countdown.pulse #countdown-text { animation: countPulse 0.9s ease-out; }
 @keyframes countPulse { 0% { transform: scale(0.3); opacity: 0; } 40% { transform: scale(1.15); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
 
-.score-popup { position: fixed; pointer-events: none; z-index: 100; font-size: 24px; font-weight: 900; color: #4ade80; text-shadow: 0 0 20px rgba(74, 222, 128, 0.8), 0 2px 4px rgba(0,0,0,0.8); animation: scoreFloat 1s ease-out forwards; }
-.score-popup.golden { color: #facc15; font-size: 30px; }
+.score-popup { position: fixed; pointer-events: none; z-index: 100; font-size: 24px; font-weight: 900; color: var(--green); text-shadow: 0 0 20px rgba(74, 222, 128, 0.8), 0 2px 4px rgba(0,0,0,0.8); animation: scoreFloat 1s ease-out forwards; }
+.score-popup.golden { color: var(--gold); font-size: 30px; }
 @keyframes scoreFloat { 0% { transform: translateY(0) scale(0.5); opacity: 0; } 20% { transform: translateY(-15px) scale(1.2); opacity: 1; } 100% { transform: translateY(-70px) scale(1); opacity: 0; } }
 
 #toast { position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%) translateY(120px); background: rgba(20, 25, 40, 0.95); color: white; padding: 12px 20px; border-radius: 14px; font-size: 13px; font-weight: 700; z-index: 9998; border: 1.5px solid rgba(74, 222, 128, 0.35); transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1); max-width: 90vw; text-align: center; backdrop-filter: blur(20px); box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5); }
 #toast.show { transform: translateX(-50%) translateY(0); }
 
-.legal-content { width: 100%; background: rgba(20, 25, 40, 0.7); border: 1px solid rgba(74, 222, 128, 0.15); border-radius: 20px; padding: 20px; max-height: 70vh; overflow-y: auto; backdrop-filter: blur(20px); font-size: 12px; line-height: 1.7; color: #cbd5e1; }
-.legal-content h2 { font-size: 17px; color: #4ade80; margin-bottom: 12px; font-weight: 900; }
-.legal-content h3 { font-size: 11px; color: #22d3ee; margin: 12px 0 6px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
+.legal-content { width: 100%; background: rgba(20, 25, 40, 0.7); border: 1.5px solid var(--card-border); border-radius: var(--radius-lg); padding: 20px; max-height: 70vh; overflow-y: auto; backdrop-filter: blur(20px); font-size: 12px; line-height: 1.7; color: #cbd5e1; }
+.legal-content h2 { font-size: 17px; color: var(--green); margin-bottom: 12px; font-weight: 900; }
+.legal-content h3 { font-size: 11px; color: var(--cyan); margin: 12px 0 6px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
 .legal-content p { margin-bottom: 8px; }
 .legal-content ul { margin: 6px 0 10px 20px; }
 .legal-content li { margin-bottom: 4px; }
-.legal-content .highlight { color: #facc15; font-weight: 700; }
-.legal-content .date { color: #64748b; font-size: 10px; margin-top: 16px; text-align: center; }
+.legal-content .highlight { color: var(--gold); font-weight: 700; }
+.legal-content .date { color: var(--muted); font-size: 10px; margin-top: 16px; text-align: center; }
 </style>
 </head>
 <body>
@@ -237,7 +445,7 @@ h1 { font-size: 42px; font-weight: 900; letter-spacing: -2px; background: linear
 <div id="countdown"><span id="countdown-text"></span></div>
 <div id="toast"></div>
 
-<!-- МЕНЮ -->
+<!-- ========== МЕНЮ ========== -->
 <div id="menuScreen" class="screen active">
     <div class="hero-card">
         <div class="hero-top">
@@ -251,7 +459,7 @@ h1 { font-size: 42px; font-weight: 900; letter-spacing: -2px; background: linear
         <div class="hero-stats">
             <div class="hero-stat"><div class="v" id="statBest">0</div><div class="l">Рекорд</div></div>
             <div class="hero-stat"><div class="v" id="statGames">0</div><div class="l">Игр</div></div>
-            <div class="hero-stat"><div class="v" id="statTotal">0</div><div class="l">Всего</div></div>
+            <div class="hero-stat coins"><div class="v" id="statCoins">0</div><div class="l">💎 Монеты</div></div>
         </div>
         <div class="hero-progress">
             <div class="hero-progress-info"><span id="xpText">0 / 100 XP</span><span id="xpNext">до Ур. 2</span></div>
@@ -284,7 +492,7 @@ h1 { font-size: 42px; font-weight: 900; letter-spacing: -2px; background: linear
             <div class="ti-wrap">🏅</div><div class="tt">Ачивки</div>
         </button>
         <button class="btn-tile" onclick="showScreen('referralScreen')">
-            <div class="ti-wrap">🎁</div><div class="tt">Бонус</div>
+            <div class="ti-wrap">🎁</div><div class="tt">Друзья</div>
         </button>
         <button class="btn-tile" onclick="showScreen('legalScreen')">
             <div class="ti-wrap">📜</div><div class="tt">Условия</div>
@@ -292,11 +500,11 @@ h1 { font-size: 42px; font-weight: 900; letter-spacing: -2px; background: linear
     </div>
 </div>
 
-<!-- ВЫБОР КАРТЫ -->
+<!-- ========== ВЫБОР КАРТЫ ========== -->
 <div id="mapScreen" class="screen">
     <button class="back-btn" onclick="showScreen('menuScreen')">← Назад</button>
-    <div class="map-title">🗺️ ВЫБОР КАРТЫ</div>
-    <div class="map-sub">Размер поля влияет на длину партии</div>
+    <div class="screen-title green">🗺️ ВЫБОР КАРТЫ</div>
+    <div class="screen-sub">Размер поля влияет на длину партии</div>
     <button class="map-card m-small" onclick="startGame('small')">
         <div class="map-visual" id="miniSmall"></div>
         <div class="map-info">
@@ -323,7 +531,7 @@ h1 { font-size: 42px; font-weight: 900; letter-spacing: -2px; background: linear
     </button>
 </div>
 
-<!-- ИГРА -->
+<!-- ========== ИГРА ========== -->
 <div id="gameScreen" class="screen">
     <div id="hud">
         <div class="hud-item" id="scoreHud">🎯 0</div>
@@ -341,7 +549,7 @@ h1 { font-size: 42px; font-weight: 900; letter-spacing: -2px; background: linear
     </div>
 </div>
 
-<!-- GAME OVER -->
+<!-- ========== GAME OVER ========== -->
 <div id="overScreen" class="screen">
     <div id="overTitle">ИГРА ОКОНЧЕНА</div>
     <div id="overScore">0</div>
@@ -354,7 +562,7 @@ h1 { font-size: 42px; font-weight: 900; letter-spacing: -2px; background: linear
     <button class="btn-wide" onclick="showScreen('menuScreen')">🏠 В меню</button>
 </div>
 
-<!-- РЕЙТИНГ -->
+<!-- ========== РЕЙТИНГ ========== -->
 <div id="leaderboardScreen" class="screen">
     <button class="back-btn" onclick="showScreen('menuScreen')">← Назад</button>
     <div class="screen-title gold">🏆 ТОП ИГРОКОВ</div>
@@ -365,11 +573,11 @@ h1 { font-size: 42px; font-weight: 900; letter-spacing: -2px; background: linear
     <button class="btn-wide" style="margin-top:10px" onclick="renderLeaderboard(true)">🔄 Обновить</button>
 </div>
 
-<!-- МАГАЗИН -->
+<!-- ========== МАГАЗИН ========== -->
 <div id="shopScreen" class="screen">
     <button class="back-btn" onclick="showScreen('menuScreen')">← Назад</button>
     <div class="screen-title purple">⭐ МАГАЗИН</div>
-    <div class="screen-sub">Открывай, собирай, поддерживай</div>
+    <div class="screen-sub">Покупай за 💎 монеты или ⭐ звёзды</div>
     <div id="shopTabs">
         <button class="shop-tab active" data-tab="skins" onclick="switchTab('skins')"><span class="icon">🎨</span>Скины</button>
         <button class="shop-tab" data-tab="boosters" onclick="switchTab('boosters')"><span class="icon">⚡</span>Бусты</button>
@@ -379,15 +587,15 @@ h1 { font-size: 42px; font-weight: 900; letter-spacing: -2px; background: linear
     <div id="shopContent"></div>
 </div>
 
-<!-- ЗАДАНИЯ -->
+<!-- ========== ЗАДАНИЯ ========== -->
 <div id="questsScreen" class="screen">
     <button class="back-btn" onclick="showScreen('menuScreen')">← Назад</button>
     <div class="screen-title purple">🎯 ЗАДАНИЯ</div>
-    <div class="screen-sub">Обновляются каждый день</div>
+    <div class="screen-sub">Обновляются каждый день · дают 💎 монеты</div>
     <div id="questList"></div>
 </div>
 
-<!-- ДОСТИЖЕНИЯ -->
+<!-- ========== ДОСТИЖЕНИЯ ========== -->
 <div id="achievementsScreen" class="screen">
     <button class="back-btn" onclick="showScreen('menuScreen')">← Назад</button>
     <div class="screen-title gold">🏅 ДОСТИЖЕНИЯ</div>
@@ -395,23 +603,24 @@ h1 { font-size: 42px; font-weight: 900; letter-spacing: -2px; background: linear
     <div class="ach-grid" id="achGrid"></div>
 </div>
 
-<!-- РЕФЕРАЛКА -->
+<!-- ========== ДРУЗЬЯ ========== -->
 <div id="referralScreen" class="screen">
     <button class="back-btn" onclick="showScreen('menuScreen')">← Назад</button>
-    <div class="screen-title purple">🎁 ПРИГЛАШАЙ ДРУЗЕЙ</div>
+    <div class="screen-title green">🎁 ДРУЗЬЯ</div>
+    <div class="screen-sub">Приглашай друзей и получай 💎 монеты</div>
     <div class="ref-box">
         <div class="ref-emoji">👥</div>
-        <div class="ref-title">Получай бонусы!</div>
-        <div class="ref-desc">За каждого друга, который запустит игру — тебе <b style="color:#facc15">5 звёзд</b> на счёт бота. Топ-1 пригласивший получит <b style="color:#facc15">50 звёзд</b> на этой неделе.</div>
+        <div class="ref-title">+100 💎 за друга</div>
+        <div class="ref-desc">За каждого друга, который запустит игру через твою ссылку, ты получаешь <b style="color:var(--gold)">100 монет</b>. Монеты можно тратить в магазине как звёзды.</div>
         <div class="ref-stats">
             <div class="ref-stat"><div class="v" id="refCount">0</div><div class="l">Друзей</div></div>
-            <div class="ref-stat"><div class="v" id="refReward">0</div><div class="l">Бонусов</div></div>
+            <div class="ref-stat"><div class="v" id="refReward">0</div><div class="l">💎 Всего</div></div>
         </div>
         <button class="ref-btn" onclick="shareReferral()">📤 Поделиться ссылкой</button>
     </div>
 </div>
 
-<!-- УСЛОВИЯ -->
+<!-- ========== УСЛОВИЯ ========== -->
 <div id="legalScreen" class="screen">
     <button class="back-btn" onclick="showScreen('menuScreen')">← Назад</button>
     <div class="legal-content">
@@ -421,8 +630,8 @@ h1 { font-size: 42px; font-weight: 900; letter-spacing: -2px; background: linear
         <h3>2. Предмет соглашения</h3>
         <p>Игра предоставляется «как есть» (as is). Разработчик не гарантирует бесперебойную работу или сохранность игрового прогресса.</p>
         <h3>3. Виртуальные товары и Telegram Stars</h3>
-        <p><span class="highlight">Все покупки цифровых товаров внутри Игры совершаются за Telegram Stars.</span></p>
-        <p>Оплата подчиняется правилам Telegram. <span class="highlight">Возврат средств за цифровые товары не производится</span>.</p>
+        <p><span class="highlight">Все покупки цифровых товаров внутри Игры совершаются за Telegram Stars или внутренние монеты (💎).</span></p>
+        <p>Внутренние монеты нельзя купить за реальные деньги — только заработать в игре. <span class="highlight">Возврат средств за Telegram Stars не производится.</span></p>
         <p>Telegram Stars не являются реальной валютой.</p>
         <h3>4. Ответственность пользователя</h3>
         <ul>
@@ -432,13 +641,13 @@ h1 { font-size: 42px; font-weight: 900; letter-spacing: -2px; background: linear
         </ul>
         <h3>5. Добровольная поддержка</h3>
         <p>Покупки категории «Поддержать автора» являются <span class="highlight">добровольными пожертвованиями</span>.</p>
-        <h3>6. PvP-режим (приbackground наличии)</h3>
-        <p:#>В будущем можетef быть добавлен режим на звё444зды. <span class="highlight">Комис4сия платформы до 10%</span>.</p>
+        <h3>6. PvP-режим (при наличии)</h3>
+        <p>В будущем может быть добавлен режим на звёзды. <span class="highlight">Комиссия платформы до 10%</span>.</p>
         <h3>7. Изменения</h3>
         <p>Разработчик вправе изменять Условия, уведомляя через бота.</p>
         <h3>8. Контакты</h3>
         <p>По вопросам: @ваш_контакт_в_телеграм</p>
-        <;div class="date">Последнее обновление: 15 сентября 2026 г.</div>
+        <div class="date">Последнее обновление: 15 сентября 2026 г.</div>
     </div>
 </div>
 
@@ -446,7 +655,7 @@ h1 { font-size: 42px; font-weight: 900; letter-spacing: -2px; background: linear
 window.addEventListener('error', function(e) {
     if (e.message === 'Script error.' || !e.message) return;
     var box = document.createElement('div');
-    box.style.cssText = 'position:fixed;top:0;left:0;right:0;color:#fff;padding:8px;font-size:11px;z-index:99999;';
+    box.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#ef4444;color:#fff;padding:8px;font-size:11px;z-index:99999;';
     box.textContent = '⚠ ' + e.message;
     document.body.appendChild(box);
     setTimeout(function() { box.remove(); }, 4000);
@@ -462,6 +671,15 @@ var CACHE_TTL = 3 * 60 * 1000;
 var scoresCache = null, scoresCacheTime = 0, lastSubmitTime = 0;
 var SUBMIT_COOLDOWN = 5000;
 
+// ============ МОНЕТЫ ============
+// Курс: 1⭐ = 10💎
+var COINS_PER_STAR = 10;
+function starToCoins(stars) { return stars * COINS_PER_STAR; }
+
+var coins = parseInt(localStorage.getItem('snakeCoins') || '0', 10);
+function addCoins(n) { coins += n; localStorage.setItem('snakeCoins', String(coins)); updateHero(); }
+function spendCoins(n) { if (coins < n) return false; coins -= n; localStorage.setItem('snakeCoins', String(coins)); updateHero(); return true; }
+
 // ============ КАРТЫ ============
 var MAPS = {
     small:  { id: 'small',  name: 'Малая',   size: 15, baseSpeed: 220, emoji: '🏝️' },
@@ -469,7 +687,7 @@ var MAPS = {
     large:  { id: 'large',  name: 'Большая', size: 25, baseSpeed: 180, emoji: '🏔️' }
 };
 
-// ============ СКИНЫ (12) ============
+// ============ СКИНЫ ============
 var SKINS = [
     { id: 'classic', name: 'Классик',  req: 0,    type: 'score', rarity: 'common',    head: '#4ade80', body: '#22c55e', glow: '#4ade80', emoji: '🐍' },
     { id: 'ocean',   name: 'Океан',    req: 30,   type: 'score', rarity: 'common',    head: '#22d3ee', body: '#0891b2', glow: '#22d3ee', emoji: '🌊' },
@@ -480,10 +698,24 @@ var SKINS = [
     { id: 'gold',    name: 'Золото',   req: 600,  type: 'score', rarity: 'epic',      head: '#facc15', body: '#f59e0b', glow: '#facc15', emoji: '⭐' },
     { id: 'shadow',  name: 'Тень',     req: 800,  type: 'score', rarity: 'epic',      head: '#475569', body: '#1e293b', glow: '#94a3b8', emoji: '🌑' },
     { id: 'rainbow', name: 'Радуга',   req: 1200, type: 'score', rarity: 'legendary', head: 'rainbow', body: 'rainbow', glow: '#8b5cf6', emoji: '🌈' },
-    { id: 'cosmos',  name: 'Космос',   price: 50,  type: 'stars', rarity: 'epic',      head: '#e879f9', body: '#7c3aed', glow: '#e879f9', emoji: '🌌' },
-    { id: 'neon',    name: 'Неон',     price: 75,  type: 'stars', rarity: 'epic',      head: '#22ff88', body: '#00ccff', glow: '#22ff88', emoji: '💚' },
-    { id: 'aurora',  name: 'Аврора',   price: 100, type: 'stars', rarity: 'legendary', head: '#a78bfa', body: '#22d3ee', glow: '#a78bfa', emoji: '✨' }
+    { id: 'cosmos',  name: 'Космос',   stars: 50,  type: 'stars', rarity: 'epic',      head: '#e879f9', body: '#7c3aed', glow: '#e879f9', emoji: '🌌' },
+    { id: 'neon',    name: 'Неон',     stars: 75,  type: 'stars', rarity: 'epic',      head: '#22ff88', body: '#00ccff', glow: '#22ff88', emoji: '💚' },
+    { id: 'aurora',  name: 'Аврора',   stars: 100, type: 'stars', rarity: 'legendary', head: '#a78bfa', body: '#22d3ee', glow: '#a78bfa', emoji: '✨' }
 ];
+
+var BOOSTERS = [
+    { id: 'extra_life', icon: '💚', name: 'Вторая жизнь', desc: 'Продолжить партию после смерти', stars: 5 },
+    { id: 'boost_x2',   icon: '⚡', name: 'Буст ×2 очков', desc: 'Следующая партия — двойные очки', stars: 10 },
+    { id: 'shield',     icon: '🛡️', name: 'Щит от смерти', desc: 'Спасает от одного столкновения', stars: 10 }
+];
+
+var DONATES = [
+    { id: 'donate_10',  icon: '☕', name: 'Кофе автору', desc: 'Небольшая поддержка', stars: 10, coinsOnly: true },
+    { id: 'donate_50',  icon: '🍕', name: 'Пицца автору', desc: 'Средняя поддержка', stars: 50, coinsOnly: true },
+    { id: 'donate_100', icon: '🎁', name: 'Большой подарок', desc: 'Мощная поддержка проекта', stars: 100, coinsOnly: true }
+];
+
+var PREMIUM = { id: 'premium', icon: '👑', name: 'Премиум навсегда', desc: 'Золотая рамка в топе · +10% к очкам · все премиум-скины', stars: 150 };
 
 // ============ ДОСТИЖЕНИЯ ============
 var ACHIEVEMENTS = [
@@ -498,7 +730,7 @@ var ACHIEVEMENTS = [
     { id: 'total_1000', name: 'Тысячник',       desc: 'Всего 1000 очков',     icon: '💰', check: function(s) { return s.total >= 1000; } },
     { id: 'all_maps',   name: 'Путешественник', desc: 'Играй на всех картах', icon: '🗺️', check: function(s) { return (s.mapsPlayed || []).length >= 3; } },
     { id: 'all_skins',  name: 'Коллекционер',   desc: 'Собери все базовые',   icon: '🎨', check: function(s, h) { return h >= 1200; } },
-    { id: 'premium',    name: 'VIP',            desc: 'Купи Премиум',         icon: '👑', check: function(s) { return isPremium; } }
+    { id: 'premium',    name: 'VIP',            desc: 'Купи Премиум',         icon: '👑', check: function() { return isPremium; } }
 ];
 
 // ============ СОСТОЯНИЕ ============
@@ -506,8 +738,7 @@ var selectedSkinId = localStorage.getItem('snakeSkin') || 'classic';
 var ownedStarsSkins = JSON.parse(localStorage.getItem('ownedStarsSkins') || '[]');
 var unlockedAchievements = JSON.parse(localStorage.getItem('snakeAch') || '[]');
 var isPremium = localStorage.getItem('snakePremium') === '1';
-var activeBoost = false;
-var activeShield = false;
+var activeBoost = false, activeShield = false;
 var currentMapId = 'medium';
 var bestScores = JSON.parse(localStorage.getItem('snakeBestByMap') || '{"small":0,"medium":0,"large":0}');
 var stats = JSON.parse(localStorage.getItem('snakeStats') || '{"games":0,"total":0,"xp":0,"mapsPlayed":[],"goldsEaten":0}');
@@ -520,7 +751,6 @@ function isSkinUnlocked(skin) {
     if (skin.type === 'stars') return isPremium || ownedStarsSkins.indexOf(skin.id) !== -1;
     return highScore >= skin.req;
 }
-
 function levelFromXp(xp) { return Math.floor(Math.sqrt(xp / 50)) + 1; }
 function xpForLevel(lvl) { return Math.pow(lvl - 1, 2) * 50; }
 
@@ -531,9 +761,9 @@ function loadDailyQuests() {
     return {
         date: today,
         list: [
-            { id: 'q_play3',  name: 'Сыграй 3 партии',        icon: '🎮', target: 3, progress: 0, reward: 5, type: 'games' },
-            { id: 'q_score20', name: 'Набери 20 очков',       icon: '🎯', target: 20, progress: 0, reward: 5, type: 'bestScore' },
-            { id: 'q_gold5',  name: 'Съешь 5 золотых ягод',   icon: '⭐', target: 5, progress: 0, reward: 10, type: 'golds' }
+            { id: 'q_play3',  name: 'Сыграй 3 партии',      icon: '🎮', target: 3, progress: 0, reward: 50, type: 'games' },
+            { id: 'q_score20', name: 'Набери 20 очков',     icon: '🎯', target: 20, progress: 0, reward: 50, type: 'bestScore' },
+            { id: 'q_gold5',  name: 'Съешь 5 золотых ягод', icon: '⭐', target: 5, progress: 0, reward: 100, type: 'golds' }
         ],
         claimed: []
     };
@@ -565,7 +795,7 @@ function checkAchievements() {
         localStorage.setItem('snakeAch', JSON.stringify(unlockedAchievements));
         for (var i = 0; i < newOnes.length; i++) {
             (function(a, delay) {
-                setTimeout(function() { showToast('🏅 Достижение: ' + a.name, 3500); }, delay);
+                setTimeout(function() { showToast('🏅 Достижение: ' + a.name, 3500); addCoins(20); }, delay);
             })(newOnes[i], i * 1200);
         }
     }
@@ -611,11 +841,7 @@ function setupUser() {
     document.getElementById('userAvatar').textContent = name.charAt(0).toUpperCase();
 }
 
-function formatTime(sec) {
-    sec = Math.floor(sec);
-    if (sec < 60) return sec + 'с';
-    return Math.floor(sec/60) + 'м ' + (sec%60 > 0 ? (sec%60) + 'с' : '');
-}
+function formatTime(sec) { sec = Math.floor(sec); if (sec < 60) return sec + 'с'; return Math.floor(sec/60) + 'м ' + (sec%60 > 0 ? (sec%60) + 'с' : ''); }
 
 function showToast(msg, ms) {
     var t = document.getElementById('toast');
@@ -789,7 +1015,7 @@ function updateBadges() {
 function updateHero() {
     document.getElementById('statBest').textContent = highScore;
     document.getElementById('statGames').textContent = stats.games;
-    document.getElementById('statTotal').textContent = stats.total;
+    document.getElementById('statCoins').textContent = coins;
     var lvl = levelFromXp(stats.xp);
     var curXp = stats.xp - xpForLevel(lvl);
     var nextXp = xpForLevel(lvl + 1) - xpForLevel(lvl);
@@ -804,23 +1030,22 @@ function renderMaps() {
     var maps = ['small', 'medium', 'large'];
     for (var i = 0; i < maps.length; i++) {
         var m = MAPS[maps[i]];
-        document.getElementById('best' + m.id.charAt(0).toUpperCase() + m.id.slice(1)).textContent = '🏅 Рекорд: ' + (bestScores[m.id] || 0);
-        renderMiniGrid('mini' + m.id.charAt(0).toUpperCase() + m.id.slice(1), m.size);
+        var key = m.id.charAt(0).toUpperCase() + m.id.slice(1);
+        document.getElementById('best' + key).textContent = '🏅 Рекорд: ' + (bestScores[m.id] || 0);
+        renderMiniGrid('mini' + key);
     }
 }
 
-function renderMiniGrid(containerId, gridSize) {
+function renderMiniGrid(containerId) {
     var el = document.getElementById(containerId);
     if (!el) return;
-    var displaySize = 8; // показываем 8x8 миниатюру
+    var displaySize = 8;
     var html = '<div class="grid-mini" style="grid-template-columns: repeat(' + displaySize + ', 1fr);">';
     var snakePositions = [[3,4],[4,4],[5,4],[6,4],[6,5]];
     for (var y = 0; y < displaySize; y++) {
         for (var x = 0; x < displaySize; x++) {
             var on = false;
-            for (var k = 0; k < snakePositions.length; k++) {
-                if (snakePositions[k][0] === x && snakePositions[k][1] === y) { on = true; break; }
-            }
+            for (var k = 0; k < snakePositions.length; k++) if (snakePositions[k][0] === x && snakePositions[k][1] === y) { on = true; break; }
             html += '<div class="cell' + (on ? ' on' : '') + '"></div>';
         }
     }
@@ -846,7 +1071,7 @@ function shareReferral() {
 function renderReferral() {
     var refs = parseInt(localStorage.getItem('snakeRefs') || '0', 10);
     document.getElementById('refCount').textContent = refs;
-    document.getElementById('refReward').textContent = refs * 5;
+    document.getElementById('refReward').textContent = refs * 100;
 }
 
 // ============ МАГАЗИН ============
@@ -865,6 +1090,30 @@ function renderShop() {
     else if (currentTab === 'premium') c.innerHTML = renderPremiumTab();
     else if (currentTab === 'support') c.innerHTML = renderSupportTab();
 }
+
+function buildBuyRow(itemId, priceStars, opts) {
+    opts = opts || {};
+    var coinsPrice = starToCoins(priceStars);
+    var canStars = !opts.noStars;
+    var canCoins = !opts.noCoins;
+    var html = '<div class="buy-row">';
+    if (canStars) {
+        html += '<button class="buy-option stars" onclick="event.stopPropagation();buyItem(\'' + itemId + '\',\'stars\')">' +
+            '<span class="em">⭐</span> ' + priceStars + '</button>';
+    } else {
+        html += '<div class="buy-option stars disabled"><span class="em">⭐</span> ' + priceStars + '</div>';
+    }
+    if (canCoins) {
+        var disabled = coins < coinsPrice ? ' disabled' : '';
+        html += '<button class="buy-option coins' + disabled + '" onclick="event.stopPropagation();buyItem(\'' + itemId + '\',\'coins\')">' +
+            '<span class="em">💎</span> ' + coinsPrice + '</button>';
+    } else {
+        html += '<div class="buy-option coins disabled"><span class="em">💎</span> ' + coinsPrice + '</div>';
+    }
+    html += '</div>';
+    return html;
+}
+
 function renderSkinsTab() {
     var html = '';
     for (var i = 0; i < SKINS.length; i++) {
@@ -874,58 +1123,73 @@ function renderSkinsTab() {
         var cls = 'shop-card';
         if (selected) cls += ' selected';
         if (!unlocked) cls += ' locked';
-        var desc, priceHtml;
-        if (unlocked) { desc = selected ? '✓ Выбран' : 'Разблокирован'; priceHtml = '<div class="shop-owned">✓</div>'; }
-        else if (s.type === 'stars') { desc = isPremium ? 'Включён в Премиум' : 'Эксклюзив'; priceHtml = '<div class="shop-price-value">' + s.price + '⭐</div><div class="shop-price-label">купить</div>'; }
-        else { desc = 'Рекорд ' + s.req; priceHtml = '<div class="shop-price-value">' + s.req + '</div><div class="shop-price-label">очков</div>'; }
         var iconBg = s.head === 'rainbow' ? 'linear-gradient(135deg, #f87171, #facc15, #22d3ee)' : 'linear-gradient(135deg, ' + s.head + '33, ' + s.body + '33)';
-        html += '<button class="' + cls + '" onclick="selectSkin(\'' + s.id + '\')">' +
+        var desc;
+        if (unlocked) desc = selected ? '✓ Выбран' : 'Разблокирован';
+        else if (s.type === 'stars') desc = isPremium ? 'Включён в Премиум' : 'Эксклюзивный скин';
+        else desc = 'Рекорд ' + s.req + ' 🏅 · можно купить за монеты/звёзды';
+
+        html += '<div class="' + cls + '">' +
             '<div class="rarity ' + s.rarity + '">' + s.rarity + '</div>' +
-            '<div class="shop-icon" style="background:' + iconBg + '">' + s.emoji + '</div>' +
-            '<div class="shop-info"><div class="shop-name">' + s.name + '</div><div class="shop-desc">' + desc + '</div></div>' +
-            '<div class="shop-price">' + priceHtml + '</div></button>';
+            '<div class="shop-top">' +
+                '<div class="shop-icon" style="background:' + iconBg + '">' + s.emoji + '</div>' +
+                '<div class="shop-info"><div class="shop-name">' + s.name + '</div><div class="shop-desc">' + desc + '</div></div>' +
+            '</div>';
+        if (unlocked) {
+            html += '<div class="shop-owned">' + (selected ? '✓ Выбран' : 'Нажми чтобы выбрать') + '</div>';
+            if (!selected) {
+                html += '<button class="buy-option coins" onclick="selectSkin(\'' + s.id + '\')" style="width:100%;padding:10px;">Выбрать</button>';
+            }
+        } else {
+            var price = s.stars || Math.max(10, Math.round(s.req / 10));
+            html += buildBuyRow('skin_' + s.id, price);
+        }
+        html += '</div>';
     }
     return html;
 }
+
 function renderBoostersTab() {
-    var items = [
-        { id: 'extra_life', icon: '💚', name: 'Вторая жизнь', desc: 'Продолжить партию', price: 5 },
-        { id: 'boost_x2', icon: '⚡', name: 'Буст ×2', desc: 'Двойные очки', price: 10 },
-        { id: 'shield', icon: '🛡️', name: 'Щит', desc: 'Спасает от 1 столкновения', price: 10 }
-    ];
     var html = '';
-    for (var i = 0; i < items.length; i++) {
-        var it = items[i];
-        html += '<button class="shop-card" onclick="buyItem(\'' + it.id + '\')">' +
-            '<div class="shop-icon">' + it.icon + '</div>' +
-            '<div class="shop-info"><div class="shop-name">' + it.name + '</div><div class="shop-desc">' + it.desc + '</div></div>' +
-            '<div class="shop-price"><div class="shop-price-value">' + it.price + '⭐</div><div class="shop-price-label">купить</div></div></button>';
+    for (var i = 0; i < BOOSTERS.length; i++) {
+        var b = BOOSTERS[i];
+        html += '<div class="shop-card">' +
+            '<div class="shop-top">' +
+                '<div class="shop-icon">' + b.icon + '</div>' +
+                '<div class="shop-info"><div class="shop-name">' + b.name + '</div><div class="shop-desc">' + b.desc + '</div></div>' +
+            '</div>' +
+            buildBuyRow(b.id, b.stars) +
+            '</div>';
     }
     return html;
 }
+
 function renderPremiumTab() {
+    var html = '<div class="shop-card premium">' +
+        '<div class="shop-top">' +
+            '<div class="shop-icon">👑</div>' +
+            '<div class="shop-info"><div class="shop-name">' + PREMIUM.name + '</div><div class="shop-desc">' + PREMIUM.desc + '</div></div>' +
+        '</div>';
     if (isPremium) {
-        return '<div class="shop-card premium" style="cursor:default"><div class="shop-icon">👑</div>' +
-            '<div class="shop-info"><div class="shop-name">Премиум активен</div><div class="shop-desc">Спасибо за поддержку! ❤️</div></div>' +
-            '<div class="shop-owned">✓</div></div>';
+        html += '<div class="shop-owned">✓ Активирован</div>';
+    } else {
+        html += buildBuyRow('premium', PREMIUM.stars);
     }
-    return '<button class="shop-card premium" onclick="buyItem(\'premium\')"><div class="shop-icon">👑</div>' +
-        '<div class="shop-info"><div class="shop-name">Премиум навсегда</div><div class="shop-desc">👑 Рамка в топе<br>+10% к очкам<br>Все премиум-скины</div></div>' +
-        '<div class="shop-price"><div class="shop-price-value">150⭐</div><div class="shop-price-label">навсегда</div></div></button>';
+    html += '</div>';
+    return html;
 }
+
 function renderSupportTab() {
-    var items = [
-        { id: 'donate_10', icon: '☕', name: 'Кофе автору', desc: 'Небольшая поддержка', price: 10 },
-        { id: 'donate_50', icon: '🍕', name: 'Пицца автору', desc: 'Средняя поддержка', price: 50 },
-        { id: 'donate_100', icon: '🎁', name: 'Большой подарок', desc: 'Мощная поддержка', price: 100 }
-    ];
-    var html = '<div style="color:#94a3b8;font-size:11px;text-align:center;padding:6px 14px 12px;line-height:1.5;">Покупки здесь — <b style="color:#f472b6">добровольные пожертвования</b>. Спасибо ❤️</div>';
-    for (var i = 0; i < items.length; i++) {
-        var it = items[i];
-        html += '<button class="shop-card donate" onclick="buyItem(\'' + it.id + '\')">' +
-            '<div class="shop-icon">' + it.icon + '</div>' +
-            '<div class="shop-info"><div class="shop-name">' + it.name + '</div><div class="shop-desc">' + it.desc + '</div></div>' +
-            '<div class="shop-price"><div class="shop-price-value">' + it.price + '⭐</div><div class="shop-price-label">донат</div></div></button>';
+    var html = '<div style="color:#94a3b8;font-size:11px;text-align:center;padding:6px 14px 12px;line-height:1.5;">Покупки здесь — <b style="color:var(--pink)">добровольные пожертвования</b>. <b style="color:var(--gold)">Только за звёзды</b>. Спасибо ❤️</div>';
+    for (var i = 0; i < DONATES.length; i++) {
+        var d = DONATES[i];
+        html += '<div class="shop-card donate">' +
+            '<div class="shop-top">' +
+                '<div class="shop-icon">' + d.icon + '</div>' +
+                '<div class="shop-info"><div class="shop-name">' + d.name + '</div><div class="shop-desc">' + d.desc + '</div></div>' +
+            '</div>' +
+            buildBuyRow(d.id, d.stars, { noCoins: true }) +
+            '</div>';
     }
     return html;
 }
@@ -933,11 +1197,7 @@ function renderSupportTab() {
 function selectSkin(id) {
     var skin = getSkinById(id);
     if (!skin) return;
-    if (!isSkinUnlocked(skin)) {
-        if (skin.type === 'stars') buyItem('skin_' + skin.id);
-        else showToast('🔒 Нужен рекорд ' + skin.req);
-        return;
-    }
+    if (!isSkinUnlocked(skin)) { showToast('🔒 Сначала купи скин'); return; }
     selectedSkinId = id;
     localStorage.setItem('snakeSkin', id);
     renderShop();
@@ -945,7 +1205,29 @@ function selectSkin(id) {
     haptic('light');
 }
 
-function buyItem(itemType) {
+function buyItem(itemType, currency) {
+    currency = currency || 'stars';
+    var priceStars = 0;
+    // Находим цену
+    for (var i = 0; i < BOOSTERS.length; i++) if (BOOSTERS[i].id === itemType) priceStars = BOOSTERS[i].stars;
+    for (var i = 0; i < DONATES.length; i++) if (DONATES[i].id === itemType) priceStars = DONATES[i].stars;
+    if (itemType === 'premium') priceStars = PREMIUM.stars;
+    if (itemType.indexOf('skin_') === 0) {
+        var sid = itemType.replace('skin_', '');
+        var sk = getSkinById(sid);
+        priceStars = sk.stars || Math.max(10, Math.round(sk.req / 10));
+    }
+
+    if (currency === 'coins') {
+        var coinsPrice = starToCoins(priceStars);
+        if (coins < coinsPrice) { showToast('⚠ Не хватает монет'); return; }
+        if (!spendCoins(coinsPrice)) return;
+        showToast('✓ Куплено за 💎 ' + coinsPrice);
+        handlePurchase(itemType);
+        return;
+    }
+
+    // Telegram Stars
     if (!tg || !tgUser) { showToast('Покупки только в Telegram'); return; }
     showToast('⏳ Создание счёта...', 5000);
     fetch(WORKER_URL + '/create-invoice', {
@@ -997,12 +1279,12 @@ function renderQuests() {
             '<div class="quest-info">' +
                 '<div class="quest-name">' + q.name + '</div>' +
                 '<div class="quest-progress-bar"><div class="quest-progress-fill" style="width:' + pct + '%"></div></div>' +
-                '<div class="quest-status' + (done ? ' done' : '') + '">' + q.progress + ' / ' + q.target + ' · Награда: +' + q.reward + '⭐</div>' +
+                '<div class="quest-status' + (done ? ' done' : '') + '">' + q.progress + ' / ' + q.target + ' · +' + q.reward + '💎</div>' +
             '</div>';
         if (done && !claimed) {
-            html += '<button class="btn-wide green" style="max-width:80px;padding:8px;font-size:11px;margin:0;" onclick="claimQuest(\'' + q.id + '\')">Забрать</button>';
+            html += '<button class="claim-btn" onclick="claimQuest(\'' + q.id + '\')">Забрать</button>';
         } else if (claimed) {
-            html += '<div style="color:#4ade80;font-size:22px;">✓</div>';
+            html += '<div style="color:var(--green);font-size:22px;">✓</div>';
         }
         html += '</div>';
     }
@@ -1016,8 +1298,8 @@ function claimQuest(id) {
     if (!q || q.progress < q.target) return;
     dailyQuests.claimed.push(id);
     saveDailyQuests();
-    localStorage.setItem('snakeQuestStars', String(parseInt(localStorage.getItem('snakeQuestStars') || '0', 10) + q.reward));
-    showToast('✓ +' + q.reward + '⭐ в накопитель!', 3000);
+    addCoins(q.reward);
+    showToast('✓ +' + q.reward + '💎', 3000);
     renderQuests();
     updateBadges();
     haptic('success');
@@ -1298,7 +1580,6 @@ function endGame() {
     gameTime = (performance.now() - gameStartTime) / 1000;
     savedState = { score: score, foodEaten: foodEaten, snakeLen: snake.length };
 
-    // Статистика
     stats.games++;
     stats.total += score;
     stats.xp += Math.round(score * 1.5);
@@ -1306,16 +1587,17 @@ function endGame() {
     if (stats.mapsPlayed.indexOf(currentMapId) === -1) stats.mapsPlayed.push(currentMapId);
     localStorage.setItem('snakeStats', JSON.stringify(stats));
 
-    // Рекорд по карте
     if (score > (bestScores[currentMapId] || 0)) bestScores[currentMapId] = score;
     localStorage.setItem('snakeBestByMap', JSON.stringify(bestScores));
 
-    // Задания
+    // Монеты за игру: 1 очко = 2 монеты
+    var earned = score * 2;
+    if (earned > 0) addCoins(earned);
+
     updateQuestProgress('games', 1);
     if (score > 20) updateQuestProgress('bestScore', score);
     if (goldsEaten > 0) updateQuestProgress('golds', goldsEaten);
 
-    // Частицы
     if (snake) {
         for (var i = 0; i < snake.length; i++) {
             var cx = snake[i].x * cellSize + cellSize / 2;
@@ -1344,7 +1626,7 @@ function endGame() {
         document.getElementById('overInfo').innerHTML =
             '<span>⏱ ' + formatTime(gameTime) + '</span>' +
             '<span>🔄 ' + reviveCount + '</span>' +
-            '<span>' + MAPS[currentMapId].emoji + ' ' + MAPS[currentMapId].name + '</span>';
+            '<span>💎 +' + earned + '</span>';
         document.getElementById('overHigh').textContent = isNewRecord ? '🎉 НОВЫЙ РЕКОРД!' : '🏅 Рекорд: ' + highScore;
         document.getElementById('submitStatus').textContent = '';
         showScreen('overScreen');
@@ -1369,9 +1651,20 @@ function buyLife() {
     if (isBuyingLife || !savedState) return;
     isBuyingLife = true;
     var btn = document.getElementById('buyLifeBtn');
-    btn.textContent = '⏳ Создание...';
-    buyItem('extra_life');
-    setTimeout(function() { btn.textContent = '💚 Вторая жизнь · 5⭐'; isBuyingLife = false; }, 1000);
+    btn.textContent = '⏳ Выбор валюты...';
+    // Открываем магазин? Нет, показываем диалог
+    var coinsPrice = starToCoins(5);
+    var useCoins = coins >= coinsPrice;
+    // Если достаточно монет — сразу монетами, иначе звёзды
+    setTimeout(function() {
+        btn.textContent = '💚 Вторая жизнь · 5⭐';
+        isBuyingLife = false;
+        if (useCoins) {
+            buyItem('extra_life', 'coins');
+        } else {
+            buyItem('extra_life', 'stars');
+        }
+    }, 300);
 }
 
 function startCountdown(callback) {
