@@ -9,350 +9,324 @@
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
 html, body { height: 100%; overflow: hidden; background: #050510; color: white; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
 
-/* ФОН */
 body::before {
-    content: ''; position: fixed; inset: -50%; z-index: 0; pointer-events: none;
+    content: ''; position: fixed; inset: -30%; z-index: 0; pointer-events: none;
     background:
-        radial-gradient(circle at 25% 15%, rgba(74, 222, 128, 0.15) 0%, transparent 35%),
-        radial-gradient(circle at 75% 85%, rgba(34, 211, 238, 0.12) 0%, transparent 35%),
-        radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.1) 0%, transparent 40%);
-    animation: bgFloat 24s ease-in-out infinite;
+        radial-gradient(circle at 25% 15%, rgba(74, 222, 128, 0.16) 0%, transparent 38%),
+        radial-gradient(circle at 75% 85%, rgba(34, 211, 238, 0.12) 0%, transparent 38%),
+        radial-gradient(circle at 85% 15%, rgba(168, 85, 247, 0.1) 0%, transparent 40%);
+    animation: bgFloat 22s ease-in-out infinite;
 }
 @keyframes bgFloat {
-    0%, 100% { transform: translate(0, 0) rotate(0deg); }
-    33% { transform: translate(2%, -2%) rotate(2deg); }
-    66% { transform: translate(-2%, 2%) rotate(-2deg); }
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(2%, -2%) scale(1.05); }
 }
-body::after {
-    content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
-    background-image:
-        linear-gradient(rgba(74, 222, 128, 0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(74, 222, 128, 0.03) 1px, transparent 1px);
-    background-size: 40px 40px;
-    mask-image: radial-gradient(ellipse at center, black 20%, transparent 80%);
-    -webkit-mask-image: radial-gradient(ellipse at center, black 20%, transparent 80%);
+
+body { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 16px; position: relative; min-height: 100vh; }
+
+.screen { display: none; flex-direction: column; align-items: center; justify-content: center; width: 100%; max-width: 420px; height: 100%; position: relative; z-index: 1; }
+.screen.active { display: flex; animation: fadeIn 0.3s ease-out; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ПРОФИЛЬ (компактный) */
+.user-chip {
+    display: none; align-items: center; gap: 8px;
+    padding: 6px 14px 6px 6px;
+    background: rgba(20, 25, 40, 0.6);
+    border: 1px solid rgba(74, 222, 128, 0.2);
+    border-radius: 50px; margin-bottom: 22px;
+    font-size: 12px; color: #cbd5e1;
+    backdrop-filter: blur(20px);
 }
-body { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 12px; position: relative; }
-
-.screen { display: none; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; position: relative; z-index: 1; }
-.screen.active { display: flex; animation: fadeIn 0.35s ease-out; }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-/* ПРОФИЛЬ */
-#userBox { display: none; align-items: center; gap: 12px; padding: 10px 18px 10px 10px; background: rgba(20, 25, 40, 0.7); border: 1px solid rgba(74, 222, 128, 0.25); border-radius: 50px; margin-bottom: 20px; font-size: 14px; color: #cbd5e1; backdrop-filter: blur(20px); box-shadow: 0 8px 32px rgba(0,0,0,0.4); }
-#userBox.show { display: flex; animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
-@keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-#userAvatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #4ade80, #22d3ee); display: flex; align-items: center; justify-content: center; font-weight: 800; color: #0f0f1a; font-size: 16px; box-shadow: 0 0 20px rgba(74, 222, 128, 0.5); }
-#userName { font-weight: 700; color: #4ade80; }
+.user-chip.show { display: flex; }
+.user-chip .av {
+    width: 26px; height: 26px; border-radius: 50%;
+    background: linear-gradient(135deg, #4ade80, #22d3ee);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; color: #0a0a14; font-size: 12px;
+}
+.user-chip .nm { font-weight: 700; color: #4ade80; }
 
 /* ЛОГО */
-.logo-container { position: relative; margin-bottom: 4px; }
 h1 {
-    font-size: 56px; font-weight: 900; letter-spacing: -4px; margin-bottom: 4px;
-    background: linear-gradient(135deg, #4ade80 0%, #22d3ee 40%, #a78bfa 70%, #f472b6 100%);
-    background-size: 300% 300%;
+    font-size: 52px; font-weight: 900; letter-spacing: -3px;
+    background: linear-gradient(135deg, #4ade80 0%, #22d3ee 50%, #a78bfa 100%);
+    background-size: 200% 200%;
     -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
     animation: gradientShift 5s ease-in-out infinite;
-    filter: drop-shadow(0 0 40px rgba(74, 222, 128, 0.5));
+    line-height: 1;
 }
 @keyframes gradientShift { 0%, 100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
-.subtitle { color: #64748b; margin-bottom: 32px; font-size: 11px; letter-spacing: 6px; font-weight: 700; }
+.subtitle { color: #475569; margin-bottom: 28px; font-size: 10px; letter-spacing: 5px; font-weight: 700; margin-top: 4px; }
 
-/* КНОПКИ МЕНЮ */
-.menu-btn {
-    width: 280px; padding: 16px 20px; margin: 6px 0;
-    background: rgba(20, 25, 40, 0.7);
-    border: 1.5px solid rgba(74, 222, 128, 0.4);
-    color: #e2e8f0; font-size: 15px; font-weight: 700;
-    border-radius: 16px; cursor: pointer;
-    -webkit-appearance: none; appearance: none; font-family: inherit;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    display: flex; align-items: center; gap: 14px;
-    backdrop-filter: blur(20px);
-    box-shadow: 0 4px 20px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05);
+/* ГЛАВНАЯ КНОПКА */
+.btn-hero {
+    width: 100%; padding: 20px; margin-bottom: 12px;
+    background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
+    color: #052e16; font-size: 20px; font-weight: 900;
+    letter-spacing: 0.5px;
+    border: none; border-radius: 20px;
+    cursor: pointer; -webkit-appearance: none; appearance: none; font-family: inherit;
+    box-shadow: 0 10px 40px rgba(74, 222, 128, 0.35), inset 0 1px 0 rgba(255,255,255,0.3);
+    transition: transform 0.1s;
+    display: flex; align-items: center; justify-content: center; gap: 12px;
     position: relative; overflow: hidden;
 }
-.menu-btn .icon-box {
-    width: 36px; height: 36px; border-radius: 10px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 18px; flex-shrink: 0;
-    background: rgba(74, 222, 128, 0.1);
-    border: 1px solid rgba(74, 222, 128, 0.2);
+.btn-hero::after {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(circle at 30% 0%, rgba(255,255,255,0.3), transparent 50%);
+    pointer-events: none;
 }
-.menu-btn .text { flex: 1; text-align: left; }
-.menu-btn:active { transform: scale(0.97); background: rgba(74, 222, 128, 0.15); }
-.menu-btn.primary {
-    background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
-    color: #0a0a14; border-color: transparent;
-    box-shadow: 0 8px 30px rgba(74, 222, 128, 0.4), inset 0 1px 0 rgba(255,255,255,0.2);
-}
-.menu-btn.primary .icon-box { background: rgba(0, 0, 0, 0.15); border-color: rgba(0,0,0,0.1); }
-.menu-btn.primary:active { background: #22c55e; }
-.menu-btn.premium {
-    background: linear-gradient(135deg, rgba(250, 204, 21, 0.15), rgba(245, 158, 11, 0.08));
-    border-color: rgba(250, 204, 21, 0.5); color: #facc15;
-    box-shadow: 0 4px 20px rgba(250, 204, 21, 0.15), inset 0 1px 0 rgba(255,255,255,0.05);
-}
-.menu-btn.premium .icon-box { background: rgba(250, 204, 21, 0.15); border-color: rgba(250, 204, 21, 0.3); }
-.menu-btn.premium:active { background: rgba(250, 204, 21, 0.25); }
-.menu-btn.small { width: 240px; padding: 11px 16px; font-size: 12px; margin: 4px 0; }
-.menu-btn.small .icon-box { width: 28px; height: 28px; font-size: 14px; }
+.btn-hero:active { transform: scale(0.97); }
+.btn-hero .icon { font-size: 26px; }
 
-/* HUD рекорда */
-.record-box {
-    margin-top: 24px; padding: 12px 24px;
+/* СЕТКА 2×2 */
+.grid-2 {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+    width: 100%; margin-bottom: 12px;
+}
+.btn-tile {
+    padding: 18px 12px;
+    background: rgba(20, 25, 40, 0.6);
+    border: 1.5px solid rgba(74, 222, 128, 0.15);
+    color: #e2e8f0;
+    border-radius: 18px; cursor: pointer;
+    -webkit-appearance: none; appearance: none; font-family: inherit;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+    backdrop-filter: blur(20px);
+    transition: all 0.15s;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.04);
+}
+.btn-tile:active { transform: scale(0.95); background: rgba(74, 222, 128, 0.12); border-color: rgba(74, 222, 128, 0.4); }
+.btn-tile .ti { font-size: 24px; }
+.btn-tile .tt { font-size: 13px; font-weight: 700; }
+.btn-tile.premium { border-color: rgba(250, 204, 21, 0.35); background: rgba(250, 204, 21, 0.06); }
+.btn-tile.premium .tt { color: #facc15; }
+.btn-tile.premium:active { background: rgba(250, 204, 21, 0.18); }
+
+/* РЕКОРД */
+.record-bar {
     display: flex; align-items: center; gap: 10px;
-    background: rgba(20, 25, 40, 0.7);
-    border: 1px solid rgba(250, 204, 21, 0.3);
-    border-radius: 50px; backdrop-filter: blur(20px);
-    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    padding: 12px 22px;
+    background: rgba(20, 25, 40, 0.5);
+    border: 1px solid rgba(250, 204, 21, 0.25);
+    border-radius: 50px;
+    backdrop-filter: blur(20px);
+    width: 100%; justify-content: center;
 }
-.record-icon { font-size: 20px; }
-.record-label { color: #94a3b8; font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; }
-.record-value { color: #facc15; font-size: 20px; font-weight: 900; margin-left: 4px; }
+.record-bar .ico { font-size: 20px; }
+.record-bar .lbl { color: #94a3b8; font-size: 11px; letter-spacing: 1.5px; font-weight: 700; text-transform: uppercase; }
+.record-bar .val { color: #facc15; font-size: 22px; font-weight: 900; margin-left: 4px; }
 
-/* ИГРА HUD */
-#hud {
-    display: flex; justify-content: space-between; align-items: center;
-    width: 100%; max-width: 500px; padding: 0 12px 10px; gap: 8px;
+/* Кнопка "правила" в самом низу */
+.legal-link {
+    background: transparent; border: none;
+    color: #475569; font-size: 11px;
+    margin-top: 14px;
+    cursor: pointer; font-family: inherit;
+    text-decoration: underline;
+    padding: 8px;
 }
+
+/* HUD ИГРЫ */
+#hud { display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 0 4px 10px; gap: 6px; }
 .hud-item {
-    padding: 6px 12px; border-radius: 10px;
+    padding: 6px 10px; border-radius: 10px;
     background: rgba(20, 25, 40, 0.7);
-    border: 1px solid rgba(74, 222, 128, 0.2);
+    border: 1px solid rgba(74, 222, 128, 0.15);
     font-size: 12px; font-weight: 800;
     backdrop-filter: blur(10px);
-    display: flex; align-items: center; gap: 4px;
 }
-#scoreHud { color: #4ade80; border-color: rgba(74, 222, 128, 0.4); }
-#speedHud { color: #22d3ee; border-color: rgba(34, 211, 238, 0.3); }
-#fpsHud { color: #475569; font-size: 10px; border-color: rgba(100, 116, 139, 0.2); }
-
-/* КАНВАС */
-#game {
-    border-radius: 20px;
-    box-shadow:
-        0 20px 60px rgba(0, 0, 0, 0.6),
-        0 0 0 1px rgba(74, 222, 128, 0.2),
-        inset 0 0 80px rgba(74, 222, 128, 0.03);
-    touch-action: none; display: block;
-    background: #050510;
-}
+#scoreHud { color: #4ade80; }
+#speedHud { color: #22d3ee; }
+#fpsHud { color: #475569; font-size: 10px; }
+#game { border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(74, 222, 128, 0.15); touch-action: none; display: block; background: #050510; }
 #game.shake { animation: shake 0.15s; }
 @keyframes shake { 0%, 100% { transform: translate(0,0); } 25% { transform: translate(-2px, 1px); } 50% { transform: translate(2px, -1px); } 75% { transform: translate(-1px, -2px); } }
 
-/* УПРАВЛЕНИЕ */
-#controls { margin-top: 18px; display: grid; grid-template-columns: repeat(3, 80px); grid-template-rows: repeat(2, 80px); gap: 10px; }
+#controls { margin-top: 16px; display: grid; grid-template-columns: repeat(3, 76px); grid-template-rows: repeat(2, 76px); gap: 10px; }
 .btn {
     background: rgba(20, 25, 40, 0.8);
-    border: 1.5px solid rgba(74, 222, 128, 0.5);
-    color: #4ade80; font-size: 34px; font-weight: 300;
+    border: 1.5px solid rgba(74, 222, 128, 0.4);
+    color: #4ade80; font-size: 32px; font-weight: 300;
     border-radius: 20px; display: flex; align-items: center; justify-content: center;
     cursor: pointer; -webkit-appearance: none; appearance: none; font-family: inherit;
     backdrop-filter: blur(10px);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255,255,255,0.05);
-    transition: all 0.1s;
-    position: relative;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05);
+    transition: all 0.08s;
 }
-.btn.pressed { background: rgba(74, 222, 128, 0.9); color: #0a0a14; transform: scale(0.94); box-shadow: 0 0 30px rgba(74, 222, 128, 0.6); }
+.btn.pressed { background: #4ade80; color: #0a0a14; transform: scale(0.94); box-shadow: 0 0 25px rgba(74, 222, 128, 0.6); }
 
 /* GAME OVER */
 #overTitle {
-    font-size: 38px; font-weight: 900; letter-spacing: -2px;
+    font-size: 34px; font-weight: 900; letter-spacing: -1.5px;
     background: linear-gradient(135deg, #ef4444, #f472b6);
     -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-    margin-bottom: 12px;
-    animation: pulseTitle 1.5s ease-in-out infinite;
+    margin-bottom: 10px;
 }
-@keyframes pulseTitle { 0%, 100% { filter: drop-shadow(0 0 20px rgba(239, 68, 68, 0.4)); } 50% { filter: drop-shadow(0 0 40px rgba(239, 68, 68, 0.7)); } }
-#overScore { font-size: 32px; color: #4ade80; margin-bottom: 6px; font-weight: 900; }
-#overInfo { font-size: 12px; color: #94a3b8; margin-bottom: 10px; display: flex; gap: 12px; }
+#overScore { font-size: 60px; color: #4ade80; font-weight: 900; line-height: 1; margin-bottom: 8px; text-shadow: 0 0 40px rgba(74, 222, 128, 0.5); }
+#overInfo { font-size: 12px; color: #94a3b8; margin-bottom: 10px; display: flex; gap: 16px; }
 #overInfo span { display: flex; align-items: center; gap: 4px; }
-#overHigh { font-size: 14px; color: #facc15; margin-bottom: 16px; min-height: 20px; font-weight: 800; }
-#submitStatus { font-size: 12px; color: #64748b; min-height: 16px; margin-bottom: 12px; }
+#overHigh { font-size: 14px; color: #facc15; margin-bottom: 18px; min-height: 20px; font-weight: 800; }
+#submitStatus { font-size: 11px; color: #64748b; min-height: 14px; margin-bottom: 14px; }
 
 .buy-btn {
-    width: 280px; padding: 16px; margin: 6px 0;
+    width: 100%; max-width: 300px; padding: 16px; margin: 6px 0;
     background: linear-gradient(135deg, #facc15 0%, #f59e0b 100%);
-    color: #0a0a14; font-size: 15px; font-weight: 900;
+    color: #422006; font-size: 15px; font-weight: 900;
     border: none; border-radius: 16px;
     cursor: pointer; -webkit-appearance: none; appearance: none; font-family: inherit;
-    box-shadow: 0 8px 30px rgba(250, 204, 21, 0.4), inset 0 1px 0 rgba(255,255,255,0.3);
-    transition: all 0.15s;
+    box-shadow: 0 8px 30px rgba(250, 204, 21, 0.35), inset 0 1px 0 rgba(255,255,255,0.3);
     display: flex; align-items: center; justify-content: center; gap: 8px;
 }
 .buy-btn:active { transform: scale(0.97); }
 
+/* ОБЩИЕ КНОПКИ */
+.btn-wide {
+    width: 100%; max-width: 300px;
+    padding: 14px 18px;
+    background: rgba(20, 25, 40, 0.6);
+    border: 1.5px solid rgba(74, 222, 128, 0.3);
+    color: #e2e8f0;
+    border-radius: 16px; cursor: pointer;
+    -webkit-appearance: none; appearance: none; font-family: inherit;
+    font-size: 14px; font-weight: 700;
+    margin: 5px 0;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    backdrop-filter: blur(20px);
+    transition: all 0.15s;
+}
+.btn-wide:active { background: rgba(74, 222, 128, 0.15); border-color: rgba(74, 222, 128, 0.6); }
+.btn-wide.green { background: linear-gradient(135deg, #4ade80, #22c55e); color: #052e16; border-color: transparent; box-shadow: 0 8px 24px rgba(74, 222, 128, 0.3); }
+
 /* РЕЙТИНГ */
 #lbTitle {
-    font-size: 30px; font-weight: 900; margin-bottom: 6px;
-    background: linear-gradient(135deg, #facc15, #f59e0b, #facc15);
-    background-size: 200% 200%;
+    font-size: 28px; font-weight: 900; margin-bottom: 4px;
+    background: linear-gradient(135deg, #facc15, #f59e0b);
     -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-    animation: gradientShift 3s ease-in-out infinite;
     letter-spacing: -1px;
 }
-#lbRules { font-size: 10px; color: #64748b; margin-bottom: 14px; text-align: center; line-height: 1.6; letter-spacing: 0.5px; }
+#lbRules { font-size: 10px; color: #64748b; margin-bottom: 14px; text-align: center; letter-spacing: 0.3px; }
 
-#podium { display: flex; align-items: flex-end; justify-content: center; gap: 8px; margin-bottom: 16px; min-height: 150px; width: 100%; max-width: 400px; padding: 0 10px; }
+#podium { display: flex; align-items: flex-end; justify-content: center; gap: 8px; margin-bottom: 14px; min-height: 140px; width: 100%; padding: 0 10px; }
 .podium-place { display: flex; flex-direction: column; align-items: center; flex: 1; position: relative; }
 .podium-avatar {
-    width: 52px; height: 52px; border-radius: 50%;
+    width: 50px; height: 50px; border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
-    font-weight: 900; font-size: 20px; color: #0a0a14;
-    margin-bottom: 8px; border: 3px solid; position: relative;
-    animation: popIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+    font-weight: 900; font-size: 18px; color: #0a0a14;
+    margin-bottom: 6px; border: 3px solid; position: relative;
 }
-.podium-1 .podium-avatar { border-color: #facc15; background: linear-gradient(135deg, #facc15, #f59e0b); box-shadow: 0 0 30px rgba(250, 204, 21, 0.6); animation-delay: 0.1s; }
-.podium-2 .podium-avatar { border-color: #cbd5e1; background: linear-gradient(135deg, #e2e8f0, #94a3b8); animation-delay: 0.2s; }
-.podium-3 .podium-avatar { border-color: #f59e0b; background: linear-gradient(135deg, #fb923c, #b45309); animation-delay: 0.3s; }
-.podium-avatar .crown { position: absolute; top: -14px; font-size: 20px; }
-.podium-name { font-size: 11px; color: #e2e8f0; font-weight: 800; max-width: 90px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: center; margin-bottom: 4px; }
-.podium-score { font-size: 18px; font-weight: 900; color: #4ade80; margin-bottom: 6px; }
+.podium-1 .podium-avatar { border-color: #facc15; background: linear-gradient(135deg, #facc15, #f59e0b); box-shadow: 0 0 28px rgba(250, 204, 21, 0.55); }
+.podium-2 .podium-avatar { border-color: #cbd5e1; background: linear-gradient(135deg, #e2e8f0, #94a3b8); }
+.podium-3 .podium-avatar { border-color: #f59e0b; background: linear-gradient(135deg, #fb923c, #b45309); }
+.podium-avatar .crown { position: absolute; top: -13px; font-size: 18px; }
+.podium-name { font-size: 10px; color: #e2e8f0; font-weight: 800; max-width: 90px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: center; margin-bottom: 3px; }
+.podium-score { font-size: 16px; font-weight: 900; color: #4ade80; margin-bottom: 5px; }
 .podium-bar {
-    width: 100%; border-radius: 10px 10px 0 0;
+    width: 100%; border-radius: 8px 8px 0 0;
     display: flex; align-items: center; justify-content: center;
-    font-size: 26px; font-weight: 900; color: #0a0a14;
-    position: relative; overflow: hidden;
+    font-size: 22px; font-weight: 900; color: #0a0a14;
+    position: relative;
 }
-.podium-bar::before {
-    content: ''; position: absolute; inset: 0;
-    background: linear-gradient(180deg, rgba(255,255,255,0.3), transparent 50%);
-    pointer-events: none;
-}
-.podium-1 .podium-bar { height: 70px; background: linear-gradient(180deg, #facc15, #f59e0b); box-shadow: 0 0 40px rgba(250, 204, 21, 0.5); }
-.podium-2 .podium-bar { height: 52px; background: linear-gradient(180deg, #e2e8f0, #94a3b8); }
-.podium-3 .podium-bar { height: 40px; background: linear-gradient(180deg, #fb923c, #b45309); }
+.podium-1 .podium-bar { height: 60px; background: linear-gradient(180deg, #facc15, #f59e0b); box-shadow: 0 0 30px rgba(250, 204, 21, 0.4); }
+.podium-2 .podium-bar { height: 46px; background: linear-gradient(180deg, #e2e8f0, #94a3b8); }
+.podium-3 .podium-bar { height: 36px; background: linear-gradient(180deg, #fb923c, #b45309); }
 
-#lbList {
-    width: 100%; max-width: 400px;
-    background: rgba(20, 25, 40, 0.5);
-    border: 1px solid rgba(74, 222, 128, 0.15);
-    border-radius: 20px; padding: 8px;
-    max-height: 32vh; overflow-y: auto; -webkit-overflow-scrolling: touch;
-    backdrop-filter: blur(20px);
-}
-.lbRow {
-    display: flex; align-items: center; gap: 10px;
-    padding: 10px 12px; border-radius: 12px;
-    font-size: 14px; margin-bottom: 3px;
-    transition: all 0.2s;
-}
-.lbRow.me { background: rgba(74, 222, 128, 0.12); border: 1px solid rgba(74, 222, 128, 0.3); }
-.lbRank { width: 32px; font-weight: 900; color: #64748b; text-align: center; flex-shrink: 0; font-size: 13px; }
+#lbList { width: 100%; background: rgba(20, 25, 40, 0.5); border: 1px solid rgba(74, 222, 128, 0.12); border-radius: 18px; padding: 6px; max-height: 30vh; overflow-y: auto; -webkit-overflow-scrolling: touch; backdrop-filter: blur(20px); }
+.lbRow { display: flex; align-items: center; gap: 8px; padding: 9px 10px; border-radius: 12px; font-size: 13px; margin-bottom: 2px; }
+.lbRow.me { background: rgba(74, 222, 128, 0.1); border: 1px solid rgba(74, 222, 128, 0.25); }
+.lbRank { width: 28px; font-weight: 900; color: #64748b; text-align: center; flex-shrink: 0; font-size: 12px; }
 .lbMain { flex: 1; min-width: 0; }
 .lbName { color: #e2e8f0; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 13px; }
 .lbSub { color: #64748b; font-size: 10px; margin-top: 2px; }
-.lbScore { color: #4ade80; font-weight: 900; font-size: 17px; text-align: right; }
-#lbStatus { color: #64748b; font-size: 14px; padding: 30px 20px; text-align: center; }
-#lbCacheInfo { color: #475569; font-size: 10px; margin-top: 8px; min-height: 12px; letter-spacing: 0.5px; }
-
-.ghost-btn {
-    margin-top: 12px; padding: 10px 22px;
-    background: rgba(20, 25, 40, 0.6);
-    border: 1.5px solid rgba(74, 222, 128, 0.4);
-    color: #4ade80; border-radius: 12px;
-    font-weight: 700; font-size: 12px;
-    cursor: pointer; -webkit-appearance: none; appearance: none; font-family: inherit;
-    backdrop-filter: blur(10px);
-}
-.ghost-btn:active { background: rgba(74, 222, 128, 0.15); }
+.lbScore { color: #4ade80; font-weight: 900; font-size: 16px; text-align: right; }
+#lbStatus { color: #64748b; font-size: 13px; padding: 28px 20px; text-align: center; }
+#lbCacheInfo { color: #475569; font-size: 10px; margin-top: 6px; min-height: 12px; }
 
 /* МАГАЗИН */
 #shopTitle {
-    font-size: 30px; font-weight: 900; margin-bottom: 4px;
+    font-size: 26px; font-weight: 900; margin-bottom: 4px;
     background: linear-gradient(135deg, #a78bfa, #22d3ee);
     -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
     letter-spacing: -1px;
 }
-#shopSub { font-size: 11px; color: #64748b; margin-bottom: 14px; text-align: center; padding: 0 20px; letter-spacing: 0.5px; }
-#shopTabs { display: flex; gap: 6px; margin-bottom: 16px; width: 100%; max-width: 420px; padding: 0 6px; }
+#shopSub { font-size: 11px; color: #64748b; margin-bottom: 12px; text-align: center; }
+#shopTabs { display: flex; gap: 5px; margin-bottom: 12px; width: 100%; }
 .shop-tab {
-    flex: 1; padding: 10px 4px;
+    flex: 1; padding: 10px 2px;
     background: rgba(20, 25, 40, 0.6);
-    border: 1.5px solid rgba(74, 222, 128, 0.15);
+    border: 1.5px solid rgba(74, 222, 128, 0.12);
     color: #64748b; border-radius: 14px;
     font-size: 10px; font-weight: 800;
     cursor: pointer; -webkit-appearance: none; appearance: none; font-family: inherit;
-    transition: all 0.2s;
+    transition: all 0.15s;
     backdrop-filter: blur(10px);
 }
-.shop-tab.active {
-    background: linear-gradient(135deg, rgba(74, 222, 128, 0.2), rgba(34, 211, 238, 0.1));
-    border-color: #4ade80; color: #4ade80;
-    box-shadow: 0 4px 20px rgba(74, 222, 128, 0.2);
-}
-.shop-tab .icon { display: block; font-size: 20px; margin-bottom: 3px; }
-#shopContent { width: 100%; max-width: 420px; max-height: 58vh; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 4px; }
+.shop-tab.active { background: linear-gradient(135deg, rgba(74, 222, 128, 0.2), rgba(34, 211, 238, 0.08)); border-color: #4ade80; color: #4ade80; }
+.shop-tab .icon { display: block; font-size: 18px; margin-bottom: 2px; }
+#shopContent { width: 100%; max-height: 55vh; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 2px; }
 
 .shop-card {
     display: flex; align-items: center; gap: 12px;
-    padding: 14px; margin-bottom: 8px;
-    background: rgba(20, 25, 40, 0.7);
-    border: 1.5px solid rgba(74, 222, 128, 0.15);
-    border-radius: 18px;
+    padding: 13px; margin-bottom: 8px;
+    background: rgba(20, 25, 40, 0.65);
+    border: 1.5px solid rgba(74, 222, 128, 0.12);
+    border-radius: 16px;
     cursor: pointer; -webkit-appearance: none; appearance: none; font-family: inherit;
-    transition: all 0.2s; text-align: left; width: 100%;
+    transition: all 0.15s; text-align: left; width: 100%;
     backdrop-filter: blur(20px);
     position: relative; overflow: hidden;
 }
-.shop-card:active { transform: scale(0.98); border-color: rgba(74, 222, 128, 0.5); }
-.shop-card.selected { border-color: #4ade80; box-shadow: 0 0 25px rgba(74, 222, 128, 0.25); background: rgba(74, 222, 128, 0.08); }
-.shop-card.locked { opacity: 0.7; }
-.shop-card.premium { border-color: rgba(250, 204, 21, 0.4); background: linear-gradient(135deg, rgba(250, 204, 21, 0.08), rgba(20, 25, 40, 0.7)); }
-.shop-card.donate { border-color: rgba(244, 114, 182, 0.4); background: linear-gradient(135deg, rgba(244, 114, 182, 0.08), rgba(20, 25, 40, 0.7)); }
-.shop-card.premium::before {
-    content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
-    background: linear-gradient(45deg, transparent 40%, rgba(250, 204, 21, 0.15) 50%, transparent 60%);
-    animation: shine 3s ease-in-out infinite; pointer-events: none;
-}
-@keyframes shine { 0%, 100% { transform: translateX(-100%) rotate(45deg); } 50% { transform: translateX(100%) rotate(45deg); } }
+.shop-card:active { transform: scale(0.98); border-color: rgba(74, 222, 128, 0.4); }
+.shop-card.selected { border-color: #4ade80; box-shadow: 0 0 22px rgba(74, 222, 128, 0.2); background: rgba(74, 222, 128, 0.06); }
+.shop-card.locked { opacity: 0.65; }
+.shop-card.premium { border-color: rgba(250, 204, 21, 0.35); background: linear-gradient(135deg, rgba(250, 204, 21, 0.06), rgba(20, 25, 40, 0.65)); }
+.shop-card.donate { border-color: rgba(244, 114, 182, 0.35); background: linear-gradient(135deg, rgba(244, 114, 182, 0.06), rgba(20, 25, 40, 0.65)); }
 
 .shop-icon {
-    width: 54px; height: 54px; border-radius: 14px;
+    width: 50px; height: 50px; border-radius: 14px;
     display: flex; align-items: center; justify-content: center;
-    font-size: 26px; flex-shrink: 0;
-    background: rgba(74, 222, 128, 0.1);
-    border: 1px solid rgba(74, 222, 128, 0.2);
-    position: relative;
+    font-size: 24px; flex-shrink: 0;
+    background: rgba(74, 222, 128, 0.08);
+    border: 1px solid rgba(74, 222, 128, 0.15);
 }
 .shop-info { flex: 1; min-width: 0; }
-.shop-name { font-size: 14px; font-weight: 800; color: #e2e8f0; margin-bottom: 3px; }
-.shop-desc { font-size: 11px; color: #94a3b8; line-height: 1.4; }
-.shop-price { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; flex-shrink: 0; }
-.shop-price-value { font-size: 17px; font-weight: 900; color: #facc15; }
+.shop-name { font-size: 14px; font-weight: 800; color: #e2e8f0; margin-bottom: 2px; }
+.shop-desc { font-size: 11px; color: #94a3b8; line-height: 1.35; }
+.shop-price { display: flex; flex-direction: column; align-items: flex-end; gap: 1px; flex-shrink: 0; }
+.shop-price-value { font-size: 16px; font-weight: 900; color: #facc15; }
 .shop-price-label { font-size: 9px; color: #64748b; letter-spacing: 0.5px; text-transform: uppercase; }
 .shop-owned { color: #4ade80; font-size: 20px; font-weight: 900; }
 
 /* COUNTDOWN */
 #countdown {
     position: fixed; inset: 0; display: none; align-items: center; justify-content: center;
-    background: radial-gradient(circle at center, rgba(0,0,0,0.85), rgba(0,0,0,0.95));
-    z-index: 1000; font-size: 160px; font-weight: 900;
-    background-clip: text;
+    background: radial-gradient(circle at center, rgba(0,0,0,0.85), rgba(0,0,0,0.96));
+    z-index: 1000;
 }
 #countdown.show { display: flex; }
 #countdown-text {
+    font-size: 150px; font-weight: 900; line-height: 1;
     background: linear-gradient(135deg, #4ade80, #22d3ee);
     -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-    filter: drop-shadow(0 0 40px rgba(74, 222, 128, 0.8));
+    filter: drop-shadow(0 0 40px rgba(74, 222, 128, 0.7));
 }
 #countdown.pulse #countdown-text { animation: countPulse 0.9s ease-out; }
 @keyframes countPulse {
-    0% { transform: scale(0.3); opacity: 0; filter: drop-shadow(0 0 60px rgba(74, 222, 128, 1)); }
+    0% { transform: scale(0.3); opacity: 0; }
     40% { transform: scale(1.15); opacity: 1; }
-    100% { transform: scale(1); opacity: 1; filter: drop-shadow(0 0 40px rgba(74, 222, 128, 0.8)); }
+    100% { transform: scale(1); opacity: 1; }
 }
 
-/* ВСПЛЫВАЮЩИЕ ОЧКИ */
+/* SCORE POPUP */
 .score-popup {
     position: fixed; pointer-events: none; z-index: 100;
-    font-size: 28px; font-weight: 900;
+    font-size: 26px; font-weight: 900;
     color: #4ade80;
     text-shadow: 0 0 20px rgba(74, 222, 128, 0.8), 0 2px 4px rgba(0,0,0,0.8);
     animation: scoreFloat 1s ease-out forwards;
 }
-.score-popup.golden { color: #facc15; text-shadow: 0 0 20px rgba(250, 204, 21, 0.8), 0 2px 4px rgba(0,0,0,0.8); font-size: 34px; }
+.score-popup.golden { color: #facc15; text-shadow: 0 0 20px rgba(250, 204, 21, 0.8), 0 2px 4px rgba(0,0,0,0.8); font-size: 32px; }
 @keyframes scoreFloat {
     0% { transform: translateY(0) scale(0.5); opacity: 0; }
     20% { transform: translateY(-15px) scale(1.2); opacity: 1; }
@@ -364,9 +338,9 @@ h1 {
     position: fixed; bottom: 40px; left: 50%;
     transform: translateX(-50%) translateY(120px);
     background: rgba(20, 25, 40, 0.95);
-    color: white; padding: 14px 24px; border-radius: 16px;
+    color: white; padding: 13px 22px; border-radius: 14px;
     font-size: 14px; font-weight: 700; z-index: 9998;
-    border: 1.5px solid rgba(74, 222, 128, 0.4);
+    border: 1.5px solid rgba(74, 222, 128, 0.35);
     transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
     max-width: 90vw; text-align: center;
     backdrop-filter: blur(20px);
@@ -374,66 +348,67 @@ h1 {
 }
 #toast.show { transform: translateX(-50%) translateY(0); }
 
-/* ERROR */
-#errorBox { position: fixed; top: 0; left: 0; right: 0; background: #ef4444; color: white; padding: 12px; font-size: 12px; z-index: 9999; display: none; word-break: break-all; max-height: 40vh; overflow-y: auto; }
-
 /* ЮРИДИЧЕСКАЯ */
-#legalScreen .legal-content {
-    width: 100%; max-width: 400px;
+.legal-content {
+    width: 100%;
     background: rgba(20, 25, 40, 0.7);
-    border: 1px solid rgba(74, 222, 128, 0.2);
+    border: 1px solid rgba(74, 222, 128, 0.15);
     border-radius: 20px; padding: 22px;
-    max-height: 65vh; overflow-y: auto; -webkit-overflow-scrolling: touch;
+    max-height: 70vh; overflow-y: auto; -webkit-overflow-scrolling: touch;
     backdrop-filter: blur(20px);
     font-size: 13px; line-height: 1.7; color: #cbd5e1;
 }
-#legalScreen h2 { font-size: 18px; color: #4ade80; margin-bottom: 12px; font-weight: 900; }
-#legalScreen h3 { font-size: 13px; color: #22d3ee; margin: 14px 0 6px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
-#legalScreen p { margin-bottom: 8px; }
-#legalScreen ul { margin: 6px 0 10px 20px; }
-#legalScreen li { margin-bottom: 4px; }
-#legalScreen .highlight { color: #facc15; font-weight: 700; }
-#legalScreen .date { color: #64748b; font-size: 11px; margin-top: 16px; text-align: center; }
+.legal-content h2 { font-size: 18px; color: #4ade80; margin-bottom: 12px; font-weight: 900; }
+.legal-content h3 { font-size: 12px; color: #22d3ee; margin: 14px 0 6px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
+.legal-content p { margin-bottom: 8px; }
+.legal-content ul { margin: 6px 0 10px 20px; }
+.legal-content li { margin-bottom: 4px; }
+.legal-content .highlight { color: #facc15; font-weight: 700; }
+.legal-content .date { color: #64748b; font-size: 11px; margin-top: 16px; text-align: center; }
 </style>
 </head>
 <body>
 
-<div id="errorBox"></div>
 <div id="countdown"><span id="countdown-text"></span></div>
 <div id="toast"></div>
 
 <!-- МЕНЮ -->
 <div id="menuScreen" class="screen active">
-    <div id="userBox">
-        <div id="userAvatar">?</div>
-        <span>Привет, <span id="userName">игрок</span>!</span>
+    <div class="user-chip" id="userChip">
+        <div class="av" id="userAvatar">?</div>
+        <span>Привет, <span class="nm" id="userName">игрок</span></span>
     </div>
     <h1>ЗМЕЙКА</h1>
-    <div class="subtitle">BATTLE EDITION</div>
-    <button class="menu-btn primary" onclick="startGame()">
-        <div class="icon-box">▶</div>
-        <div class="text">Играть</div>
+    <div class="subtitle">BATTLE</div>
+
+    <button class="btn-hero" onclick="startGame()">
+        <span class="icon">▶</span>
+        <span>ИГРАТЬ</span>
     </button>
-    <button class="menu-btn premium" onclick="showScreen('shopScreen')">
-        <div class="icon-box">⭐</div>
-        <div class="text">Магазин</div>
-    </button>
-    <button class="menu-btn" onclick="showScreen('leaderboardScreen')">
-        <div class="icon-box">🏆</div>
-        <div class="text">Рейтинг</div>
-    </button>
-    <button class="menu-btn" onclick="shareScore()">
-        <div class="icon-box">📤</div>
-        <div class="text">Поделиться</div>
-    </button>
-    <button class="menu-btn small" onclick="showScreen('legalScreen')">
-        <div class="icon-box">📜</div>
-        <div class="text">Условия использования</div>
-    </button>
-    <div class="record-box">
-        <div class="record-icon">🏅</div>
-        <div class="record-label">Рекорд</div>
-        <div class="record-value" id="menuHigh">0</div>
+
+    <div class="grid-2">
+        <button class="btn-tile premium" onclick="showScreen('shopScreen')">
+            <span class="ti">⭐</span>
+            <span class="tt">Магазин</span>
+        </button>
+        <button class="btn-tile" onclick="showScreen('leaderboardScreen')">
+            <span class="ti">🏆</span>
+            <span class="tt">Рейтинг</span>
+        </button>
+        <button class="btn-tile" onclick="shareScore()">
+            <span class="ti">📤</span>
+            <span class="tt">Друзьям</span>
+        </button>
+        <button class="btn-tile" onclick="showLegal()">
+            <span class="ti">📜</span>
+            <span class="tt">Условия</span>
+        </button>
+    </div>
+
+    <div class="record-bar">
+        <span class="ico">🏅</span>
+        <span class="lbl">Рекорд</span>
+        <span class="val" id="menuHigh">0</span>
     </div>
 </div>
 
@@ -442,7 +417,7 @@ h1 {
     <div id="hud">
         <div class="hud-item" id="scoreHud">🎯 0</div>
         <div class="hud-item" id="speedHud">⚡ x1.0</div>
-        <div class="hud-item" id="fpsHud">-- FPS</div>
+        <div class="hud-item" id="fpsHud">--</div>
     </div>
     <canvas id="game"></canvas>
     <div id="controls">
@@ -462,33 +437,21 @@ h1 {
     <div id="overInfo"></div>
     <div id="overHigh"></div>
     <div id="submitStatus"></div>
-    <button class="buy-btn" onclick="buyLife()" id="buyLifeBtn">💚 Вторая жизнь за 5⭐</button>
-    <button class="menu-btn primary" onclick="startGame()">
-        <div class="icon-box">🔄</div>
-        <div class="text">Ещё раз</div>
-    </button>
-    <button class="menu-btn" onclick="showScreen('leaderboardScreen')">
-        <div class="icon-box">🏆</div>
-        <div class="text">Рейтинг</div>
-    </button>
-    <button class="menu-btn" onclick="showScreen('menuScreen')">
-        <div class="icon-box">🏠</div>
-        <div class="text">Меню</div>
-    </button>
+    <button class="buy-btn" onclick="buyLife()" id="buyLifeBtn">💚 Вторая жизнь · 5⭐</button>
+    <button class="btn-wide green" onclick="startGame()">🔄 Играть снова</button>
+    <button class="btn-wide" onclick="showScreen('leaderboardScreen')">🏆 Рейтинг</button>
+    <button class="btn-wide" onclick="showScreen('menuScreen')">🏠 В меню</button>
 </div>
 
 <!-- РЕЙТИНГ -->
 <div id="leaderboardScreen" class="screen">
     <div id="lbTitle">🏆 ТОП ИГРОКОВ</div>
-    <div id="lbRules">1️⃣ Больше очков • 2️⃣ Меньше возрождений • 3️⃣ Меньше времени</div>
+    <div id="lbRules">1️⃣ больше очков · 2️⃣ меньше возрождений · 3️⃣ меньше времени</div>
     <div id="podium"></div>
     <div id="lbList"><div id="lbStatus">Загрузка...</div></div>
     <div id="lbCacheInfo"></div>
-    <button class="ghost-btn" onclick="renderLeaderboard(true)">🔄 Обновить</button>
-    <button class="menu-btn" onclick="showScreen('menuScreen')" style="margin-top:10px;">
-        <div class="icon-box">🏠</div>
-        <div class="text">В меню</div>
-    </button>
+    <button class="btn-wide" style="margin-top:12px" onclick="renderLeaderboard(true)">🔄 Обновить</button>
+    <button class="btn-wide" onclick="showScreen('menuScreen')">🏠 В меню</button>
 </div>
 
 <!-- МАГАЗИН -->
@@ -502,10 +465,7 @@ h1 {
         <button class="shop-tab" data-tab="support" onclick="switchTab('support')"><span class="icon">💚</span>Донат</button>
     </div>
     <div id="shopContent"></div>
-    <button class="menu-btn" onclick="showScreen('menuScreen')" style="margin-top:10px;">
-        <div class="icon-box">🏠</div>
-        <div class="text">В меню</div>
-    </button>
+    <button class="btn-wide" style="margin-top:10px" onclick="showScreen('menuScreen')">🏠 В меню</button>
 </div>
 
 <!-- ЮРИДИЧЕСКАЯ -->
@@ -536,18 +496,19 @@ h1 {
         <p>По вопросам: @ваш_контакт_в_телеграм</p>
         <div class="date">Последнее обновление: 15 сентября 2026 г.</div>
     </div>
-    <button class="menu-btn" onclick="showScreen('menuScreen')" style="margin-top:12px;">
-        <div class="icon-box">🏠</div>
-        <div class="text">В меню</div>
-    </button>
+    <button class="btn-wide" style="margin-top:12px" onclick="showScreen('menuScreen')">🏠 В меню</button>
 </div>
 
 <script>
-window.onerror = function(msg, url, line) {
-    var box = document.getElementById('errorBox');
-    if (box) { box.style.display = 'block'; box.textContent = 'ОШИБКА: ' + msg + ' (строка ' + line + ')'; }
-    return false;
-};
+// Безопасный логгер ошибок — игнорируем CORS-ошибки сторонних скриптов
+window.addEventListener('error', function(e) {
+    if (e.message === 'Script error.' || !e.message) return;
+    var box = document.createElement('div');
+    box.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#ef4444;color:#fff;padding:8px;font-size:11px;z-index:99999;word-break:break-all;';
+    box.textContent = '⚠ ' + e.message + ' (стр. ' + e.lineno + ')';
+    document.body.appendChild(box);
+    setTimeout(function() { box.remove(); }, 5000);
+});
 
 var BIN_ID = '6aa93256ac6210605acffcdf';
 var MASTER_KEY = '$2a$10$3jAxvBubFU/n15BoFgKVS.SIL5E/j1fcLADrALJEk3hrvhiOXvNvi';
@@ -581,10 +542,7 @@ function getSkin() {
     return SKINS[0];
 }
 function isSkinUnlocked(skin) {
-    if (skin.type === 'stars') {
-        if (isPremium) return true;
-        return ownedStarsSkins.indexOf(skin.id) !== -1;
-    }
+    if (skin.type === 'stars') return isPremium || ownedStarsSkins.indexOf(skin.id) !== -1;
     return highScore >= skin.req;
 }
 
@@ -599,7 +557,7 @@ var GRID = 20, BASE_SPEED = 200, MIN_SPEED = 70, SPEED_STEP = 4;
 var canvas, ctx, cellSize, dpr, canvasSize;
 var snake, oldSnake, dir, nextDir, score, food, speed, foodEaten;
 var lastTick = 0, lastFrameTime = 0, rafId = null, running = false;
-var particles = [], floaters = [];
+var particles = [];
 var frameCount = 0, fpsLastUpdate = 0, fps = 60;
 var highScore = parseInt(localStorage.getItem('snakeHigh') || '0', 10);
 var leaderboardOpen = false, lbInterval = null;
@@ -611,7 +569,7 @@ function initCanvas() {
     canvas = document.getElementById('game');
     ctx = canvas.getContext('2d');
     dpr = Math.min(window.devicePixelRatio || 1, 3);
-    var availW = window.innerWidth - 24;
+    var availW = window.innerWidth - 28;
     var availH = window.innerHeight - 340;
     var size = Math.min(availW, availH, 500);
     size = Math.floor(size / GRID) * GRID;
@@ -626,7 +584,7 @@ function initCanvas() {
 
 function setupUser() {
     if (!tgUser) return;
-    document.getElementById('userBox').classList.add('show');
+    document.getElementById('userChip').classList.add('show');
     var name = tgUser.first_name || tgUser.username || 'игрок';
     document.getElementById('userName').textContent = name;
     document.getElementById('userAvatar').textContent = name.charAt(0).toUpperCase();
@@ -645,13 +603,16 @@ function showToast(msg, ms) {
     setTimeout(function() { t.classList.remove('show'); }, ms || 2200);
 }
 
+function showLegal() { showScreen('legalScreen'); }
+
 function spawnScorePopup(worldX, worldY, text, golden) {
-    var canvasRect = canvas.getBoundingClientRect();
+    if (!canvas) return;
+    var rect = canvas.getBoundingClientRect();
     var popup = document.createElement('div');
     popup.className = 'score-popup' + (golden ? ' golden' : '');
     popup.textContent = text;
-    popup.style.left = (canvasRect.left + worldX) + 'px';
-    popup.style.top = (canvasRect.top + worldY) + 'px';
+    popup.style.left = (rect.left + worldX) + 'px';
+    popup.style.top = (rect.top + worldY) + 'px';
     document.body.appendChild(popup);
     setTimeout(function() { popup.remove(); }, 1000);
 }
@@ -676,7 +637,7 @@ function saveScores(scores) {
     return fetch(API_BASE + BIN_ID, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', 'X-Master-Key': MASTER_KEY },
-        body: JSON.stringify({ scores: scores, config: (window.__cfg || null) })
+        body: JSON.stringify({ scores: scores })
     }).then(function(res) {
         if (!res.ok) throw new Error('HTTP ' + res.status);
         scoresCache = scores;
@@ -741,7 +702,7 @@ function renderLeaderboard(forceRefresh) {
 
     if (!forceRefresh && scoresCache && (Date.now() - scoresCacheTime) < CACHE_TTL) {
         drawLeaderboard(scoresCache);
-        cacheEl.textContent = '📦 из кэша (' + Math.round((Date.now() - scoresCacheTime)/1000) + 'с назад)';
+        cacheEl.textContent = '📦 из кэша (' + Math.round((Date.now() - scoresCacheTime)/1000) + 'с)';
         return;
     }
     listEl.innerHTML = '<div id="lbStatus">Загрузка...</div>';
@@ -750,7 +711,7 @@ function renderLeaderboard(forceRefresh) {
 
     fetchScores(forceRefresh).then(function(scores) {
         drawLeaderboard(scores);
-        cacheEl.textContent = '✅ только что';
+        cacheEl.textContent = '✅ обновлено';
     }).catch(function(e) {
         console.warn(e);
         if (scoresCache) {
@@ -776,7 +737,6 @@ function drawLeaderboard(scores) {
 
     if (scores.length >= 1) {
         var order = [1, 0, 2];
-        var heights = [52, 70, 40];
         var html = '';
         for (var k = 0; k < 3; k++) {
             var idx = order[k];
@@ -788,7 +748,7 @@ function drawLeaderboard(scores) {
             var isMe = myId && s.id === myId;
             var safeName = String(s.name || 'игрок').replace(/[<>&]/g, '').substring(0, 9);
             var initial = safeName.charAt(0).toUpperCase();
-            var crown = (s.premium || idx === 0) ? '<span class="crown">👑</span>' : '';
+            var crown = idx === 0 ? '<span class="crown">👑</span>' : '';
             html += '<div class="podium-place podium-' + (idx+1) + '">' +
                 '<div class="podium-avatar">' + initial + crown + '</div>' +
                 '<div class="podium-name">' + safeName + (isMe ? ' ★' : '') + '</div>' +
@@ -880,17 +840,17 @@ function renderSkinsTab() {
             desc = selected ? '✓ Выбран' : 'Разблокирован';
             priceHtml = '<div class="shop-owned">✓</div>';
         } else if (s.type === 'stars') {
-            desc = isPremium ? 'Включён в Премиум' : 'Эксклюзивный скин';
+            desc = isPremium ? 'Включён в Премиум' : 'Эксклюзив';
             priceHtml = '<div class="shop-price-value">' + s.price + '⭐</div><div class="shop-price-label">купить</div>';
         } else {
-            desc = 'Рекорд ' + s.req + ' 🏅';
+            desc = 'Нужен рекорд ' + s.req;
             priceHtml = '<div class="shop-price-value">' + s.req + '</div><div class="shop-price-label">рекорд</div>';
         }
 
-        var iconBg = s.head === 'rainbow' ? 'linear-gradient(135deg, #f87171, #facc15, #22d3ee)' : 'linear-gradient(135deg, ' + s.head + '44, ' + s.body + '44)';
+        var iconBg = s.head === 'rainbow' ? 'linear-gradient(135deg, #f87171, #facc15, #22d3ee)' : 'linear-gradient(135deg, ' + s.head + '33, ' + s.body + '33)';
 
         html += '<button class="' + cls + '" onclick="selectSkin(\'' + s.id + '\')">' +
-            '<div class="shop-icon" style="background:' + iconBg + '; border-color: ' + (s.head === 'rainbow' ? '#8b5cf6' : s.head) + '44">' + s.emoji + '</div>' +
+            '<div class="shop-icon" style="background:' + iconBg + '">' + s.emoji + '</div>' +
             '<div class="shop-info"><div class="shop-name">' + s.name + '</div><div class="shop-desc">' + desc + '</div></div>' +
             '<div class="shop-price">' + priceHtml + '</div>' +
             '</button>';
@@ -900,9 +860,9 @@ function renderSkinsTab() {
 
 function renderBoostersTab() {
     var items = [
-        { id: 'extra_life', icon: '💚', name: 'Вторая жизнь', desc: 'Продолжить партию после смерти', price: 5 },
-        { id: 'boost_x2', icon: '⚡', name: 'Буст ×2 очков', desc: 'Следующая партия с двойными очками', price: 10 },
-        { id: 'shield', icon: '🛡️', name: 'Щит от смерти', desc: 'Игнорирует одно столкновение', price: 10 }
+        { id: 'extra_life', icon: '💚', name: 'Вторая жизнь', desc: 'Продолжить партию', price: 5 },
+        { id: 'boost_x2', icon: '⚡', name: 'Буст ×2', desc: 'Двойные очки на партию', price: 10 },
+        { id: 'shield', icon: '🛡️', name: 'Щит', desc: 'Спасает от 1 столкновения', price: 10 }
     ];
     var html = '';
     for (var i = 0; i < items.length; i++) {
@@ -920,7 +880,7 @@ function renderPremiumTab() {
     if (isPremium) {
         return '<div class="shop-card premium" style="cursor:default">' +
             '<div class="shop-icon">👑</div>' +
-            '<div class="shop-info"><div class="shop-name">Премиум активен</div><div class="shop-desc">Золотая рамка в топе • +10% к очкам • все премиум-скины</div></div>' +
+            '<div class="shop-info"><div class="shop-name">Премиум активен</div><div class="shop-desc">Золотая рамка • +10% очков • все премиум-скины</div></div>' +
             '<div class="shop-owned">✓</div></div>';
     }
     return '<button class="shop-card premium" onclick="buyItem(\'premium\')">' +
@@ -932,11 +892,11 @@ function renderPremiumTab() {
 
 function renderSupportTab() {
     var items = [
-        { id: 'donate_10', icon: '☕', name: 'Кофе автору', desc: 'Небольшая поддержка проекта', price: 10 },
+        { id: 'donate_10', icon: '☕', name: 'Кофе автору', desc: 'Небольшая поддержка', price: 10 },
         { id: 'donate_50', icon: '🍕', name: 'Пицца автору', desc: 'Средняя поддержка', price: 50 },
-        { id: 'donate_100', icon: '🎁', name: 'Большой подарок', desc: 'Мощная поддержка проекта', price: 100 }
+        { id: 'donate_100', icon: '🎁', name: 'Большой подарок', desc: 'Мощная поддержка', price: 100 }
     ];
-    var html = '<div style="color:#94a3b8;font-size:11px;text-align:center;padding:8px 16px 14px;line-height:1.5;">Покупки в этой категории — <b style="color:#f472b6">добровольные пожертвования</b>. Никаких бонусов, только спасибо ❤️</div>';
+    var html = '<div style="color:#94a3b8;font-size:11px;text-align:center;padding:6px 14px 12px;line-height:1.5;">Покупки в этой категории — <b style="color:#f472b6">добровольные пожертвования</b>. Спасибо ❤️</div>';
     for (var i = 0; i < items.length; i++) {
         var it = items[i];
         html += '<button class="shop-card donate" onclick="buyItem(\'' + it.id + '\')">' +
@@ -954,7 +914,7 @@ function selectSkin(id) {
     if (!skin) return;
     if (!isSkinUnlocked(skin)) {
         if (skin.type === 'stars') buyItem('skin_' + skin.id);
-        else showToast('🔒 Набери ' + skin.req + ' очков');
+        else showToast('🔒 Нужен рекорд ' + skin.req);
         return;
     }
     selectedSkinId = id;
@@ -965,7 +925,7 @@ function selectSkin(id) {
 }
 
 function buyItem(itemType) {
-    if (!tg || !tgUser) { showToast('Только в Telegram'); return; }
+    if (!tg || !tgUser) { showToast('Покупки только в Telegram'); return; }
     showToast('⏳ Создание счёта...', 5000);
     fetch(WORKER_URL + '/create-invoice', {
         method: 'POST',
@@ -993,7 +953,7 @@ function handlePurchase(itemType) {
             showToast('✓ Оплачено!');
             startCountdown(function() { reviveSnake(); });
         } else {
-            showToast('✓ Куплено. Используется при смерти');
+            showToast('✓ Куплено');
         }
     } else if (itemType === 'boost_x2') {
         activeBoost = true;
@@ -1048,7 +1008,7 @@ function loop(timestamp) {
         fps = Math.round(frameCount * 1000 / (timestamp - fpsLastUpdate));
         frameCount = 0; fpsLastUpdate = timestamp;
         var fpsEl = document.getElementById('fpsHud');
-        if (fpsEl) fpsEl.textContent = fps + ' FPS';
+        if (fpsEl) fpsEl.textContent = fps;
     }
     if (deathAnim) {
         deathAnim.t += 16;
@@ -1105,12 +1065,10 @@ function tick() {
 
         var cx = food.x * cellSize + cellSize / 2;
         var cy = food.y * cellSize + cellSize / 2;
-        spawnParticles(cx, cy, food.golden ? '#facc15' : '#ef4444', food.golden ? 20 : 12);
+        spawnParticles(cx, cy, food.golden ? '#facc15' : '#ef4444', food.golden ? 18 : 10);
         spawnScorePopup(cx - 15, cy - 20, '+' + pts, food.golden);
-
         canvas.classList.add('shake');
         setTimeout(function() { canvas.classList.remove('shake'); }, 150);
-
         placeFood();
     } else { snake.pop(); }
 }
@@ -1132,7 +1090,7 @@ function spawnParticles(x, y, color, count) {
     for (var i = 0; i < count; i++) {
         var a = Math.random() * Math.PI * 2;
         var sp = 0.5 + Math.random() * 3;
-        particles.push({ x: x, y: y, vx: Math.cos(a)*sp, vy: Math.sin(a)*sp, life: 1, color: color, size: 2 + Math.random()*4 });
+        particles.push({ x: x, y: y, vx: Math.cos(a)*sp, vy: Math.sin(a)*sp, life: 1, color: color, size: 2 + Math.random()*3.5 });
     }
 }
 
@@ -1161,7 +1119,6 @@ function render(progress) {
     var w = canvasSize, h = canvasSize;
     ctx.fillStyle = '#050510'; ctx.fillRect(0, 0, w, h);
 
-    // Grid с градиентом
     ctx.strokeStyle = 'rgba(74, 222, 128, 0.04)'; ctx.lineWidth = 1;
     ctx.beginPath();
     for (var i = 1; i < GRID; i++) {
@@ -1171,35 +1128,29 @@ function render(progress) {
     }
     ctx.stroke();
 
-    // Food с двойным glow
     if (food) {
         var pulse = 1 + Math.sin(performance.now() / 200) * 0.2;
         var fx = food.x * cellSize + cellSize / 2;
         var fy = food.y * cellSize + cellSize / 2;
         var fr = (cellSize / 2 - 2) * pulse;
-
         var isG = food.golden;
+
         ctx.shadowColor = isG ? '#facc15' : '#ef4444';
-        ctx.shadowBlur = 25;
+        ctx.shadowBlur = 22;
         ctx.fillStyle = isG ? '#facc15' : '#ef4444';
         ctx.beginPath(); ctx.arc(fx, fy, fr, 0, Math.PI * 2); ctx.fill();
 
-        // Внутренний блик
         ctx.shadowBlur = 0;
-        ctx.fillStyle = 'rgba(255,255,255,0.6)';
+        ctx.fillStyle = 'rgba(255,255,255,0.55)';
         ctx.beginPath(); ctx.arc(fx - fr*0.3, fy - fr*0.3, fr*0.3, 0, Math.PI * 2); ctx.fill();
 
-        // Внешнее кольцо
-        ctx.strokeStyle = isG ? 'rgba(250, 204, 21, 0.4)' : 'rgba(239, 68, 68, 0.4)';
+        ctx.strokeStyle = isG ? 'rgba(250, 204, 21, 0.35)' : 'rgba(239, 68, 68, 0.35)';
         ctx.lineWidth = 2;
         ctx.beginPath(); ctx.arc(fx, fy, fr + 4 + Math.sin(performance.now()/300)*2, 0, Math.PI * 2); ctx.stroke();
     }
 
-    // Snake с trail
     if (snake) {
         var len = snake.length;
-
-        // Trail (тень за головой)
         for (var i = len - 1; i >= 0; i--) {
             var newP = snake[i];
             var oldP = oldSnake[i] || newP;
@@ -1210,10 +1161,9 @@ function render(progress) {
             var y = oy + (newP.y - oy) * progress;
             var colors = getSnakeColors(i, len);
 
-            // Свечение тела
             if (i === 0) {
                 ctx.shadowColor = colors.glow;
-                ctx.shadowBlur = 20;
+                ctx.shadowBlur = 18;
                 ctx.fillStyle = colors.head;
             } else {
                 ctx.shadowBlur = i < 3 ? 8 : 0;
@@ -1233,18 +1183,16 @@ function render(progress) {
             roundRect(ctx, px, py, ps, ps, rad);
             ctx.fill();
 
-            // Внутренний блик на голове
             if (i === 0) {
                 ctx.shadowBlur = 0;
-                ctx.fillStyle = 'rgba(255,255,255,0.35)';
+                ctx.fillStyle = 'rgba(255,255,255,0.3)';
                 ctx.beginPath();
-                ctx.arc(px + ps * 0.3, py + ps * 0.3, ps * 0.13, 0, Math.PI * 2);
+                ctx.arc(px + ps * 0.3, py + ps * 0.3, ps * 0.12, 0, Math.PI * 2);
                 ctx.fill();
             }
         }
         ctx.shadowBlur = 0;
 
-        // Индикатор щита
         if (activeShield && snake.length > 0) {
             var head = snake[0];
             var hx = head.x * cellSize + cellSize/2;
@@ -1259,7 +1207,6 @@ function render(progress) {
             ctx.shadowBlur = 0;
         }
 
-        // Индикатор буста
         if (activeBoost) {
             ctx.strokeStyle = 'rgba(250, 204, 21, 0.5)';
             ctx.lineWidth = 1.5;
@@ -1271,13 +1218,12 @@ function render(progress) {
         }
     }
 
-    // Частицы
     for (var i = 0; i < particles.length; i++) {
         var p = particles[i];
         ctx.globalAlpha = p.life;
         ctx.fillStyle = p.color;
         ctx.shadowColor = p.color;
-        ctx.shadowBlur = 8;
+        ctx.shadowBlur = 6;
         ctx.beginPath(); ctx.arc(p.x, p.y, p.size * p.life, 0, Math.PI * 2); ctx.fill();
     }
     ctx.globalAlpha = 1;
@@ -1307,9 +1253,9 @@ function roundRect(ctx, x, y, w, h, r) {
 
 function updateHud() {
     var extra = '';
-    if (activeBoost) extra += ' ⚡';
-    if (isPremium) extra += ' 👑';
-    document.getElementById('scoreHud').textContent = '🎯 ' + score + extra;
+    if (activeBoost) extra += '⚡';
+    if (isPremium) extra += '👑';
+    document.getElementById('scoreHud').textContent = '🎯 ' + score + (extra ? ' ' + extra : '');
     document.getElementById('speedHud').textContent = '⚡ x' + (BASE_SPEED / speed).toFixed(1);
 }
 
@@ -1376,7 +1322,7 @@ function buyLife() {
     btn.textContent = '⏳ Создание...';
     buyItem('extra_life');
     setTimeout(function() {
-        btn.textContent = '💚 Вторая жизнь за 5⭐';
+        btn.textContent = '💚 Вторая жизнь · 5⭐';
         isBuyingLife = false;
     }, 1000);
 }
