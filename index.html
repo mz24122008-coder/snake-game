@@ -5,139 +5,247 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Змейка Баттл</title>
     <style>
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
         body {
-            margin: 0;
-            background: #0f0f1a;
+            background: radial-gradient(circle at 50% 0%, #1e1b4b 0%, #0f0f1a 70%);
             color: white;
             font-family: -apple-system, sans-serif;
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            min-height: 100vh;
             overflow: hidden;
             user-select: none;
             padding: 10px;
         }
-        #score {
-            font-size: 22px;
-            margin-bottom: 12px;
-            font-weight: bold;
+        .screen { display: none; flex-direction: column; align-items: center; width: 100%; }
+        .screen.active { display: flex; }
+
+        /* МЕНЮ */
+        h1 {
+            font-size: 42px;
+            font-weight: 900;
+            background: linear-gradient(135deg, #4ade80, #22d3ee);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+            letter-spacing: -1px;
+        }
+        .subtitle { color: #94a3b8; margin-bottom: 40px; font-size: 14px; }
+
+        .menu-btn {
+            width: 240px;
+            padding: 16px;
+            margin: 8px 0;
+            background: rgba(74, 222, 128, 0.1);
+            border: 2px solid #4ade80;
             color: #4ade80;
+            font-size: 17px;
+            font-weight: bold;
+            border-radius: 14px;
+            cursor: pointer;
+            transition: all 0.15s;
         }
+        .menu-btn:active { background: #4ade80; color: #0f0f1a; transform: scale(0.97); }
+        .menu-btn.primary { background: #4ade80; color: #0f0f1a; }
+        .menu-btn.primary:active { background: #22c55e; }
+
+        .high-score {
+            margin-top: 24px;
+            color: #facc15;
+            font-size: 14px;
+        }
+
+        /* ИГРА */
+        #hud {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 400px;
+            margin-bottom: 10px;
+            padding: 0 6px;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        #scoreHud { color: #4ade80; }
+        #speedHud { color: #22d3ee; }
+
         #game {
-            background: #1a1a2e;
-            border-radius: 12px;
-            box-shadow: 0 0 20px rgba(74, 222, 128, 0.25);
+            background: #0a0a14;
+            border-radius: 14px;
+            box-shadow: 0 0 30px rgba(74, 222, 128, 0.15), inset 0 0 0 1px rgba(74, 222, 128, 0.2);
             touch-action: none;
-            max-width: 90vw;
-            max-height: 55vh;
+            display: block;
         }
+
         #controls {
-            margin-top: 16px;
+            margin-top: 14px;
             display: grid;
-            grid-template-columns: repeat(3, 64px);
-            grid-template-rows: repeat(2, 64px);
-            gap: 10px;
+            grid-template-columns: repeat(3, 60px);
+            grid-template-rows: repeat(2, 60px);
+            gap: 8px;
         }
         .btn {
-            background: #2a2a40;
-            border: 2px solid #4ade80;
-            color: white;
-            font-size: 26px;
+            background: rgba(74, 222, 128, 0.1);
+            border: 2px solid rgba(74, 222, 128, 0.6);
+            color: #4ade80;
+            font-size: 24px;
             border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
         }
         .btn:active { background: #4ade80; color: #0f0f1a; }
-        #restart {
-            display: none;
-            margin-top: 14px;
-            padding: 12px 24px;
-            background: #4ade80;
-            color: #0f0f1a;
-            border: none;
-            border-radius: 10px;
-            font-weight: bold;
-            font-size: 16px;
-        }
+
+        /* GAME OVER */
+        #overTitle { font-size: 34px; color: #ef4444; margin-bottom: 8px; font-weight: 900; }
+        #overScore { font-size: 20px; color: #4ade80; margin-bottom: 6px; }
+        #overHigh { font-size: 14px; color: #facc15; margin-bottom: 30px; }
+
+        .hint { color: #64748b; font-size: 12px; margin-top: 20px; text-align: center; }
     </style>
 </head>
 <body>
-    <div id="score">Счёт: 0</div>
-    <canvas id="game" width="300" height="300"></canvas>
-    <button id="restart">Заново</button>
-    <div id="controls">
-        <div></div>
-        <div class="btn" data-dir="up">▲</div>
-        <div></div>
-        <div class="btn" data-dir="left">◀</div>
-        <div class="btn" data-dir="down">▼</div>
-        <div class="btn" data-dir="right">▶</div>
+
+    <!-- МЕНЮ -->
+    <div id="menuScreen" class="screen active">
+        <h1>ЗМЕЙКА</h1>
+        <div class="subtitle">BATTLE EDITION 🐍</div>
+        <button class="menu-btn primary" onclick="startGame()">▶ Играть</button>
+        <button class="menu-btn" onclick="showSkinInfo()">🎨 Скины (скоро)</button>
+        <button class="menu-btn" onclick="showLeaderboard()">🏆 Рейтинг (скоро)</button>
+        <div class="high-score">Рекорд: <span id="menuHigh">0</span></div>
+    </div>
+
+    <!-- ИГРА -->
+    <div id="gameScreen" class="screen">
+        <div id="hud">
+            <span id="scoreHud">Счёт: 0</span>
+            <span id="speedHud">Скорость: x1</span>
+        </div>
+        <canvas id="game"></canvas>
+        <div id="controls">
+            <div></div>
+            <div class="btn" data-dir="up">▲</div>
+            <div></div>
+            <div class="btn" data-dir="left">◀</div>
+            <div class="btn" data-dir="down">▼</div>
+            <div class="btn" data-dir="right">▶</div>
+        </div>
+    </div>
+
+    <!-- КОНЕЦ ИГРЫ -->
+    <div id="overScreen" class="screen">
+        <div id="overTitle">ИГРА ОКОНЧЕНА</div>
+        <div id="overScore">Счёт: 0</div>
+        <div id="overHigh"></div>
+        <button class="menu-btn primary" onclick="startGame()">🔄 Ещё раз</button>
+        <button class="menu-btn" onclick="showScreen('menuScreen')">🏠 Меню</button>
     </div>
 
 <script>
-    var canvas = document.getElementById('game');
-    var ctx = canvas.getContext('2d');
-    var scoreEl = document.getElementById('score');
-    var restartBtn = document.getElementById('restart');
+    // ============ НАСТРОЙКИ ============
+    var GRID = 20;              // поле 20x20 (было 15)
+    var BASE_SPEED = 200;       // мс между кадрами
+    var MIN_SPEED = 80;         // максимальная скорость
+    var SPEED_STEP = 4;         // ускорение за каждую еду
 
-    var gridSize = 15;
-    var cellSize = canvas.width / gridSize;
-    var snake, food, direction, nextDirection, score, gameLoop, isGameOver;
+    // ============ СОСТОЯНИЕ ============
+    var canvas, ctx, cellSize, dpr;
+    var snake, dir, nextDir, score, food, speed, foodEaten;
+    var lastTick, rafId, running;
+    var highScore = parseInt(localStorage.getItem('snakeHigh') || '0', 10);
 
-    function init() {
-        snake = [{x: 7, y: 7}, {x: 6, y: 7}, {x: 5, y: 7}];
-        direction = {x: 1, y: 0};      // едет вправо
-        nextDirection = {x: 1, y: 0};
+    // ============ ИНИЦИАЛИЗАЦИЯ ============
+    function initCanvas() {
+        canvas = document.getElementById('game');
+        ctx = canvas.getContext('2d');
+        dpr = window.devicePixelRatio || 1;
+
+        // Размер: минимум из ширины экрана и высоты
+        var maxW = Math.min(window.innerWidth - 30, 400);
+        var maxH = window.innerHeight - 280;
+        var size = Math.min(maxW, maxH);
+        size = Math.floor(size / GRID) * GRID; // кратно сетке
+
+        canvas.style.width = size + 'px';
+        canvas.style.height = size + 'px';
+        canvas.width = size * dpr;
+        canvas.height = size * dpr;
+        ctx.scale(dpr, dpr);
+
+        cellSize = size / GRID;
+    }
+
+    // ============ ЭКРАНЫ ============
+    function showScreen(id) {
+        var screens = document.querySelectorAll('.screen');
+        for (var i = 0; i < screens.length; i++) screens[i].classList.remove('active');
+        document.getElementById(id).classList.add('active');
+        if (id === 'menuScreen') {
+            document.getElementById('menuHigh').textContent = highScore;
+        }
+    }
+
+    function showSkinInfo() { alert('Скины появятся после подключения Telegram Stars 🎨'); }
+    function showLeaderboard() { alert('Рейтинг появится после подключения бэкенда 🏆'); }
+
+    // ============ ИГРА ============
+    function startGame() {
+        initCanvas();
+        showScreen('gameScreen');
+
+        snake = [{x: 9, y: 10}, {x: 8, y: 10}, {x: 7, y: 10}];
+        dir = {x: 1, y: 0};
+        nextDir = {x: 1, y: 0};
         score = 0;
-        isGameOver = false;
-        scoreEl.textContent = 'Счёт: 0';
-        restartBtn.style.display = 'none';
+        foodEaten = 0;
+        speed = BASE_SPEED;
+        running = true;
+        lastTick = 0;
+
         placeFood();
-        draw();                        // сразу рисуем поле
-        if (gameLoop) clearInterval(gameLoop);
-        gameLoop = setInterval(update, 180);
+        updateHud();
+        draw();
+
+        if (rafId) cancelAnimationFrame(rafId);
+        rafId = requestAnimationFrame(loop);
     }
 
-    function placeFood() {
-        while (true) {
-            var f = {
-                x: Math.floor(Math.random() * gridSize),
-                y: Math.floor(Math.random() * gridSize)
-            };
-            var onSnake = false;
-            for (var i = 0; i < snake.length; i++) {
-                if (snake[i].x === f.x && snake[i].y === f.y) { onSnake = true; break; }
-            }
-            if (!onSnake) { food = f; return; }
+    function loop(timestamp) {
+        if (!running) return;
+        if (!lastTick) lastTick = timestamp;
+
+        var elapsed = timestamp - lastTick;
+        if (elapsed >= speed) {
+            lastTick = timestamp;
+            tick();
         }
+        rafId = requestAnimationFrame(loop);
     }
 
-    function update() {
-        if (isGameOver) return;
+    function tick() {
+        dir = {x: nextDir.x, y: nextDir.y};
+        var head = {x: snake[0].x + dir.x, y: snake[0].y + dir.y};
 
-        direction = {x: nextDirection.x, y: nextDirection.y};
-        var head = {x: snake[0].x + direction.x, y: snake[0].y + direction.y};
-
-        // столкновение со стеной
-        if (head.x < 0 || head.x >= gridSize || head.y < 0 || head.y >= gridSize) {
-            return endGame();
-        }
-        // столкновение с собой
+        // стены
+        if (head.x < 0 || head.x >= GRID || head.y < 0 || head.y >= GRID) return endGame();
+        // себя
         for (var i = 0; i < snake.length; i++) {
-            if (snake[i].x === head.x && snake[i].y === head.y) {
-                return endGame();
-            }
+            if (snake[i].x === head.x && snake[i].y === head.y) return endGame();
         }
 
         snake.unshift(head);
 
         if (head.x === food.x && head.y === food.y) {
-            score++;
-            scoreEl.textContent = 'Счёт: ' + score;
+            score += food.points;
+            foodEaten++;
+
+            // ускорение
+            speed = Math.max(MIN_SPEED, BASE_SPEED - foodEaten * SPEED_STEP);
+            updateHud();
+
             placeFood();
         } else {
             snake.pop();
@@ -146,90 +254,167 @@
         draw();
     }
 
-    function draw() {
-        // фон
-        ctx.fillStyle = '#1a1a2e';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-        // еда
-        ctx.fillStyle = '#ef4444';
-        ctx.beginPath();
-        ctx.arc(
-            food.x * cellSize + cellSize / 2,
-            food.y * cellSize + cellSize / 2,
-            cellSize / 2 - 2, 0, Math.PI * 2
-        );
-        ctx.fill();
-
-        // змейка
-        for (var i = 0; i < snake.length; i++) {
-            ctx.fillStyle = (i === 0) ? '#4ade80' : '#22c55e';
-            ctx.fillRect(
-                snake[i].x * cellSize + 1,
-                snake[i].y * cellSize + 1,
-                cellSize - 2,
-                cellSize - 2
-            );
+    function placeFood() {
+        while (true) {
+            var f = {
+                x: Math.floor(Math.random() * GRID),
+                y: Math.floor(Math.random() * GRID)
+            };
+            var busy = false;
+            for (var i = 0; i < snake.length; i++) {
+                if (snake[i].x === f.x && snake[i].y === f.y) { busy = true; break; }
+            }
+            if (!busy) {
+                // 15% шанс золотой еды
+                var golden = Math.random() < 0.15;
+                f.golden = golden;
+                f.points = golden ? 5 : 1;
+                food = f;
+                return;
+            }
         }
     }
 
-    function endGame() {
-        isGameOver = true;
-        clearInterval(gameLoop);
-        restartBtn.style.display = 'block';
+    function draw() {
+        var w = canvas.width / dpr;
+        var h = canvas.height / dpr;
+
+        // фон + сетка
+        ctx.fillStyle = '#0a0a14';
+        ctx.fillRect(0, 0, w, h);
+
+        ctx.strokeStyle = 'rgba(74, 222, 128, 0.05)';
+        ctx.lineWidth = 1;
+        for (var i = 1; i < GRID; i++) {
+            ctx.beginPath();
+            ctx.moveTo(i * cellSize, 0);
+            ctx.lineTo(i * cellSize, h);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(0, i * cellSize);
+            ctx.lineTo(w, i * cellSize);
+            ctx.stroke();
+        }
+
+        // еда с пульсацией
+        var pulse = 1 + Math.sin(Date.now() / 200) * 0.15;
+        var fx = food.x * cellSize + cellSize / 2;
+        var fy = food.y * cellSize + cellSize / 2;
+        var fr = (cellSize / 2 - 1.5) * pulse;
+
+        if (food.golden) {
+            ctx.shadowColor = '#facc15';
+            ctx.shadowBlur = 12;
+            ctx.fillStyle = '#facc15';
+        } else {
+            ctx.shadowColor = '#ef4444';
+            ctx.shadowBlur = 8;
+            ctx.fillStyle = '#ef4444';
+        }
+        ctx.beginPath();
+        ctx.arc(fx, fy, fr, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+
+        // змейка
+        for (var i = snake.length - 1; i >= 0; i--) {
+            var s = snake[i];
+            if (i === 0) {
+                ctx.fillStyle = '#4ade80';
+                ctx.shadowColor = '#4ade80';
+                ctx.shadowBlur = 10;
+            } else {
+                // градиент по телу
+                var t = i / Math.max(1, snake.length);
+                var r = Math.floor(34 + (74 - 34) * (1 - t));
+                var g = Math.floor(197 + (222 - 197) * (1 - t));
+                var b = Math.floor(94 + (128 - 94) * (1 - t));
+                ctx.fillStyle = 'rgb(' + r + ',' + g + ',' + b + ')';
+                ctx.shadowBlur = 0;
+            }
+            var pad = i === 0 ? 0.5 : 1;
+            ctx.fillRect(
+                s.x * cellSize + pad,
+                s.y * cellSize + pad,
+                cellSize - pad * 2,
+                cellSize - pad * 2
+            );
+        }
+        ctx.shadowBlur = 0;
     }
 
-    function setDirection(dir) {
-        if (isGameOver) return;
+    function updateHud() {
+        document.getElementById('scoreHud').textContent = 'Счёт: ' + score;
+        var mult = (BASE_SPEED / speed).toFixed(1);
+        document.getElementById('speedHud').textContent = 'Скорость: x' + mult;
+    }
+
+    function endGame() {
+        running = false;
+        cancelAnimationFrame(rafId);
+
+        var isNewRecord = score > highScore;
+        if (isNewRecord) {
+            highScore = score;
+            localStorage.setItem('snakeHigh', String(highScore));
+        }
+
+        document.getElementById('overScore').textContent = 'Счёт: ' + score;
+        document.getElementById('overHigh').textContent = isNewRecord
+            ? '🎉 НОВЫЙ РЕКОРД!'
+            : 'Рекорд: ' + highScore;
+
+        showScreen('overScreen');
+    }
+
+    // ============ УПРАВЛЕНИЕ ============
+    function setDir(d) {
+        if (!running) return;
         var dirs = {
             up:    {x: 0,  y: -1},
             down:  {x: 0,  y: 1},
             left:  {x: -1, y: 0},
             right: {x: 1,  y: 0}
         };
-        var nd = dirs[dir];
+        var nd = dirs[d];
         if (!nd) return;
-        // нельзя развернуться на 180°
-        if (nd.x === -direction.x && nd.y === -direction.y) return;
-        nextDirection = nd;
+        if (nd.x === -dir.x && nd.y === -dir.y) return;
+        nextDir = nd;
     }
 
-    // кнопки
-    var btns = document.querySelectorAll('.btn');
-    for (var i = 0; i < btns.length; i++) {
-        (function(b){
-            b.addEventListener('click', function(){ setDirection(b.dataset.dir); });
-        })(btns[i]);
-    }
-
-    // свайпы
-    var touchStartX = null, touchStartY = null;
-    canvas.addEventListener('touchstart', function(e){
-        touchStartX = e.touches[0].clientX;
-        touchStartY = e.touches[0].clientY;
-    }, {passive: true});
-
-    canvas.addEventListener('touchend', function(e){
-        if (touchStartX === null) return;
-        var dx = e.changedTouches[0].clientX - touchStartX;
-        var dy = e.changedTouches[0].clientY - touchStartY;
-        if (Math.abs(dx) > Math.abs(dy)) {
-            setDirection(dx > 0 ? 'right' : 'left');
-        } else {
-            setDirection(dy > 0 ? 'down' : 'up');
-        }
-        touchStartX = null;
-    }, {passive: true});
-
-    // клавиатура (на всякий)
-    document.addEventListener('keydown', function(e){
-        var map = {ArrowUp:'up', ArrowDown:'down', ArrowLeft:'left', ArrowRight:'right'};
-        if (map[e.key]) setDirection(map[e.key]);
+    // кнопки — делегирование, работает быстрее
+    document.getElementById('controls').addEventListener('click', function(e) {
+        var btn = e.target.closest('.btn');
+        if (btn) setDir(btn.dataset.dir);
     });
 
-    restartBtn.addEventListener('click', init);
+    // свайпы
+    var touchX = null, touchY = null;
+    document.getElementById('gameScreen').addEventListener('touchstart', function(e) {
+        if (e.target.id === 'game') {
+            touchX = e.touches[0].clientX;
+            touchY = e.touches[0].clientY;
+        }
+    }, {passive: true});
 
-    init();
+    document.getElementById('gameScreen').addEventListener('touchend', function(e) {
+        if (touchX === null) return;
+        var dx = e.changedTouches[0].clientX - touchX;
+        var dy = e.changedTouches[0].clientY - touchY;
+        if (Math.abs(dx) > 20 || Math.abs(dy) > 20) {
+            if (Math.abs(dx) > Math.abs(dy)) setDir(dx > 0 ? 'right' : 'left');
+            else setDir(dy > 0 ? 'down' : 'up');
+        }
+        touchX = null; touchY = null;
+    }, {passive: true});
+
+    document.addEventListener('keydown', function(e) {
+        var map = {ArrowUp:'up', ArrowDown:'down', ArrowLeft:'left', ArrowRight:'right'};
+        if (map[e.key]) { e.preventDefault(); setDir(map[e.key]); }
+    });
+
+    // стартуем с меню
+    document.getElementById('menuHigh').textContent = highScore;
 </script>
 </body>
 </html>
