@@ -8,110 +8,43 @@
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
         html, body { height: 100%; overflow: hidden; background: #0a0a14; color: white; font-family: -apple-system, sans-serif; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
-
-        /* Анимированный фон */
-        body::before {
-            content: ''; position: fixed; top: -50%; left: -50%; width: 200%; height: 200%;
-            background: radial-gradient(circle at 30% 20%, rgba(74, 222, 128, 0.12) 0%, transparent 40%),
-                        radial-gradient(circle at 70% 80%, rgba(34, 211, 238, 0.1) 0%, transparent 40%),
-                        radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.08) 0%, transparent 50%);
-            animation: bgFloat 20s ease-in-out infinite; z-index: 0; pointer-events: none;
-        }
-        @keyframes bgFloat {
-            0%, 100% { transform: translate(0, 0) rotate(0deg); }
-            50% { transform: translate(3%, -3%) rotate(5deg); }
-        }
-
+        body::before { content: ''; position: fixed; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle at 30% 20%, rgba(74, 222, 128, 0.12) 0%, transparent 40%), radial-gradient(circle at 70% 80%, rgba(34, 211, 238, 0.1) 0%, transparent 40%); animation: bgFloat 20s ease-in-out infinite; z-index: 0; pointer-events: none; }
+        @keyframes bgFloat { 0%, 100% { transform: translate(0, 0) rotate(0deg); } 50% { transform: translate(3%, -3%) rotate(5deg); } }
         body { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 8px; position: relative; }
         .screen { display: none; flex-direction: column; align-items: center; width: 100%; height: 100%; justify-content: center; position: relative; z-index: 1; }
         .screen.active { display: flex; }
-
-        /* USER */
         #userBox { display: none; align-items: center; gap: 10px; padding: 8px 14px; background: rgba(74, 222, 128, 0.08); border: 1px solid rgba(74, 222, 128, 0.3); border-radius: 40px; margin-bottom: 18px; font-size: 14px; color: #cbd5e1; backdrop-filter: blur(10px); }
         #userBox.show { display: flex; }
         #userAvatar { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #4ade80, #22d3ee); display: flex; align-items: center; justify-content: center; font-weight: bold; color: #0f0f1a; font-size: 14px; }
         #userName { font-weight: 600; color: #4ade80; }
-
-        /* MENU */
-        h1 {
-            font-size: 52px; font-weight: 900;
-            background: linear-gradient(135deg, #4ade80 0%, #22d3ee 50%, #8b5cf6 100%);
-            background-size: 200% 200%;
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-            letter-spacing: -3px; margin-bottom: 4px;
-            animation: gradientShift 4s ease-in-out infinite;
-            filter: drop-shadow(0 0 30px rgba(74, 222, 128, 0.4));
-        }
-        @keyframes gradientShift {
-            0%, 100% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-        }
+        h1 { font-size: 52px; font-weight: 900; background: linear-gradient(135deg, #4ade80 0%, #22d3ee 50%, #8b5cf6 100%); background-size: 200% 200%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; letter-spacing: -3px; margin-bottom: 4px; animation: gradientShift 4s ease-in-out infinite; filter: drop-shadow(0 0 30px rgba(74, 222, 128, 0.4)); }
+        @keyframes gradientShift { 0%, 100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
         .subtitle { color: #94a3b8; margin-bottom: 28px; font-size: 12px; letter-spacing: 4px; }
-
-        .menu-btn {
-            width: 260px; padding: 16px; margin: 5px 0;
-            background: rgba(74, 222, 128, 0.06);
-            border: 2px solid rgba(74, 222, 128, 0.6);
-            color: #4ade80; font-size: 16px; font-weight: 700;
-            border-radius: 14px; cursor: pointer;
-            -webkit-appearance: none; appearance: none; font-family: inherit;
-            transition: all 0.15s;
-            display: flex; align-items: center; justify-content: center; gap: 8px;
-            backdrop-filter: blur(10px);
-        }
+        .menu-btn { width: 260px; padding: 16px; margin: 5px 0; background: rgba(74, 222, 128, 0.06); border: 2px solid rgba(74, 222, 128, 0.6); color: #4ade80; font-size: 16px; font-weight: 700; border-radius: 14px; cursor: pointer; -webkit-appearance: none; appearance: none; font-family: inherit; transition: all 0.15s; display: flex; align-items: center; justify-content: center; gap: 8px; backdrop-filter: blur(10px); }
         .menu-btn:active { background: #4ade80; color: #0f0f1a; transform: scale(0.97); }
-        .menu-btn.primary {
-            background: linear-gradient(135deg, #4ade80, #22c55e);
-            color: #0f0f1a; border-color: transparent;
-            box-shadow: 0 6px 20px rgba(74, 222, 128, 0.35);
-        }
+        .menu-btn.primary { background: linear-gradient(135deg, #4ade80, #22c55e); color: #0f0f1a; border-color: transparent; box-shadow: 0 6px 20px rgba(74, 222, 128, 0.35); }
         .menu-btn.primary:active { background: #22c55e; }
-        .menu-btn.premium {
-            background: linear-gradient(135deg, rgba(250, 204, 21, 0.15), rgba(245, 158, 11, 0.08));
-            border-color: #facc15; color: #facc15;
-        }
+        .menu-btn.premium { background: linear-gradient(135deg, rgba(250, 204, 21, 0.15), rgba(245, 158, 11, 0.08)); border-color: #facc15; color: #facc15; }
         .menu-btn.premium:active { background: #facc15; color: #0f0f1a; }
-
+        .menu-btn.small { width: 200px; padding: 10px; font-size: 13px; margin: 4px 0; }
         .high-score { margin-top: 20px; color: #facc15; font-size: 14px; letter-spacing: 1px; display: flex; align-items: center; gap: 6px; }
-
-        /* HUD */
         #hud { display: flex; justify-content: space-between; align-items: center; width: 100%; max-width: 500px; padding: 0 10px 8px; font-size: 14px; font-weight: 700; }
         #scoreHud { color: #4ade80; }
         #speedHud { color: #22d3ee; }
         #fpsHud { color: #64748b; font-size: 12px; }
         #game { background: #0a0a14; border-radius: 16px; box-shadow: 0 0 40px rgba(74, 222, 128, 0.18), inset 0 0 0 1px rgba(74, 222, 128, 0.2); touch-action: none; display: block; }
         #controls { margin-top: 14px; display: grid; grid-template-columns: repeat(3, 78px); grid-template-rows: repeat(2, 78px); gap: 10px; }
-        .btn {
-            background: linear-gradient(180deg, rgba(74,222,128,0.14), rgba(74,222,128,0.06));
-            border: 2px solid rgba(74, 222, 128, 0.7); color: #4ade80;
-            font-size: 32px; font-weight: bold; border-radius: 18px;
-            display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 4px 0 rgba(34, 197, 94, 0.3); cursor: pointer;
-            -webkit-appearance: none; appearance: none; font-family: inherit;
-        }
+        .btn { background: linear-gradient(180deg, rgba(74,222,128,0.14), rgba(74,222,128,0.06)); border: 2px solid rgba(74, 222, 128, 0.7); color: #4ade80; font-size: 32px; font-weight: bold; border-radius: 18px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 0 rgba(34, 197, 94, 0.3); cursor: pointer; -webkit-appearance: none; appearance: none; font-family: inherit; }
         .btn.pressed { background: #4ade80; color: #0f0f1a; transform: translateY(2px); box-shadow: 0 2px 0 rgba(34, 197, 94, 0.5); }
-
-        /* GAME OVER */
         #overTitle { font-size: 34px; color: #ef4444; margin-bottom: 10px; font-weight: 900; letter-spacing: -1px; text-shadow: 0 0 30px rgba(239, 68, 68, 0.5); }
         #overScore { font-size: 24px; color: #4ade80; margin-bottom: 4px; font-weight: 900; }
         #overInfo { font-size: 13px; color: #94a3b8; margin-bottom: 8px; }
         #overHigh { font-size: 14px; color: #facc15; margin-bottom: 14px; min-height: 20px; font-weight: 700; }
         #submitStatus { font-size: 12px; color: #64748b; min-height: 16px; margin-bottom: 10px; }
-        .buy-btn {
-            width: 260px; padding: 16px; margin: 5px 0;
-            background: linear-gradient(135deg, rgba(250, 204, 21, 0.2), rgba(245, 158, 11, 0.1));
-            border: 2px solid #facc15; color: #facc15;
-            font-size: 16px; font-weight: 800; border-radius: 14px;
-            cursor: pointer; -webkit-appearance: none; appearance: none; font-family: inherit;
-            box-shadow: 0 6px 20px rgba(250, 204, 21, 0.2);
-        }
+        .buy-btn { width: 260px; padding: 16px; margin: 5px 0; background: linear-gradient(135deg, rgba(250, 204, 21, 0.2), rgba(245, 158, 11, 0.1)); border: 2px solid #facc15; color: #facc15; font-size: 16px; font-weight: 800; border-radius: 14px; cursor: pointer; -webkit-appearance: none; appearance: none; font-family: inherit; box-shadow: 0 6px 20px rgba(250, 204, 21, 0.2); }
         .buy-btn:active { background: #facc15; color: #0f0f1a; transform: scale(0.97); }
-
-        /* LEADERBOARD */
         #lbTitle { font-size: 28px; font-weight: 900; margin-bottom: 6px; background: linear-gradient(135deg, #facc15, #4ade80); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
         #lbRules { font-size: 11px; color: #64748b; margin-bottom: 12px; text-align: center; line-height: 1.5; }
-
-        /* ПОДИУМ */
         #podium { display: flex; align-items: flex-end; justify-content: center; gap: 6px; margin-bottom: 14px; min-height: 130px; width: 100%; max-width: 380px; }
         .podium-place { display: flex; flex-direction: column; align-items: center; flex: 1; }
         .podium-avatar { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 18px; color: #0f0f1a; margin-bottom: 6px; border: 3px solid; }
@@ -120,12 +53,10 @@
         .podium-3 .podium-avatar { border-color: #f59e0b; background: linear-gradient(135deg, #f59e0b, #b45309); }
         .podium-name { font-size: 11px; color: #e2e8f0; font-weight: 700; max-width: 90px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: center; margin-bottom: 3px; }
         .podium-score { font-size: 16px; font-weight: 900; color: #4ade80; margin-bottom: 4px; }
-        .podium-info { font-size: 10px; color: #64748b; text-align: center; }
         .podium-bar { width: 100%; border-radius: 8px 8px 0 0; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 900; color: #0f0f1a; }
         .podium-1 .podium-bar { height: 60px; background: linear-gradient(180deg, #facc15, #f59e0b); box-shadow: 0 0 30px rgba(250, 204, 21, 0.4); }
         .podium-2 .podium-bar { height: 45px; background: linear-gradient(180deg, #cbd5e1, #94a3b8); }
         .podium-3 .podium-bar { height: 35px; background: linear-gradient(180deg, #f59e0b, #b45309); }
-
         #lbList { width: 100%; max-width: 380px; background: rgba(10, 10, 20, 0.6); border: 1px solid rgba(74, 222, 128, 0.2); border-radius: 16px; padding: 6px; max-height: 35vh; overflow-y: auto; -webkit-overflow-scrolling: touch; backdrop-filter: blur(10px); }
         .lbRow { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 10px; font-size: 14px; margin-bottom: 2px; }
         .lbRow.me { background: rgba(74, 222, 128, 0.15); border: 1px solid rgba(74, 222, 128, 0.4); }
@@ -137,58 +68,36 @@
         #lbStatus { color: #64748b; font-size: 14px; padding: 30px 20px; text-align: center; }
         #lbRefresh { margin-top: 12px; padding: 10px 24px; background: rgba(74, 222, 128, 0.1); border: 2px solid rgba(74, 222, 128, 0.5); color: #4ade80; border-radius: 12px; font-weight: 700; font-size: 13px; cursor: pointer; -webkit-appearance: none; appearance: none; font-family: inherit; }
         #lbCacheInfo { color: #475569; font-size: 11px; margin-top: 6px; min-height: 14px; }
-
-        /* СКИНЫ */
         #shopTitle { font-size: 30px; font-weight: 900; margin-bottom: 4px; background: linear-gradient(135deg, #8b5cf6, #22d3ee); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
         #shopSub { font-size: 12px; color: #94a3b8; margin-bottom: 16px; text-align: center; }
         #skinGrid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; width: 100%; max-width: 380px; margin-bottom: 14px; }
-        .skin-card {
-            padding: 12px; border-radius: 14px;
-            background: rgba(10, 10, 20, 0.6);
-            border: 2px solid rgba(74, 222, 128, 0.2);
-            display: flex; flex-direction: column; align-items: center;
-            cursor: pointer; -webkit-appearance: none; appearance: none; font-family: inherit;
-            transition: all 0.15s;
-        }
+        .skin-card { padding: 12px; border-radius: 14px; background: rgba(10, 10, 20, 0.6); border: 2px solid rgba(74, 222, 128, 0.2); display: flex; flex-direction: column; align-items: center; cursor: pointer; -webkit-appearance: none; appearance: none; font-family: inherit; transition: all 0.15s; }
         .skin-card.locked { opacity: 0.55; }
         .skin-card.selected { border-color: #4ade80; box-shadow: 0 0 20px rgba(74, 222, 128, 0.4); }
+        .skin-card.stars-only { border-color: rgba(250, 204, 21, 0.4); }
         .skin-preview { width: 50px; height: 50px; border-radius: 12px; margin-bottom: 8px; display: flex; align-items: center; justify-content: center; }
         .skin-preview svg { width: 40px; height: 40px; }
         .skin-name { color: #e2e8f0; font-size: 12px; font-weight: 700; margin-bottom: 3px; }
         .skin-req { color: #94a3b8; font-size: 10px; text-align: center; }
         .skin-req.done { color: #4ade80; font-weight: 700; }
-
-        /* COUNTDOWN */
-        #countdown {
-            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            display: none; align-items: center; justify-content: center;
-            background: rgba(0,0,0,0.85); z-index: 1000;
-            font-size: 140px; font-weight: 900; color: #4ade80;
-            text-shadow: 0 0 40px #4ade80, 0 0 80px #22c55e;
-        }
+        .skin-req.stars { color: #facc15; font-weight: 700; }
+        #countdown { position: fixed; top: 0; left: 0; right: 0; bottom: 0; display: none; align-items: center; justify-content: center; background: rgba(0,0,0,0.85); z-index: 1000; font-size: 140px; font-weight: 900; color: #4ade80; text-shadow: 0 0 40px #4ade80, 0 0 80px #22c55e; }
         #countdown.show { display: flex; }
         #countdown.pulse { animation: pulse 0.9s ease-out; }
-        @keyframes pulse {
-            0% { transform: scale(1.8); opacity: 0.2; }
-            60% { transform: scale(0.92); opacity: 1; }
-            100% { transform: scale(1); opacity: 1; }
-        }
-
-        /* ERROR */
+        @keyframes pulse { 0% { transform: scale(1.8); opacity: 0.2; } 60% { transform: scale(0.92); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
         #errorBox { position: fixed; top: 0; left: 0; right: 0; background: #ef4444; color: white; padding: 12px; font-size: 12px; z-index: 9999; display: none; word-break: break-all; max-height: 40vh; overflow-y: auto; }
-
-        /* TOAST */
-        #toast {
-            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px);
-            background: rgba(30, 41, 59, 0.95); color: white;
-            padding: 12px 24px; border-radius: 12px;
-            font-size: 14px; font-weight: 600; z-index: 9998;
-            border: 1px solid rgba(74, 222, 128, 0.4);
-            transition: transform 0.3s ease-out;
-            max-width: 90vw; text-align: center;
-            backdrop-filter: blur(10px);
-        }
+        #toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px); background: rgba(30, 41, 59, 0.95); color: white; padding: 12px 24px; border-radius: 12px; font-size: 14px; font-weight: 600; z-index: 9998; border: 1px solid rgba(74, 222, 128, 0.4); transition: transform 0.3s ease-out; max-width: 90vw; text-align: center; backdrop-filter: blur(10px); }
         #toast.show { transform: translateX(-50%) translateY(0); }
+
+        /* ЮРИДИЧЕСКАЯ СТРАНИЦА */
+        #legalScreen .legal-content { width: 100%; max-width: 380px; background: rgba(10, 10, 20, 0.6); border: 1px solid rgba(74, 222, 128, 0.2); border-radius: 16px; padding: 20px; max-height: 65vh; overflow-y: auto; -webkit-overflow-scrolling: touch; backdrop-filter: blur(10px); font-size: 13px; line-height: 1.6; color: #cbd5e1; }
+        #legalScreen h2 { font-size: 18px; color: #4ade80; margin-bottom: 12px; font-weight: 800; }
+        #legalScreen h3 { font-size: 14px; color: #22d3ee; margin: 14px 0 6px; font-weight: 700; }
+        #legalScreen p { margin-bottom: 8px; }
+        #legalScreen ul { margin: 6px 0 10px 20px; }
+        #legalScreen li { margin-bottom: 4px; }
+        #legalScreen .highlight { color: #facc15; font-weight: 700; }
+        #legalScreen .date { color: #64748b; font-size: 11px; margin-top: 16px; text-align: center; }
     </style>
 </head>
 <body>
@@ -210,6 +119,7 @@
         <button class="menu-btn" onclick="showScreen('shopScreen')">🎨  Скины</button>
         <button class="menu-btn" onclick="shareScore()">📤  Поделиться</button>
         <button class="menu-btn premium" onclick="openStarsShop()">⭐  Магазин звёзд</button>
+        <button class="menu-btn small" onclick="showScreen('legalScreen')">📜  Условия использования</button>
         <div class="high-score">🏅 Рекорд: <span id="menuHigh">0</span></div>
     </div>
 
@@ -258,9 +168,38 @@
     <!-- МАГАЗИН СКИНОВ -->
     <div id="shopScreen" class="screen">
         <div id="shopTitle">🎨  СКИНЫ</div>
-        <div id="shopSub">Разблокируй скины, побивая рекорды</div>
+        <div id="shopSub">Разблокируй скины, побивая рекорды, или купи эксклюзив за звёзды</div>
         <div id="skinGrid"></div>
         <button class="menu-btn" onclick="showScreen('menuScreen')">🏠  В меню</button>
+    </div>
+
+    <!-- ЮРИДИЧЕСКАЯ СТРАНИЦА -->
+    <div id="legalScreen" class="screen">
+        <div class="legal-content">
+            <h2>📜 Условия использования</h2>
+            <h3>1. Общие положения</h3>
+            <p>Настоящие Условия регулируют использование мини-приложения «Змейка Баттл» (далее — «Игра»), доступного через Telegram-бота @BattleSnakes_bot. Используя Игру, вы соглашаетесь с настоящими Условиями в полном объёме.</p>
+            <h3>2. Предмет соглашения</h3>
+            <p>Игра предоставляется «как есть» (as is). Разработчик не гарантирует бесперебойную работу, отсутствие ошибок или сохранность игрового прогресса.</p>
+            <h3>3. Виртуальные товары и Telegram Stars</h3>
+            <p><span class="highlight">Все покупки цифровых товаров внутри Игры (скины, вторая жизнь, бусты и прочее) совершаются за Telegram Stars.</span></p>
+            <p>Оплата подчиняется правилам Telegram. <span class="highlight">Возврат средств за цифровые товары не производится</span>, если иное не предусмотрено законодательством вашей страны и правилами Telegram.</p>
+            <p>Telegram Stars не являются реальной валютой. Разработчик не несёт ответственности за невозможность вывода звёзд из Telegram.</p>
+            <h3>4. Ответственность пользователя</h3>
+            <ul>
+                <li>Запрещено использование читов, эксплойтов, автоматических скриптов и любых манипуляций, нарушающих честную игру.</li>
+                <li>Запрещено оскорбительное поведение, спам и мошенничество.</li>
+                <li>При нарушении доступ к Игре может быть ограничен без возврата средств.</li>
+            </ul>
+            <h3>5. PvP-режим (при наличии)</h3>
+            <p>В будущих версиях может быть добавлен режим сражений между игроками на звёзды. Условия будут опубликованы отдельно. <span class="highlight">Комиссия платформы может составлять до 10%</span> от ставки. Участие в платных PvP-режимах требует отдельного согласия.</p>
+            <h3>6. Изменения</h3>
+            <p>Разработчик вправе изменять Условия, уведомляя пользователей через бота. Продолжение использования означает согласие с новой редакцией.</p>
+            <h3>7. Контакты</h3>
+            <p>По вопросам: @ваш_контакт_в_телеграм</p>
+            <div class="date">Последнее обновление: 15 сентября 2026 г.</div>
+        </div>
+        <button class="menu-btn" onclick="showScreen('menuScreen')" style="margin-top:12px;">🏠  В меню</button>
     </div>
 
 <script>
@@ -270,7 +209,6 @@ window.onerror = function(msg, url, line) {
     return false;
 };
 
-// ================== КОНФИГ ==================
 var BIN_ID = '6aa93256ac6210605acffcdf';
 var MASTER_KEY = '$2a$10$3jAxvBubFU/n15BoFgKVS.SIL5E/j1fcLADrALJEk3hrvhiOXvNvi';
 var API_BASE = 'https://api.jsonbin.io/v3/b/';
@@ -279,25 +217,32 @@ var CACHE_TTL = 3 * 60 * 1000;
 var scoresCache = null, scoresCacheTime = 0, lastSubmitTime = 0;
 var SUBMIT_COOLDOWN = 5000;
 
-// ================== СКИНЫ ==================
+// ================== СКИНЫ (8 штук) ==================
 var SKINS = [
-    { id: 'classic', name: 'Классик',   req: 0,    head: '#4ade80', body: '#22c55e', glow: '#4ade80' },
-    { id: 'ocean',   name: 'Океан',     req: 50,   head: '#22d3ee', body: '#0891b2', glow: '#22d3ee' },
-    { id: 'violet',  name: 'Фиолет',    req: 150,  head: '#a78bfa', body: '#7c3aed', glow: '#a78bfa' },
-    { id: 'fire',    name: 'Огонь',     req: 300,  head: '#f87171', body: '#dc2626', glow: '#f87171' },
-    { id: 'gold',    name: 'Золото',    req: 500,  head: '#facc15', body: '#f59e0b', glow: '#facc15' },
-    { id: 'rainbow', name: 'Радуга',    req: 1000, head: 'rainbow', body: 'rainbow', glow: '#8b5cf6' }
+    // Бесплатные (за очки)
+    { id: 'classic', name: 'Классик',   req: 0,    type: 'score', head: '#4ade80', body: '#22c55e', glow: '#4ade80' },
+    { id: 'ocean',   name: 'Океан',     req: 50,   type: 'score', head: '#22d3ee', body: '#0891b2', glow: '#22d3ee' },
+    { id: 'violet',  name: 'Фиолет',    req: 150,  type: 'score', head: '#a78bfa', body: '#7c3aed', glow: '#a78bfa' },
+    { id: 'fire',    name: 'Огонь',     req: 300,  type: 'score', head: '#f87171', body: '#dc2626', glow: '#f87171' },
+    { id: 'gold',    name: 'Золото',    req: 500,  type: 'score', head: '#facc15', body: '#f59e0b', glow: '#facc15' },
+    { id: 'rainbow', name: 'Радуга',    req: 1000, type: 'score', head: 'rainbow', body: 'rainbow', glow: '#8b5cf6' },
+    // Эксклюзивные (за звёзды)
+    { id: 'cosmos',  name: 'Космос',    req: 50,   type: 'stars', head: '#e879f9', body: '#7c3aed', glow: '#e879f9' },
+    { id: 'neon',    name: 'Неон',      req: 100,  type: 'stars', head: '#22ff88', body: '#00ccff', glow: '#22ff88' }
 ];
 
 var selectedSkinId = localStorage.getItem('snakeSkin') || 'classic';
+var ownedStarsSkins = JSON.parse(localStorage.getItem('ownedStarsSkins') || '[]');
 
 function getSkin() {
     for (var i = 0; i < SKINS.length; i++) if (SKINS[i].id === selectedSkinId) return SKINS[i];
     return SKINS[0];
 }
-function isSkinUnlocked(skin) { return highScore >= skin.req; }
+function isSkinUnlocked(skin) {
+    if (skin.type === 'stars') return ownedStarsSkins.indexOf(skin.id) !== -1;
+    return highScore >= skin.req;
+}
 
-// ================== TELEGRAM ==================
 var tg = window.Telegram ? window.Telegram.WebApp : null;
 var tgUser = null;
 if (tg) {
@@ -305,10 +250,7 @@ if (tg) {
     catch(e) { console.warn(e); }
 }
 
-// ================== НАСТРОЙКИ ==================
 var GRID = 20, BASE_SPEED = 200, MIN_SPEED = 70, SPEED_STEP = 4;
-
-// ================== СОСТОЯНИЕ ==================
 var canvas, ctx, cellSize, dpr, canvasSize;
 var snake, oldSnake, dir, nextDir, score, food, speed, foodEaten;
 var lastTick = 0, lastFrameTime = 0, rafId = null, running = false;
@@ -318,7 +260,7 @@ var highScore = parseInt(localStorage.getItem('snakeHigh') || '0', 10);
 var leaderboardOpen = false, lbInterval = null;
 var isBuyingLife = false;
 var gameStartTime = 0, gameTime = 0, reviveCount = 0, savedState = null;
-var deathAnim = null; // анимация смерти
+var deathAnim = null;
 
 function initCanvas() {
     canvas = document.getElementById('game');
@@ -358,7 +300,6 @@ function showToast(msg, ms) {
     setTimeout(function() { t.classList.remove('show'); }, ms || 2200);
 }
 
-// ================== API ==================
 function fetchScores(forceRefresh) {
     var now = Date.now();
     if (!forceRefresh && scoresCache && (now - scoresCacheTime) < CACHE_TTL) return Promise.resolve(scoresCache);
@@ -434,7 +375,6 @@ function submitScore(finalScore, finalTime, finalRevives) {
     });
 }
 
-// ================== LEADERBOARD ==================
 function renderLeaderboard(forceRefresh) {
     var listEl = document.getElementById('lbList');
     var podiumEl = document.getElementById('podium');
@@ -475,9 +415,8 @@ function drawLeaderboard(scores) {
     sortScores(scores);
     var myId = tgUser ? String(tgUser.id) : null;
 
-    // ПОДИУМ топ-3
     if (scores.length >= 1) {
-        var order = [1, 0, 2]; // 2 место, 1 место, 3 место
+        var order = [1, 0, 2];
         var html = '';
         for (var k = 0; k < 3; k++) {
             var idx = order[k];
@@ -500,7 +439,6 @@ function drawLeaderboard(scores) {
         podiumEl.innerHTML = html;
     }
 
-    // ТОП 4-10
     var rest = scores.slice(3, 10);
     if (!rest.length) {
         listEl.innerHTML = '<div id="lbStatus" style="padding:20px">Остальные места свободны 🎯</div>';
@@ -525,7 +463,6 @@ function drawLeaderboard(scores) {
     listEl.innerHTML = html2;
 }
 
-// ================== SCREENS ==================
 function showScreen(id) {
     var all = document.querySelectorAll('.screen');
     for (var i = 0; i < all.length; i++) all[i].classList.remove('active');
@@ -547,18 +484,17 @@ function shareScore() {
     else alert(text + ' ' + url);
 }
 
-// ================== МАГАЗИН ЗВЁЗД ==================
 function openStarsShop() {
     var msg = '⭐ МАГАЗИН ЗВЁЗД\n\n' +
               '💚 Вторая жизнь — 15⭐\n' +
               '⚡ Ускорение x2 на 1 партию — 25⭐\n' +
-              '🎨 Эксклюзивный скин «Космос» — 50⭐\n' +
+              '🎨 Скин «Космос» — 50⭐\n' +
+              '🎨 Скин «Неон» — 100⭐\n' +
               '💰 +50% очков на 1 партию — 20⭐\n\n' +
               '⚠ Настоящая оплата заработает после подключения бэкенда. Пока всё работает за внутриигровые очки.';
     if (tg) tg.showAlert(msg); else alert(msg);
 }
 
-// ================== СКИНЫ UI ==================
 function renderShop() {
     var grid = document.getElementById('skinGrid');
     var html = '';
@@ -566,10 +502,20 @@ function renderShop() {
         var s = SKINS[i];
         var unlocked = isSkinUnlocked(s);
         var selected = s.id === selectedSkinId;
-        var cls = 'skin-card' + (unlocked ? '' : ' locked') + (selected ? ' selected' : '');
+        var isStars = s.type === 'stars';
+        var cls = 'skin-card' + (unlocked ? '' : ' locked') + (selected ? ' selected' : '') + (isStars && !unlocked ? ' stars-only' : '');
         var preview = renderSkinPreview(s);
-        var reqText = unlocked ? (selected ? '✓ Выбран' : 'Разблокирован') : '🏅 Рекорд: ' + s.req;
-        var reqCls = unlocked ? 'skin-req done' : 'skin-req';
+        var reqText, reqCls;
+        if (unlocked) {
+            reqText = selected ? '✓ Выбран' : 'Разблокирован';
+            reqCls = 'skin-req done';
+        } else if (isStars) {
+            reqText = '⭐ ' + s.req + ' звёзд';
+            reqCls = 'skin-req stars';
+        } else {
+            reqText = '🏅 Рекорд: ' + s.req;
+            reqCls = 'skin-req';
+        }
         html += '<button class="' + cls + '" onclick="selectSkin(\'' + s.id + '\')">' +
             '<div class="skin-preview">' + preview + '</div>' +
             '<div class="skin-name">' + s.name + '</div>' +
@@ -604,7 +550,11 @@ function selectSkin(id) {
     for (var i = 0; i < SKINS.length; i++) if (SKINS[i].id === id) { skin = SKINS[i]; break; }
     if (!skin) return;
     if (!isSkinUnlocked(skin)) {
-        showToast('🔒 Набери рекорд ' + skin.req + ' очков');
+        if (skin.type === 'stars') {
+            showToast('⭐ Скин «' + skin.name + '» — ' + skin.req + ' звёзд. Покупка за звёзды скоро!');
+        } else {
+            showToast('🔒 Набери рекорд ' + skin.req + ' очков');
+        }
         return;
     }
     selectedSkinId = id;
@@ -614,7 +564,6 @@ function selectSkin(id) {
     haptic('light');
 }
 
-// ================== ИГРА ==================
 function startGame() {
     initCanvas();
     showScreen('gameScreen');
@@ -644,8 +593,6 @@ function loop(timestamp) {
         var fpsEl = document.getElementById('fpsHud');
         if (fpsEl) fpsEl.textContent = fps + ' FPS';
     }
-
-    // Анимация смерти
     if (deathAnim) {
         deathAnim.t += 16;
         updateParticles(16.67);
@@ -655,7 +602,6 @@ function loop(timestamp) {
         }
         return;
     }
-
     if (!running) return;
     if (!lastTick) lastTick = timestamp;
     if (timestamp - lastTick >= speed) { lastTick = timestamp; tick(); }
@@ -726,7 +672,6 @@ function getSnakeColors(i, len) {
         return { head: 'hsl(' + hue + ', 85%, 65%)', body: 'hsl(' + ((hue+30)%360) + ', 75%, 55%)', glow: 'hsl(' + hue + ', 85%, 65%)' };
     }
     if (i === 0) return { head: skin.head, body: skin.head, glow: skin.glow };
-    // Градиент для тела
     return { head: skin.head, body: skin.body, glow: skin.glow };
 }
 
@@ -742,7 +687,6 @@ function render(progress) {
     }
     ctx.stroke();
 
-    // Еда
     if (food) {
         var pulse = 1 + Math.sin(performance.now() / 180) * 0.18;
         var fx = food.x * cellSize + cellSize / 2;
@@ -755,7 +699,6 @@ function render(progress) {
         ctx.shadowBlur = 0;
     }
 
-    // Змейка
     if (snake) {
         var len = snake.length;
         for (var i = len - 1; i >= 0; i--) {
@@ -774,7 +717,6 @@ function render(progress) {
                 ctx.shadowBlur = 14;
             } else {
                 ctx.fillStyle = colors.body;
-                // затемнение к хвосту
                 if (getSkin().id !== 'rainbow') {
                     var t = i / Math.max(1, len);
                     var darkness = 1 - t * 0.4;
@@ -834,7 +776,6 @@ function endGame() {
     gameTime = (performance.now() - gameStartTime) / 1000;
     savedState = { score: score, foodEaten: foodEaten, snakeLen: snake.length };
 
-    // Анимация смерти — змейка разлетается
     if (snake) {
         for (var i = 0; i < snake.length; i++) {
             var cx = snake[i].x * cellSize + cellSize / 2;
@@ -882,14 +823,12 @@ function haptic(type) {
     try { if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred(type || 'light'); } catch(e){}
 }
 
-// ================== ЗВЁЗДЫ ==================
 function buyLife() {
     if (isBuyingLife || !savedState) return;
     isBuyingLife = true;
     var btn = document.getElementById('buyLifeBtn');
     btn.textContent = '⏳ Создание счёта...';
 
-    // ЗАГЛУШКА — реальная оплата после бэкенда
     setTimeout(function() {
         btn.textContent = '💚 Вторая жизнь за 15⭐';
         isBuyingLife = false;
@@ -943,7 +882,6 @@ function reviveSnake() {
     rafId = requestAnimationFrame(loop);
 }
 
-// ================== КНОПКИ ==================
 function bindDirButton(el) {
     var pressed = false;
     function down(e) {
@@ -964,7 +902,6 @@ function bindDirButton(el) {
 var dirBtns = document.querySelectorAll('.btn');
 for (var i = 0; i < dirBtns.length; i++) bindDirButton(dirBtns[i]);
 
-// Свайпы
 var touchX = null, touchY = null;
 document.getElementById('gameScreen').addEventListener('touchstart', function(e) {
     if (e.target.id === 'game') { touchX = e.touches[0].clientX; touchY = e.touches[0].clientY; }
@@ -987,7 +924,6 @@ document.addEventListener('keydown', function(e) {
 
 window.addEventListener('resize', function() { if (running) initCanvas(); });
 
-// ================== СТАРТ ==================
 setupUser();
 if (tg && tg.CloudStorage) {
     tg.CloudStorage.getItem('snakeHighScore', function(err, val) {
