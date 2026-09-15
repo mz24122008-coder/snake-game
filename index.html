@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Диагностика</title>
+    <title>Диагностика v2</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
@@ -27,10 +27,9 @@
     </style>
 </head>
 <body>
-    <h2>🔍 Диагностика</h2>
+    <h2>🔍 Диагностика v2</h2>
     <div id="log"></div>
-    <button onclick="runTest()">Запустить тест</button>
-    <button onclick="location.reload()" style="background:#334155;color:#e2e8f0;margin-top:8px;">🔄 Перезагрузить</button>
+    <button onclick="location.reload()" style="background:#334155;color:#e2e8f0;">🔄 Перезагрузить</button>
 
 <script>
 const logEl = document.getElementById('log');
@@ -41,29 +40,31 @@ function log(msg, type) {
     div.className = 'step ' + cls;
     div.textContent = msg;
     logEl.appendChild(div);
-    console.log(msg);
+}
+
+function withTimeout(promise, ms, label) {
+    return Promise.race([
+        promise,
+        new Promise((_, rej) => setTimeout(() => rej(new Error('TIMEOUT ' + ms + 'ms: ' + label)), ms))
+    ]);
 }
 
 async function runTest() {
     logEl.innerHTML = '';
-    log('1. Проверка Telegram SDK...');
+    log('1. Telegram SDK...');
     if (window.Telegram && window.Telegram.WebApp) {
-        log('✓ Telegram SDK загружен', 'ok');
+        log('✓ OK', 'ok');
         const u = window.Telegram.WebApp.initDataUnsafe?.user;
         if (u) log('  Юзер: ' + u.first_name + ' (id: ' + u.id + ')', 'ok');
-        else log('  Юзер: не определён (открой через бота)', 'err');
     } else {
-        log('✗ Telegram SDK НЕ загружен', 'err');
+        log('✗ Нет Telegram SDK', 'err');
     }
 
-    log('2. Проверка Firebase SDK...');
-    if (typeof firebase === 'undefined') {
-        log('✗ Firebase SDK НЕ загружен', 'err');
-        return;
-    }
-    log('✓ Firebase SDK загружен', 'ok');
+    log('2. Firebase SDK...');
+    if (typeof firebase === 'undefined') { log('✗ Нет Firebase', 'err'); return; }
+    log('✓ OK', 'ok');
 
-    log('3. Инициализация Firebase...');
+    log('3. Init Firebase + Long Polling...');
     const firebaseConfig = {
         apiKey: "AIzaSyBkqNXGyWIHRGzv8woTZg_CdC73Zimnipc",
         authDomain: "snake-battle-2ce38.firebaseapp.com",
@@ -76,45 +77,56 @@ async function runTest() {
     let db;
     try {
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        // ГЛАВНОЕ: включаем long polling для Telegram WebView
         db = firebase.firestore();
-        log('✓ Firebase инициализирован', 'ok');
-        log('  Проект: ' + firebaseConfig.projectId, 'ok');
+        db.settings({
+            experimentalForceLongPolling: true,
+            experimentalAutoDetectLongPolling: false,
+            useFetchStreams: false
+        });
+        log('✓ OK + Force Long Polling включён', 'ok');
     } catch(e) {
-        log('✗ Ошибка init: ' + e.message, 'err');
+        log('✗ ' + e.message, 'err');
         return;
     }
 
-    log('4. Тест ЗАПИСИ в Firestore...');
+    log('4. Тест ЗАПИСИ (таймаут 15 сек)...');
     try {
-        const testId = 'test_' + Date.now();
-        await db.collection('scores').doc(testId).set({
-            name: 'Diagnostic',
-            score: 42,
-            date: Date.now()
-        });
+        const testId = 'diag_' + Date.now();
+        await withTimeout(
+            db.collection('scores').doc(testId).set({
+                name: 'DiagTest',
+                score: 42,
+                date: Date.now()
+            }),
+            15000, 'write'
+        );
         log('✓ Запись успешна! ID: ' + testId, 'ok');
     } catch(e) {
-        log('✗ Ошибка записи: ' + e.code + ' — ' + e.message, 'err');
+        log('✗ Ошибка записи: ' + (e.code || '') + ' — ' + e.message, 'err');
+        log('⚠ Возможно, Firestore всё ещё блокируется', 'err');
         return;
     }
 
-    log('5. Тест ЧТЕНИЯ из Firestore...');
+    log('5. Тест ЧТЕНИЯ (таймаут 15 сек)...');
     try {
-        const snap = await db.collection('scores').orderBy('score', 'desc').limit(10).get();
-        log('✓ Чтение успешно! Найдено: ' + snap.size + ' документов', 'ok');
+        const snap = await withTimeout(
+            db.collection('scores').orderBy('score', 'desc').limit(10).get(),
+            15000, 'read'
+        );
+        log('✓ Чтение OK! Документов: ' + snap.size, 'ok');
         snap.forEach(doc => {
             log('  ' + doc.data().name + ' — ' + doc.data().score);
         });
     } catch(e) {
-        log('✗ Ошибка чтения: ' + e.code + ' — ' + e.message, 'err');
+        log('✗ Ошибка чтения: ' + (e.code || '') + ' — ' + e.message, 'err');
+        return;
     }
 
-    log('✅ ТЕСТ ЗАВЕРШЁН', 'ok');
+    log('✅ ВСЁ РАБОТАЕТ!', 'ok');
 }
 
-window.addEventListener('load', () => {
-    setTimeout(runTest, 500);
-});
+window.addEventListener('load', () => setTimeout(runTest, 500));
 </script>
 </body>
 </html>
