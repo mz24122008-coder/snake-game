@@ -1,198 +1,546 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Змейка Баттл</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <style>
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
-        html, body { height: 100%; overflow: hidden; background: #0a0a14; color: white; font-family: -apple-system, sans-serif; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
-        body::before { content: ''; position: fixed; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle at 30% 20%, rgba(74, 222, 128, 0.12) 0%, transparent 40%), radial-gradient(circle at 70% 80%, rgba(34, 211, 238, 0.1) 0%, transparent 40%); animation: bgFloat 20s ease-in-out infinite; z-index: 0; pointer-events: none; }
-        @keyframes bgFloat { 0%, 100% { transform: translate(0, 0) rotate(0deg); } 50% { transform: translate(3%, -3%) rotate(5deg); } }
-        body { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 8px; position: relative; }
-        .screen { display: none; flex-direction: column; align-items: center; width: 100%; height: 100%; justify-content: center; position: relative; z-index: 1; }
-        .screen.active { display: flex; }
-        #userBox { display: none; align-items: center; gap: 10px; padding: 8px 14px; background: rgba(74, 222, 128, 0.08); border: 1px solid rgba(74, 222, 128, 0.3); border-radius: 40px; margin-bottom: 18px; font-size: 14px; color: #cbd5e1; backdrop-filter: blur(10px); }
-        #userBox.show { display: flex; }
-        #userAvatar { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #4ade80, #22d3ee); display: flex; align-items: center; justify-content: center; font-weight: bold; color: #0f0f1a; font-size: 14px; }
-        #userName { font-weight: 600; color: #4ade80; }
-        h1 { font-size: 52px; font-weight: 900; background: linear-gradient(135deg, #4ade80 0%, #22d3ee 50%, #8b5cf6 100%); background-size: 200% 200%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; letter-spacing: -3px; margin-bottom: 4px; animation: gradientShift 4s ease-in-out infinite; filter: drop-shadow(0 0 30px rgba(74, 222, 128, 0.4)); }
-        @keyframes gradientShift { 0%, 100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
-        .subtitle { color: #94a3b8; margin-bottom: 28px; font-size: 12px; letter-spacing: 4px; }
-        .menu-btn { width: 260px; padding: 16px; margin: 5px 0; background: rgba(74, 222, 128, 0.06); border: 2px solid rgba(74, 222, 128, 0.6); color: #4ade80; font-size: 16px; font-weight: 700; border-radius: 14px; cursor: pointer; -webkit-appearance: none; appearance: none; font-family: inherit; transition: all 0.15s; display: flex; align-items: center; justify-content: center; gap: 8px; backdrop-filter: blur(10px); }
-        .menu-btn:active { background: #4ade80; color: #0f0f1a; transform: scale(0.97); }
-        .menu-btn.primary { background: linear-gradient(135deg, #4ade80, #22c55e); color: #0f0f1a; border-color: transparent; box-shadow: 0 6px 20px rgba(74, 222, 128, 0.35); }
-        .menu-btn.primary:active { background: #22c55e; }
-        .menu-btn.premium { background: linear-gradient(135deg, rgba(250, 204, 21, 0.15), rgba(245, 158, 11, 0.08)); border-color: #facc15; color: #facc15; }
-        .menu-btn.premium:active { background: #facc15; color: #0f0f1a; }
-        .menu-btn.small { width: 200px; padding: 10px; font-size: 13px; margin: 4px 0; }
-        .high-score { margin-top: 20px; color: #facc15; font-size: 14px; letter-spacing: 1px; display: flex; align-items: center; gap: 6px; }
-        #hud { display: flex; justify-content: space-between; align-items: center; width: 100%; max-width: 500px; padding: 0 10px 8px; font-size: 14px; font-weight: 700; }
-        #scoreHud { color: #4ade80; }
-        #speedHud { color: #22d3ee; }
-        #fpsHud { color: #64748b; font-size: 12px; }
-        #game { background: #0a0a14; border-radius: 16px; box-shadow: 0 0 40px rgba(74, 222, 128, 0.18), inset 0 0 0 1px rgba(74, 222, 128, 0.2); touch-action: none; display: block; }
-        #controls { margin-top: 14px; display: grid; grid-template-columns: repeat(3, 78px); grid-template-rows: repeat(2, 78px); gap: 10px; }
-        .btn { background: linear-gradient(180deg, rgba(74,222,128,0.14), rgba(74,222,128,0.06)); border: 2px solid rgba(74, 222, 128, 0.7); color: #4ade80; font-size: 32px; font-weight: bold; border-radius: 18px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 0 rgba(34, 197, 94, 0.3); cursor: pointer; -webkit-appearance: none; appearance: none; font-family: inherit; }
-        .btn.pressed { background: #4ade80; color: #0f0f1a; transform: translateY(2px); box-shadow: 0 2px 0 rgba(34, 197, 94, 0.5); }
-        #overTitle { font-size: 34px; color: #ef4444; margin-bottom: 10px; font-weight: 900; letter-spacing: -1px; text-shadow: 0 0 30px rgba(239, 68, 68, 0.5); }
-        #overScore { font-size: 24px; color: #4ade80; margin-bottom: 4px; font-weight: 900; }
-        #overInfo { font-size: 13px; color: #94a3b8; margin-bottom: 8px; }
-        #overHigh { font-size: 14px; color: #facc15; margin-bottom: 14px; min-height: 20px; font-weight: 700; }
-        #submitStatus { font-size: 12px; color: #64748b; min-height: 16px; margin-bottom: 10px; }
-        .buy-btn { width: 260px; padding: 16px; margin: 5px 0; background: linear-gradient(135deg, rgba(250, 204, 21, 0.2), rgba(245, 158, 11, 0.1)); border: 2px solid #facc15; color: #facc15; font-size: 16px; font-weight: 800; border-radius: 14px; cursor: pointer; -webkit-appearance: none; appearance: none; font-family: inherit; box-shadow: 0 6px 20px rgba(250, 204, 21, 0.2); }
-        .buy-btn:active { background: #facc15; color: #0f0f1a; transform: scale(0.97); }
-        #lbTitle { font-size: 28px; font-weight: 900; margin-bottom: 6px; background: linear-gradient(135deg, #facc15, #4ade80); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-        #lbRules { font-size: 11px; color: #64748b; margin-bottom: 12px; text-align: center; line-height: 1.5; }
-        #podium { display: flex; align-items: flex-end; justify-content: center; gap: 6px; margin-bottom: 14px; min-height: 130px; width: 100%; max-width: 380px; }
-        .podium-place { display: flex; flex-direction: column; align-items: center; flex: 1; }
-        .podium-avatar { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 18px; color: #0f0f1a; margin-bottom: 6px; border: 3px solid; }
-        .podium-1 .podium-avatar { border-color: #facc15; background: linear-gradient(135deg, #facc15, #f59e0b); box-shadow: 0 0 20px rgba(250, 204, 21, 0.5); }
-        .podium-2 .podium-avatar { border-color: #cbd5e1; background: linear-gradient(135deg, #cbd5e1, #94a3b8); }
-        .podium-3 .podium-avatar { border-color: #f59e0b; background: linear-gradient(135deg, #f59e0b, #b45309); }
-        .podium-name { font-size: 11px; color: #e2e8f0; font-weight: 700; max-width: 90px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: center; margin-bottom: 3px; }
-        .podium-score { font-size: 16px; font-weight: 900; color: #4ade80; margin-bottom: 4px; }
-        .podium-bar { width: 100%; border-radius: 8px 8px 0 0; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 900; color: #0f0f1a; }
-        .podium-1 .podium-bar { height: 60px; background: linear-gradient(180deg, #facc15, #f59e0b); box-shadow: 0 0 30px rgba(250, 204, 21, 0.4); }
-        .podium-2 .podium-bar { height: 45px; background: linear-gradient(180deg, #cbd5e1, #94a3b8); }
-        .podium-3 .podium-bar { height: 35px; background: linear-gradient(180deg, #f59e0b, #b45309); }
-        #lbList { width: 100%; max-width: 380px; background: rgba(10, 10, 20, 0.6); border: 1px solid rgba(74, 222, 128, 0.2); border-radius: 16px; padding: 6px; max-height: 35vh; overflow-y: auto; -webkit-overflow-scrolling: touch; backdrop-filter: blur(10px); }
-        .lbRow { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 10px; font-size: 14px; margin-bottom: 2px; }
-        .lbRow.me { background: rgba(74, 222, 128, 0.15); border: 1px solid rgba(74, 222, 128, 0.4); }
-        .lbRank { width: 30px; font-weight: 900; color: #94a3b8; text-align: center; flex-shrink: 0; }
-        .lbMain { flex: 1; min-width: 0; }
-        .lbName { color: #e2e8f0; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 13px; }
-        .lbSub { color: #64748b; font-size: 10px; margin-top: 2px; }
-        .lbScore { color: #4ade80; font-weight: 900; font-size: 16px; text-align: right; }
-        #lbStatus { color: #64748b; font-size: 14px; padding: 30px 20px; text-align: center; }
-        #lbRefresh { margin-top: 12px; padding: 10px 24px; background: rgba(74, 222, 128, 0.1); border: 2px solid rgba(74, 222, 128, 0.5); color: #4ade80; border-radius: 12px; font-weight: 700; font-size: 13px; cursor: pointer; -webkit-appearance: none; appearance: none; font-family: inherit; }
-        #lbCacheInfo { color: #475569; font-size: 11px; margin-top: 6px; min-height: 14px; }
-        #shopTitle { font-size: 30px; font-weight: 900; margin-bottom: 4px; background: linear-gradient(135deg, #8b5cf6, #22d3ee); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-        #shopSub { font-size: 12px; color: #94a3b8; margin-bottom: 16px; text-align: center; }
-        #skinGrid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; width: 100%; max-width: 380px; margin-bottom: 14px; }
-        .skin-card { padding: 12px; border-radius: 14px; background: rgba(10, 10, 20, 0.6); border: 2px solid rgba(74, 222, 128, 0.2); display: flex; flex-direction: column; align-items: center; cursor: pointer; -webkit-appearance: none; appearance: none; font-family: inherit; transition: all 0.15s; }
-        .skin-card.locked { opacity: 0.55; }
-        .skin-card.selected { border-color: #4ade80; box-shadow: 0 0 20px rgba(74, 222, 128, 0.4); }
-        .skin-card.stars-only { border-color: rgba(250, 204, 21, 0.4); }
-        .skin-preview { width: 50px; height: 50px; border-radius: 12px; margin-bottom: 8px; display: flex; align-items: center; justify-content: center; }
-        .skin-preview svg { width: 40px; height: 40px; }
-        .skin-name { color: #e2e8f0; font-size: 12px; font-weight: 700; margin-bottom: 3px; }
-        .skin-req { color: #94a3b8; font-size: 10px; text-align: center; }
-        .skin-req.done { color: #4ade80; font-weight: 700; }
-        .skin-req.stars { color: #facc15; font-weight: 700; }
-        #countdown { position: fixed; top: 0; left: 0; right: 0; bottom: 0; display: none; align-items: center; justify-content: center; background: rgba(0,0,0,0.85); z-index: 1000; font-size: 140px; font-weight: 900; color: #4ade80; text-shadow: 0 0 40px #4ade80, 0 0 80px #22c55e; }
-        #countdown.show { display: flex; }
-        #countdown.pulse { animation: pulse 0.9s ease-out; }
-        @keyframes pulse { 0% { transform: scale(1.8); opacity: 0.2; } 60% { transform: scale(0.92); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
-        #errorBox { position: fixed; top: 0; left: 0; right: 0; background: #ef4444; color: white; padding: 12px; font-size: 12px; z-index: 9999; display: none; word-break: break-all; max-height: 40vh; overflow-y: auto; }
-        #toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px); background: rgba(30, 41, 59, 0.95); color: white; padding: 12px 24px; border-radius: 12px; font-size: 14px; font-weight: 600; z-index: 9998; border: 1px solid rgba(74, 222, 128, 0.4); transition: transform 0.3s ease-out; max-width: 90vw; text-align: center; backdrop-filter: blur(10px); }
-        #toast.show { transform: translateX(-50%) translateY(0); }
-        #legalScreen .legal-content { width: 100%; max-width: 380px; background: rgba(10, 10, 20, 0.6); border: 1px solid rgba(74, 222, 128, 0.2); border-radius: 16px; padding: 20px; max-height: 65vh; overflow-y: auto; -webkit-overflow-scrolling: touch; backdrop-filter: blur(10px); font-size: 13px; line-height: 1.6; color: #cbd5e1; }
-        #legalScreen h2 { font-size: 18px; color: #4ade80; margin-bottom: 12px; font-weight: 800; }
-        #legalScreen h3 { font-size: 14px; color: #22d3ee; margin: 14px 0 6px; font-weight: 700; }
-        #legalScreen p { margin-bottom: 8px; }
-        #legalScreen ul { margin: 6px 0 10px 20px; }
-        #legalScreen li { margin-bottom: 4px; }
-        #legalScreen .highlight { color: #facc15; font-weight: 700; }
-        #legalScreen .date { color: #64748b; font-size: 11px; margin-top: 16px; text-align: center; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Змейка Баттл</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; background: #050510; color: white; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
+
+/* ФОН */
+body::before {
+    content: ''; position: fixed; inset: -50%; z-index: 0; pointer-events: none;
+    background:
+        radial-gradient(circle at 25% 15%, rgba(74, 222, 128, 0.15) 0%, transparent 35%),
+        radial-gradient(circle at 75% 85%, rgba(34, 211, 238, 0.12) 0%, transparent 35%),
+        radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.1) 0%, transparent 40%);
+    animation: bgFloat 24s ease-in-out infinite;
+}
+@keyframes bgFloat {
+    0%, 100% { transform: translate(0, 0) rotate(0deg); }
+    33% { transform: translate(2%, -2%) rotate(2deg); }
+    66% { transform: translate(-2%, 2%) rotate(-2deg); }
+}
+body::after {
+    content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background-image:
+        linear-gradient(rgba(74, 222, 128, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(74, 222, 128, 0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    mask-image: radial-gradient(ellipse at center, black 20%, transparent 80%);
+    -webkit-mask-image: radial-gradient(ellipse at center, black 20%, transparent 80%);
+}
+body { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 12px; position: relative; }
+
+.screen { display: none; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; position: relative; z-index: 1; }
+.screen.active { display: flex; animation: fadeIn 0.35s ease-out; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ПРОФИЛЬ */
+#userBox { display: none; align-items: center; gap: 12px; padding: 10px 18px 10px 10px; background: rgba(20, 25, 40, 0.7); border: 1px solid rgba(74, 222, 128, 0.25); border-radius: 50px; margin-bottom: 20px; font-size: 14px; color: #cbd5e1; backdrop-filter: blur(20px); box-shadow: 0 8px 32px rgba(0,0,0,0.4); }
+#userBox.show { display: flex; animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
+@keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+#userAvatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #4ade80, #22d3ee); display: flex; align-items: center; justify-content: center; font-weight: 800; color: #0f0f1a; font-size: 16px; box-shadow: 0 0 20px rgba(74, 222, 128, 0.5); }
+#userName { font-weight: 700; color: #4ade80; }
+
+/* ЛОГО */
+.logo-container { position: relative; margin-bottom: 4px; }
+h1 {
+    font-size: 56px; font-weight: 900; letter-spacing: -4px; margin-bottom: 4px;
+    background: linear-gradient(135deg, #4ade80 0%, #22d3ee 40%, #a78bfa 70%, #f472b6 100%);
+    background-size: 300% 300%;
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    animation: gradientShift 5s ease-in-out infinite;
+    filter: drop-shadow(0 0 40px rgba(74, 222, 128, 0.5));
+}
+@keyframes gradientShift { 0%, 100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+.subtitle { color: #64748b; margin-bottom: 32px; font-size: 11px; letter-spacing: 6px; font-weight: 700; }
+
+/* КНОПКИ МЕНЮ */
+.menu-btn {
+    width: 280px; padding: 16px 20px; margin: 6px 0;
+    background: rgba(20, 25, 40, 0.7);
+    border: 1.5px solid rgba(74, 222, 128, 0.4);
+    color: #e2e8f0; font-size: 15px; font-weight: 700;
+    border-radius: 16px; cursor: pointer;
+    -webkit-appearance: none; appearance: none; font-family: inherit;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex; align-items: center; gap: 14px;
+    backdrop-filter: blur(20px);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05);
+    position: relative; overflow: hidden;
+}
+.menu-btn .icon-box {
+    width: 36px; height: 36px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; flex-shrink: 0;
+    background: rgba(74, 222, 128, 0.1);
+    border: 1px solid rgba(74, 222, 128, 0.2);
+}
+.menu-btn .text { flex: 1; text-align: left; }
+.menu-btn:active { transform: scale(0.97); background: rgba(74, 222, 128, 0.15); }
+.menu-btn.primary {
+    background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
+    color: #0a0a14; border-color: transparent;
+    box-shadow: 0 8px 30px rgba(74, 222, 128, 0.4), inset 0 1px 0 rgba(255,255,255,0.2);
+}
+.menu-btn.primary .icon-box { background: rgba(0, 0, 0, 0.15); border-color: rgba(0,0,0,0.1); }
+.menu-btn.primary:active { background: #22c55e; }
+.menu-btn.premium {
+    background: linear-gradient(135deg, rgba(250, 204, 21, 0.15), rgba(245, 158, 11, 0.08));
+    border-color: rgba(250, 204, 21, 0.5); color: #facc15;
+    box-shadow: 0 4px 20px rgba(250, 204, 21, 0.15), inset 0 1px 0 rgba(255,255,255,0.05);
+}
+.menu-btn.premium .icon-box { background: rgba(250, 204, 21, 0.15); border-color: rgba(250, 204, 21, 0.3); }
+.menu-btn.premium:active { background: rgba(250, 204, 21, 0.25); }
+.menu-btn.small { width: 240px; padding: 11px 16px; font-size: 12px; margin: 4px 0; }
+.menu-btn.small .icon-box { width: 28px; height: 28px; font-size: 14px; }
+
+/* HUD рекорда */
+.record-box {
+    margin-top: 24px; padding: 12px 24px;
+    display: flex; align-items: center; gap: 10px;
+    background: rgba(20, 25, 40, 0.7);
+    border: 1px solid rgba(250, 204, 21, 0.3);
+    border-radius: 50px; backdrop-filter: blur(20px);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+.record-icon { font-size: 20px; }
+.record-label { color: #94a3b8; font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; }
+.record-value { color: #facc15; font-size: 20px; font-weight: 900; margin-left: 4px; }
+
+/* ИГРА HUD */
+#hud {
+    display: flex; justify-content: space-between; align-items: center;
+    width: 100%; max-width: 500px; padding: 0 12px 10px; gap: 8px;
+}
+.hud-item {
+    padding: 6px 12px; border-radius: 10px;
+    background: rgba(20, 25, 40, 0.7);
+    border: 1px solid rgba(74, 222, 128, 0.2);
+    font-size: 12px; font-weight: 800;
+    backdrop-filter: blur(10px);
+    display: flex; align-items: center; gap: 4px;
+}
+#scoreHud { color: #4ade80; border-color: rgba(74, 222, 128, 0.4); }
+#speedHud { color: #22d3ee; border-color: rgba(34, 211, 238, 0.3); }
+#fpsHud { color: #475569; font-size: 10px; border-color: rgba(100, 116, 139, 0.2); }
+
+/* КАНВАС */
+#game {
+    border-radius: 20px;
+    box-shadow:
+        0 20px 60px rgba(0, 0, 0, 0.6),
+        0 0 0 1px rgba(74, 222, 128, 0.2),
+        inset 0 0 80px rgba(74, 222, 128, 0.03);
+    touch-action: none; display: block;
+    background: #050510;
+}
+#game.shake { animation: shake 0.15s; }
+@keyframes shake { 0%, 100% { transform: translate(0,0); } 25% { transform: translate(-2px, 1px); } 50% { transform: translate(2px, -1px); } 75% { transform: translate(-1px, -2px); } }
+
+/* УПРАВЛЕНИЕ */
+#controls { margin-top: 18px; display: grid; grid-template-columns: repeat(3, 80px); grid-template-rows: repeat(2, 80px); gap: 10px; }
+.btn {
+    background: rgba(20, 25, 40, 0.8);
+    border: 1.5px solid rgba(74, 222, 128, 0.5);
+    color: #4ade80; font-size: 34px; font-weight: 300;
+    border-radius: 20px; display: flex; align-items: center; justify-content: center;
+    cursor: pointer; -webkit-appearance: none; appearance: none; font-family: inherit;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255,255,255,0.05);
+    transition: all 0.1s;
+    position: relative;
+}
+.btn.pressed { background: rgba(74, 222, 128, 0.9); color: #0a0a14; transform: scale(0.94); box-shadow: 0 0 30px rgba(74, 222, 128, 0.6); }
+
+/* GAME OVER */
+#overTitle {
+    font-size: 38px; font-weight: 900; letter-spacing: -2px;
+    background: linear-gradient(135deg, #ef4444, #f472b6);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    margin-bottom: 12px;
+    animation: pulseTitle 1.5s ease-in-out infinite;
+}
+@keyframes pulseTitle { 0%, 100% { filter: drop-shadow(0 0 20px rgba(239, 68, 68, 0.4)); } 50% { filter: drop-shadow(0 0 40px rgba(239, 68, 68, 0.7)); } }
+#overScore { font-size: 32px; color: #4ade80; margin-bottom: 6px; font-weight: 900; }
+#overInfo { font-size: 12px; color: #94a3b8; margin-bottom: 10px; display: flex; gap: 12px; }
+#overInfo span { display: flex; align-items: center; gap: 4px; }
+#overHigh { font-size: 14px; color: #facc15; margin-bottom: 16px; min-height: 20px; font-weight: 800; }
+#submitStatus { font-size: 12px; color: #64748b; min-height: 16px; margin-bottom: 12px; }
+
+.buy-btn {
+    width: 280px; padding: 16px; margin: 6px 0;
+    background: linear-gradient(135deg, #facc15 0%, #f59e0b 100%);
+    color: #0a0a14; font-size: 15px; font-weight: 900;
+    border: none; border-radius: 16px;
+    cursor: pointer; -webkit-appearance: none; appearance: none; font-family: inherit;
+    box-shadow: 0 8px 30px rgba(250, 204, 21, 0.4), inset 0 1px 0 rgba(255,255,255,0.3);
+    transition: all 0.15s;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.buy-btn:active { transform: scale(0.97); }
+
+/* РЕЙТИНГ */
+#lbTitle {
+    font-size: 30px; font-weight: 900; margin-bottom: 6px;
+    background: linear-gradient(135deg, #facc15, #f59e0b, #facc15);
+    background-size: 200% 200%;
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    animation: gradientShift 3s ease-in-out infinite;
+    letter-spacing: -1px;
+}
+#lbRules { font-size: 10px; color: #64748b; margin-bottom: 14px; text-align: center; line-height: 1.6; letter-spacing: 0.5px; }
+
+#podium { display: flex; align-items: flex-end; justify-content: center; gap: 8px; margin-bottom: 16px; min-height: 150px; width: 100%; max-width: 400px; padding: 0 10px; }
+.podium-place { display: flex; flex-direction: column; align-items: center; flex: 1; position: relative; }
+.podium-avatar {
+    width: 52px; height: 52px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 900; font-size: 20px; color: #0a0a14;
+    margin-bottom: 8px; border: 3px solid; position: relative;
+    animation: popIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+}
+.podium-1 .podium-avatar { border-color: #facc15; background: linear-gradient(135deg, #facc15, #f59e0b); box-shadow: 0 0 30px rgba(250, 204, 21, 0.6); animation-delay: 0.1s; }
+.podium-2 .podium-avatar { border-color: #cbd5e1; background: linear-gradient(135deg, #e2e8f0, #94a3b8); animation-delay: 0.2s; }
+.podium-3 .podium-avatar { border-color: #f59e0b; background: linear-gradient(135deg, #fb923c, #b45309); animation-delay: 0.3s; }
+.podium-avatar .crown { position: absolute; top: -14px; font-size: 20px; }
+.podium-name { font-size: 11px; color: #e2e8f0; font-weight: 800; max-width: 90px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: center; margin-bottom: 4px; }
+.podium-score { font-size: 18px; font-weight: 900; color: #4ade80; margin-bottom: 6px; }
+.podium-bar {
+    width: 100%; border-radius: 10px 10px 0 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 26px; font-weight: 900; color: #0a0a14;
+    position: relative; overflow: hidden;
+}
+.podium-bar::before {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(180deg, rgba(255,255,255,0.3), transparent 50%);
+    pointer-events: none;
+}
+.podium-1 .podium-bar { height: 70px; background: linear-gradient(180deg, #facc15, #f59e0b); box-shadow: 0 0 40px rgba(250, 204, 21, 0.5); }
+.podium-2 .podium-bar { height: 52px; background: linear-gradient(180deg, #e2e8f0, #94a3b8); }
+.podium-3 .podium-bar { height: 40px; background: linear-gradient(180deg, #fb923c, #b45309); }
+
+#lbList {
+    width: 100%; max-width: 400px;
+    background: rgba(20, 25, 40, 0.5);
+    border: 1px solid rgba(74, 222, 128, 0.15);
+    border-radius: 20px; padding: 8px;
+    max-height: 32vh; overflow-y: auto; -webkit-overflow-scrolling: touch;
+    backdrop-filter: blur(20px);
+}
+.lbRow {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px; border-radius: 12px;
+    font-size: 14px; margin-bottom: 3px;
+    transition: all 0.2s;
+}
+.lbRow.me { background: rgba(74, 222, 128, 0.12); border: 1px solid rgba(74, 222, 128, 0.3); }
+.lbRank { width: 32px; font-weight: 900; color: #64748b; text-align: center; flex-shrink: 0; font-size: 13px; }
+.lbMain { flex: 1; min-width: 0; }
+.lbName { color: #e2e8f0; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 13px; }
+.lbSub { color: #64748b; font-size: 10px; margin-top: 2px; }
+.lbScore { color: #4ade80; font-weight: 900; font-size: 17px; text-align: right; }
+#lbStatus { color: #64748b; font-size: 14px; padding: 30px 20px; text-align: center; }
+#lbCacheInfo { color: #475569; font-size: 10px; margin-top: 8px; min-height: 12px; letter-spacing: 0.5px; }
+
+.ghost-btn {
+    margin-top: 12px; padding: 10px 22px;
+    background: rgba(20, 25, 40, 0.6);
+    border: 1.5px solid rgba(74, 222, 128, 0.4);
+    color: #4ade80; border-radius: 12px;
+    font-weight: 700; font-size: 12px;
+    cursor: pointer; -webkit-appearance: none; appearance: none; font-family: inherit;
+    backdrop-filter: blur(10px);
+}
+.ghost-btn:active { background: rgba(74, 222, 128, 0.15); }
+
+/* МАГАЗИН */
+#shopTitle {
+    font-size: 30px; font-weight: 900; margin-bottom: 4px;
+    background: linear-gradient(135deg, #a78bfa, #22d3ee);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    letter-spacing: -1px;
+}
+#shopSub { font-size: 11px; color: #64748b; margin-bottom: 14px; text-align: center; padding: 0 20px; letter-spacing: 0.5px; }
+#shopTabs { display: flex; gap: 6px; margin-bottom: 16px; width: 100%; max-width: 420px; padding: 0 6px; }
+.shop-tab {
+    flex: 1; padding: 10px 4px;
+    background: rgba(20, 25, 40, 0.6);
+    border: 1.5px solid rgba(74, 222, 128, 0.15);
+    color: #64748b; border-radius: 14px;
+    font-size: 10px; font-weight: 800;
+    cursor: pointer; -webkit-appearance: none; appearance: none; font-family: inherit;
+    transition: all 0.2s;
+    backdrop-filter: blur(10px);
+}
+.shop-tab.active {
+    background: linear-gradient(135deg, rgba(74, 222, 128, 0.2), rgba(34, 211, 238, 0.1));
+    border-color: #4ade80; color: #4ade80;
+    box-shadow: 0 4px 20px rgba(74, 222, 128, 0.2);
+}
+.shop-tab .icon { display: block; font-size: 20px; margin-bottom: 3px; }
+#shopContent { width: 100%; max-width: 420px; max-height: 58vh; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 4px; }
+
+.shop-card {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px; margin-bottom: 8px;
+    background: rgba(20, 25, 40, 0.7);
+    border: 1.5px solid rgba(74, 222, 128, 0.15);
+    border-radius: 18px;
+    cursor: pointer; -webkit-appearance: none; appearance: none; font-family: inherit;
+    transition: all 0.2s; text-align: left; width: 100%;
+    backdrop-filter: blur(20px);
+    position: relative; overflow: hidden;
+}
+.shop-card:active { transform: scale(0.98); border-color: rgba(74, 222, 128, 0.5); }
+.shop-card.selected { border-color: #4ade80; box-shadow: 0 0 25px rgba(74, 222, 128, 0.25); background: rgba(74, 222, 128, 0.08); }
+.shop-card.locked { opacity: 0.7; }
+.shop-card.premium { border-color: rgba(250, 204, 21, 0.4); background: linear-gradient(135deg, rgba(250, 204, 21, 0.08), rgba(20, 25, 40, 0.7)); }
+.shop-card.donate { border-color: rgba(244, 114, 182, 0.4); background: linear-gradient(135deg, rgba(244, 114, 182, 0.08), rgba(20, 25, 40, 0.7)); }
+.shop-card.premium::before {
+    content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+    background: linear-gradient(45deg, transparent 40%, rgba(250, 204, 21, 0.15) 50%, transparent 60%);
+    animation: shine 3s ease-in-out infinite; pointer-events: none;
+}
+@keyframes shine { 0%, 100% { transform: translateX(-100%) rotate(45deg); } 50% { transform: translateX(100%) rotate(45deg); } }
+
+.shop-icon {
+    width: 54px; height: 54px; border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 26px; flex-shrink: 0;
+    background: rgba(74, 222, 128, 0.1);
+    border: 1px solid rgba(74, 222, 128, 0.2);
+    position: relative;
+}
+.shop-info { flex: 1; min-width: 0; }
+.shop-name { font-size: 14px; font-weight: 800; color: #e2e8f0; margin-bottom: 3px; }
+.shop-desc { font-size: 11px; color: #94a3b8; line-height: 1.4; }
+.shop-price { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; flex-shrink: 0; }
+.shop-price-value { font-size: 17px; font-weight: 900; color: #facc15; }
+.shop-price-label { font-size: 9px; color: #64748b; letter-spacing: 0.5px; text-transform: uppercase; }
+.shop-owned { color: #4ade80; font-size: 20px; font-weight: 900; }
+
+/* COUNTDOWN */
+#countdown {
+    position: fixed; inset: 0; display: none; align-items: center; justify-content: center;
+    background: radial-gradient(circle at center, rgba(0,0,0,0.85), rgba(0,0,0,0.95));
+    z-index: 1000; font-size: 160px; font-weight: 900;
+    background-clip: text;
+}
+#countdown.show { display: flex; }
+#countdown-text {
+    background: linear-gradient(135deg, #4ade80, #22d3ee);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    filter: drop-shadow(0 0 40px rgba(74, 222, 128, 0.8));
+}
+#countdown.pulse #countdown-text { animation: countPulse 0.9s ease-out; }
+@keyframes countPulse {
+    0% { transform: scale(0.3); opacity: 0; filter: drop-shadow(0 0 60px rgba(74, 222, 128, 1)); }
+    40% { transform: scale(1.15); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; filter: drop-shadow(0 0 40px rgba(74, 222, 128, 0.8)); }
+}
+
+/* ВСПЛЫВАЮЩИЕ ОЧКИ */
+.score-popup {
+    position: fixed; pointer-events: none; z-index: 100;
+    font-size: 28px; font-weight: 900;
+    color: #4ade80;
+    text-shadow: 0 0 20px rgba(74, 222, 128, 0.8), 0 2px 4px rgba(0,0,0,0.8);
+    animation: scoreFloat 1s ease-out forwards;
+}
+.score-popup.golden { color: #facc15; text-shadow: 0 0 20px rgba(250, 204, 21, 0.8), 0 2px 4px rgba(0,0,0,0.8); font-size: 34px; }
+@keyframes scoreFloat {
+    0% { transform: translateY(0) scale(0.5); opacity: 0; }
+    20% { transform: translateY(-15px) scale(1.2); opacity: 1; }
+    100% { transform: translateY(-70px) scale(1); opacity: 0; }
+}
+
+/* TOAST */
+#toast {
+    position: fixed; bottom: 40px; left: 50%;
+    transform: translateX(-50%) translateY(120px);
+    background: rgba(20, 25, 40, 0.95);
+    color: white; padding: 14px 24px; border-radius: 16px;
+    font-size: 14px; font-weight: 700; z-index: 9998;
+    border: 1.5px solid rgba(74, 222, 128, 0.4);
+    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    max-width: 90vw; text-align: center;
+    backdrop-filter: blur(20px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+}
+#toast.show { transform: translateX(-50%) translateY(0); }
+
+/* ERROR */
+#errorBox { position: fixed; top: 0; left: 0; right: 0; background: #ef4444; color: white; padding: 12px; font-size: 12px; z-index: 9999; display: none; word-break: break-all; max-height: 40vh; overflow-y: auto; }
+
+/* ЮРИДИЧЕСКАЯ */
+#legalScreen .legal-content {
+    width: 100%; max-width: 400px;
+    background: rgba(20, 25, 40, 0.7);
+    border: 1px solid rgba(74, 222, 128, 0.2);
+    border-radius: 20px; padding: 22px;
+    max-height: 65vh; overflow-y: auto; -webkit-overflow-scrolling: touch;
+    backdrop-filter: blur(20px);
+    font-size: 13px; line-height: 1.7; color: #cbd5e1;
+}
+#legalScreen h2 { font-size: 18px; color: #4ade80; margin-bottom: 12px; font-weight: 900; }
+#legalScreen h3 { font-size: 13px; color: #22d3ee; margin: 14px 0 6px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
+#legalScreen p { margin-bottom: 8px; }
+#legalScreen ul { margin: 6px 0 10px 20px; }
+#legalScreen li { margin-bottom: 4px; }
+#legalScreen .highlight { color: #facc15; font-weight: 700; }
+#legalScreen .date { color: #64748b; font-size: 11px; margin-top: 16px; text-align: center; }
+</style>
 </head>
 <body>
 
-    <div id="errorBox"></div>
-    <div id="countdown"></div>
-    <div id="toast"></div>
+<div id="errorBox"></div>
+<div id="countdown"><span id="countdown-text"></span></div>
+<div id="toast"></div>
 
-    <div id="menuScreen" class="screen active">
-        <div id="userBox">
-            <div id="userAvatar">?</div>
-            <span>Привет, <span id="userName">игрок</span>!</span>
-        </div>
-        <h1>ЗМЕЙКА</h1>
-        <div class="subtitle">BATTLE EDITION</div>
-        <button class="menu-btn primary" onclick="startGame()">▶  Играть</button>
-        <button class="menu-btn" onclick="showScreen('leaderboardScreen')">🏆  Рейтинг</button>
-        <button class="menu-btn" onclick="showScreen('shopScreen')">🎨  Скины</button>
-        <button class="menu-btn" onclick="shareScore()">📤  Поделиться</button>
-        <button class="menu-btn premium" onclick="openStarsShop()">⭐  Магазин звёзд</button>
-        <button class="menu-btn small" onclick="showScreen('legalScreen')">📜  Условия использования</button>
-        <div class="high-score">🏅 Рекорд: <span id="menuHigh">0</span></div>
+<!-- МЕНЮ -->
+<div id="menuScreen" class="screen active">
+    <div id="userBox">
+        <div id="userAvatar">?</div>
+        <span>Привет, <span id="userName">игрок</span>!</span>
     </div>
+    <h1>ЗМЕЙКА</h1>
+    <div class="subtitle">BATTLE EDITION</div>
+    <button class="menu-btn primary" onclick="startGame()">
+        <div class="icon-box">▶</div>
+        <div class="text">Играть</div>
+    </button>
+    <button class="menu-btn premium" onclick="showScreen('shopScreen')">
+        <div class="icon-box">⭐</div>
+        <div class="text">Магазин</div>
+    </button>
+    <button class="menu-btn" onclick="showScreen('leaderboardScreen')">
+        <div class="icon-box">🏆</div>
+        <div class="text">Рейтинг</div>
+    </button>
+    <button class="menu-btn" onclick="shareScore()">
+        <div class="icon-box">📤</div>
+        <div class="text">Поделиться</div>
+    </button>
+    <button class="menu-btn small" onclick="showScreen('legalScreen')">
+        <div class="icon-box">📜</div>
+        <div class="text">Условия использования</div>
+    </button>
+    <div class="record-box">
+        <div class="record-icon">🏅</div>
+        <div class="record-label">Рекорд</div>
+        <div class="record-value" id="menuHigh">0</div>
+    </div>
+</div>
 
-    <div id="gameScreen" class="screen">
-        <div id="hud">
-            <span id="scoreHud">Счёт: 0</span>
-            <span id="speedHud">x1.0</span>
-            <span id="fpsHud">-- FPS</span>
-        </div>
-        <canvas id="game"></canvas>
-        <div id="controls">
-            <div></div>
-            <div class="btn" data-dir="up">▲</div>
-            <div></div>
-            <div class="btn" data-dir="left">◀</div>
-            <div class="btn" data-dir="down">▼</div>
-            <div class="btn" data-dir="right">▶</div>
-        </div>
+<!-- ИГРА -->
+<div id="gameScreen" class="screen">
+    <div id="hud">
+        <div class="hud-item" id="scoreHud">🎯 0</div>
+        <div class="hud-item" id="speedHud">⚡ x1.0</div>
+        <div class="hud-item" id="fpsHud">-- FPS</div>
     </div>
+    <canvas id="game"></canvas>
+    <div id="controls">
+        <div></div>
+        <div class="btn" data-dir="up">▲</div>
+        <div></div>
+        <div class="btn" data-dir="left">◀</div>
+        <div class="btn" data-dir="down">▼</div>
+        <div class="btn" data-dir="right">▶</div>
+    </div>
+</div>
 
-    <div id="overScreen" class="screen">
-        <div id="overTitle">ИГРА ОКОНЧЕНА</div>
-        <div id="overScore">Счёт: 0</div>
-        <div id="overInfo"></div>
-        <div id="overHigh"></div>
-        <div id="submitStatus"></div>
-        <button class="buy-btn" onclick="buyLife()" id="buyLifeBtn">💚 Вторая жизнь за 1⭐</button>
-        <button class="menu-btn primary" onclick="startGame()">🔄  Ещё раз</button>
-        <button class="menu-btn" onclick="showScreen('leaderboardScreen')">🏆  Рейтинг</button>
-        <button class="menu-btn" onclick="showScreen('menuScreen')">🏠  Меню</button>
-    </div>
+<!-- GAME OVER -->
+<div id="overScreen" class="screen">
+    <div id="overTitle">ИГРА ОКОНЧЕНА</div>
+    <div id="overScore">0</div>
+    <div id="overInfo"></div>
+    <div id="overHigh"></div>
+    <div id="submitStatus"></div>
+    <button class="buy-btn" onclick="buyLife()" id="buyLifeBtn">💚 Вторая жизнь за 5⭐</button>
+    <button class="menu-btn primary" onclick="startGame()">
+        <div class="icon-box">🔄</div>
+        <div class="text">Ещё раз</div>
+    </button>
+    <button class="menu-btn" onclick="showScreen('leaderboardScreen')">
+        <div class="icon-box">🏆</div>
+        <div class="text">Рейтинг</div>
+    </button>
+    <button class="menu-btn" onclick="showScreen('menuScreen')">
+        <div class="icon-box">🏠</div>
+        <div class="text">Меню</div>
+    </button>
+</div>
 
-    <div id="leaderboardScreen" class="screen">
-        <div id="lbTitle">🏆  ТОП ИГРОКОВ</div>
-        <div id="lbRules">1️⃣ Больше очков • 2️⃣ Меньше возрождений • 3️⃣ Меньше времени</div>
-        <div id="podium"></div>
-        <div id="lbList"><div id="lbStatus">Загрузка...</div></div>
-        <div id="lbCacheInfo"></div>
-        <button id="lbRefresh" onclick="renderLeaderboard(true)">🔄  Обновить</button>
-        <button class="menu-btn" onclick="showScreen('menuScreen')" style="margin-top:8px;">🏠  В меню</button>
-    </div>
+<!-- РЕЙТИНГ -->
+<div id="leaderboardScreen" class="screen">
+    <div id="lbTitle">🏆 ТОП ИГРОКОВ</div>
+    <div id="lbRules">1️⃣ Больше очков • 2️⃣ Меньше возрождений • 3️⃣ Меньше времени</div>
+    <div id="podium"></div>
+    <div id="lbList"><div id="lbStatus">Загрузка...</div></div>
+    <div id="lbCacheInfo"></div>
+    <button class="ghost-btn" onclick="renderLeaderboard(true)">🔄 Обновить</button>
+    <button class="menu-btn" onclick="showScreen('menuScreen')" style="margin-top:10px;">
+        <div class="icon-box">🏠</div>
+        <div class="text">В меню</div>
+    </button>
+</div>
 
-    <div id="shopScreen" class="screen">
-        <div id="shopTitle">🎨  СКИНЫ</div>
-        <div id="shopSub">Разблокируй скины, побивая рекорды, или купи эксклюзив за звёзды</div>
-        <div id="skinGrid"></div>
-        <button class="menu-btn" onclick="showScreen('menuScreen')">🏠  В меню</button>
+<!-- МАГАЗИН -->
+<div id="shopScreen" class="screen">
+    <div id="shopTitle">⭐ МАГАЗИН</div>
+    <div id="shopSub">Поддержи игру и получи бонусы</div>
+    <div id="shopTabs">
+        <button class="shop-tab active" data-tab="skins" onclick="switchTab('skins')"><span class="icon">🎨</span>Скины</button>
+        <button class="shop-tab" data-tab="boosters" onclick="switchTab('boosters')"><span class="icon">⚡</span>Бусты</button>
+        <button class="shop-tab" data-tab="premium" onclick="switchTab('premium')"><span class="icon">👑</span>Премиум</button>
+        <button class="shop-tab" data-tab="support" onclick="switchTab('support')"><span class="icon">💚</span>Донат</button>
     </div>
+    <div id="shopContent"></div>
+    <button class="menu-btn" onclick="showScreen('menuScreen')" style="margin-top:10px;">
+        <div class="icon-box">🏠</div>
+        <div class="text">В меню</div>
+    </button>
+</div>
 
-    <div id="legalScreen" class="screen">
-        <div class="legal-content">
-            <h2>📜 Условия использования</h2>
-            <h3>1. Общие положения</h3>
-            <p>Настоящие Условия регулируют использование мини-приложения «Змейка Баттл» (далее — «Игра»), доступного через Telegram-бота @BattleSnakes_bot. Используя Игру, вы соглашаетесь с настоящими Условиями в полном объёме.</p>
-            <h3>2. Предмет соглашения</h3>
-            <p>Игра предоставляется «как есть» (as is). Разработчик не гарантирует бесперебойную работу, отсутствие ошибок или сохранность игрового прогресса.</p>
-            <h3>3. Виртуальные товары и Telegram Stars</h3>
-            <p><span class="highlight">Все покупки цифровых товаров внутри Игры (скины, вторая жизнь, бусты и прочее) совершаются за Telegram Stars.</span></p>
-            <p>Оплата подчиняется правилам Telegram. <span class="highlight">Возврат средств за цифровые товары не производится</span>, если иное не предусмотрено законодательством вашей страны и правилами Telegram.</p>
-            <p>Telegram Stars не являются реальной валютой. Разработчик не несёт ответственности за невозможность вывода звёзд из Telegram.</p>
-            <h3>4. Ответственность пользователя</h3>
-            <ul>
-                <li>Запрещено использование читов, эксплойтов, автоматических скриптов и любых манипуляций, нарушающих честную игру.</li>
-                <li>Запрещено оскорбительное поведение, спам и мошенничество.</li>
-                <li>При нарушении доступ к Игре может быть ограничен без возврата средств.</li>
-            </ul>
-            <h3>5. PvP-режим (при наличии)</h3>
-            <p>В будущих версиях может быть добавлен режим сражений между игроками на звёзды. Условия будут опубликованы отдельно. <span class="highlight">Комиссия платформы может составлять до 10%</span> от ставки. Участие в платных PvP-режимах требует отдельного согласия.</p>
-            <h3>6. Изменения</h3>
-            <p>Разработчик вправе изменять Условия, уведомляя пользователей через бота. Продолжение использования означает согласие с новой редакцией.</p>
-            <h3>7. Контакты</h3>
-            <p>По вопросам: @ваш_контакт_в_телеграм</p>
-            <div class="date">Последнее обновление: 15 сентября 2026 г.</div>
-        </div>
-        <button class="menu-btn" onclick="showScreen('menuScreen')" style="margin-top:12px;">🏠  В меню</button>
+<!-- ЮРИДИЧЕСКАЯ -->
+<div id="legalScreen" class="screen">
+    <div class="legal-content">
+        <h2>📜 Условия использования</h2>
+        <h3>1. Общие положения</h3>
+        <p>Настоящие Условия регулируют использование мини-приложения «Змейка Баттл» (далее — «Игра»), доступного через Telegram-бота @BattleSnakes_bot. Используя Игру, вы соглашаетесь с настоящими Условиями в полном объёме.</p>
+        <h3>2. Предмет соглашения</h3>
+        <p>Игра предоставляется «как есть» (as is). Разработчик не гарантирует бесперебойную работу, отсутствие ошибок или сохранность игрового прогресса.</p>
+        <h3>3. Виртуальные товары и Telegram Stars</h3>
+        <p><span class="highlight">Все покупки цифровых товаров внутри Игры совершаются за Telegram Stars.</span></p>
+        <p>Оплата подчиняется правилам Telegram. <span class="highlight">Возврат средств за цифровые товары не производится</span>, если иное не предусмотрено законодательством вашей страны и правилами Telegram.</p>
+        <p>Telegram Stars не являются реальной валютой. Разработчик не несёт ответственности за невозможность вывода звёзд из Telegram.</p>
+        <h3>4. Ответственность пользователя</h3>
+        <ul>
+            <li>Запрещено использование читов, эксплойтов и автоматических скриптов.</li>
+            <li>Запрещено оскорбительное поведение и мошенничество.</li>
+            <li>При нарушении доступ к Игре может быть ограничен без возврата средств.</li>
+        </ul>
+        <h3>5. Добровольная поддержка</h3>
+        <p>Покупки категории «Поддержать автора» являются <span class="highlight">добровольными пожертвованиями</span> и не предполагают получения материальной выгоды.</p>
+        <h3>6. PvP-режим (при наличии)</h3>
+        <p>В будущих версиях может быть добавлен режим сражений между игроками на звёзды. Условия будут опубликованы отдельно. <span class="highlight">Комиссия платформы может составлять до 10%</span> от ставки.</p>
+        <h3>7. Изменения</h3>
+        <p>Разработчик вправе изменять Условия, уведомляя пользователей через бота. Продолжение использования означает согласие с новой редакцией.</p>
+        <h3>8. Контакты</h3>
+        <p>По вопросам: @ваш_контакт_в_телеграм</p>
+        <div class="date">Последнее обновление: 15 сентября 2026 г.</div>
     </div>
+    <button class="menu-btn" onclick="showScreen('menuScreen')" style="margin-top:12px;">
+        <div class="icon-box">🏠</div>
+        <div class="text">В меню</div>
+    </button>
+</div>
 
 <script>
 window.onerror = function(msg, url, line) {
@@ -211,25 +559,32 @@ var scoresCache = null, scoresCacheTime = 0, lastSubmitTime = 0;
 var SUBMIT_COOLDOWN = 5000;
 
 var SKINS = [
-    { id: 'classic', name: 'Классик',   req: 0,    type: 'score', head: '#4ade80', body: '#22c55e', glow: '#4ade80' },
-    { id: 'ocean',   name: 'Океан',     req: 50,   type: 'score', head: '#22d3ee', body: '#0891b2', glow: '#22d3ee' },
-    { id: 'violet',  name: 'Фиолет',    req: 150,  type: 'score', head: '#a78bfa', body: '#7c3aed', glow: '#a78bfa' },
-    { id: 'fire',    name: 'Огонь',     req: 300,  type: 'score', head: '#f87171', body: '#dc2626', glow: '#f87171' },
-    { id: 'gold',    name: 'Золото',    req: 500,  type: 'score', head: '#facc15', body: '#f59e0b', glow: '#facc15' },
-    { id: 'rainbow', name: 'Радуга',    req: 1000, type: 'score', head: 'rainbow', body: 'rainbow', glow: '#8b5cf6' },
-    { id: 'cosmos',  name: 'Космос',    req: 1,    type: 'stars', head: '#e879f9', body: '#7c3aed', glow: '#e879f9' },
-    { id: 'neon',    name: 'Неон',      req: 1,    type: 'stars', head: '#22ff88', body: '#00ccff', glow: '#22ff88' }
+    { id: 'classic', name: 'Классик',  req: 0,    type: 'score', head: '#4ade80', body: '#22c55e', glow: '#4ade80', emoji: '🐍' },
+    { id: 'ocean',   name: 'Океан',    req: 50,   type: 'score', head: '#22d3ee', body: '#0891b2', glow: '#22d3ee', emoji: '🌊' },
+    { id: 'violet',  name: 'Фиолет',   req: 150,  type: 'score', head: '#a78bfa', body: '#7c3aed', glow: '#a78bfa', emoji: '🔮' },
+    { id: 'fire',    name: 'Огонь',    req: 300,  type: 'score', head: '#f87171', body: '#dc2626', glow: '#f87171', emoji: '🔥' },
+    { id: 'gold',    name: 'Золото',   req: 500,  type: 'score', head: '#facc15', body: '#f59e0b', glow: '#facc15', emoji: '⭐' },
+    { id: 'rainbow', name: 'Радуга',   req: 1000, type: 'score', head: 'rainbow', body: 'rainbow', glow: '#8b5cf6', emoji: '🌈' },
+    { id: 'cosmos',  name: 'Космос',   price: 50,  type: 'stars', head: '#e879f9', body: '#7c3aed', glow: '#e879f9', emoji: '🌌' },
+    { id: 'neon',    name: 'Неон',     price: 75,  type: 'stars', head: '#22ff88', body: '#00ccff', glow: '#22ff88', emoji: '💚' },
+    { id: 'aurora',  name: 'Аврора',   price: 100, type: 'stars', head: '#a78bfa', body: '#22d3ee', glow: '#a78bfa', emoji: '✨' }
 ];
 
 var selectedSkinId = localStorage.getItem('snakeSkin') || 'classic';
 var ownedStarsSkins = JSON.parse(localStorage.getItem('ownedStarsSkins') || '[]');
+var isPremium = localStorage.getItem('snakePremium') === '1';
+var activeBoost = false;
+var activeShield = false;
 
 function getSkin() {
     for (var i = 0; i < SKINS.length; i++) if (SKINS[i].id === selectedSkinId) return SKINS[i];
     return SKINS[0];
 }
 function isSkinUnlocked(skin) {
-    if (skin.type === 'stars') return ownedStarsSkins.indexOf(skin.id) !== -1;
+    if (skin.type === 'stars') {
+        if (isPremium) return true;
+        return ownedStarsSkins.indexOf(skin.id) !== -1;
+    }
     return highScore >= skin.req;
 }
 
@@ -244,7 +599,7 @@ var GRID = 20, BASE_SPEED = 200, MIN_SPEED = 70, SPEED_STEP = 4;
 var canvas, ctx, cellSize, dpr, canvasSize;
 var snake, oldSnake, dir, nextDir, score, food, speed, foodEaten;
 var lastTick = 0, lastFrameTime = 0, rafId = null, running = false;
-var particles = [];
+var particles = [], floaters = [];
 var frameCount = 0, fpsLastUpdate = 0, fps = 60;
 var highScore = parseInt(localStorage.getItem('snakeHigh') || '0', 10);
 var leaderboardOpen = false, lbInterval = null;
@@ -257,7 +612,7 @@ function initCanvas() {
     ctx = canvas.getContext('2d');
     dpr = Math.min(window.devicePixelRatio || 1, 3);
     var availW = window.innerWidth - 24;
-    var availH = window.innerHeight - 320;
+    var availH = window.innerHeight - 340;
     var size = Math.min(availW, availH, 500);
     size = Math.floor(size / GRID) * GRID;
     canvasSize = size;
@@ -279,8 +634,8 @@ function setupUser() {
 
 function formatTime(sec) {
     sec = Math.floor(sec);
-    if (sec < 60) return sec + ' сек';
-    return Math.floor(sec/60) + ' мин' + (sec%60 > 0 ? ' ' + (sec%60) + ' сек' : '');
+    if (sec < 60) return sec + 'с';
+    return Math.floor(sec/60) + 'м ' + (sec%60 > 0 ? (sec%60) + 'с' : '');
 }
 
 function showToast(msg, ms) {
@@ -290,6 +645,18 @@ function showToast(msg, ms) {
     setTimeout(function() { t.classList.remove('show'); }, ms || 2200);
 }
 
+function spawnScorePopup(worldX, worldY, text, golden) {
+    var canvasRect = canvas.getBoundingClientRect();
+    var popup = document.createElement('div');
+    popup.className = 'score-popup' + (golden ? ' golden' : '');
+    popup.textContent = text;
+    popup.style.left = (canvasRect.left + worldX) + 'px';
+    popup.style.top = (canvasRect.top + worldY) + 'px';
+    document.body.appendChild(popup);
+    setTimeout(function() { popup.remove(); }, 1000);
+}
+
+// API
 function fetchScores(forceRefresh) {
     var now = Date.now();
     if (!forceRefresh && scoresCache && (now - scoresCacheTime) < CACHE_TTL) return Promise.resolve(scoresCache);
@@ -309,7 +676,7 @@ function saveScores(scores) {
     return fetch(API_BASE + BIN_ID, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', 'X-Master-Key': MASTER_KEY },
-        body: JSON.stringify({ scores: scores })
+        body: JSON.stringify({ scores: scores, config: (window.__cfg || null) })
     }).then(function(res) {
         if (!res.ok) throw new Error('HTTP ' + res.status);
         scoresCache = scores;
@@ -334,7 +701,7 @@ function submitScore(finalScore, finalTime, finalRevives) {
     if (now - lastSubmitTime < SUBMIT_COOLDOWN) return;
     lastSubmitTime = now;
     var statusEl = document.getElementById('submitStatus');
-    statusEl.textContent = '⏳ Отправка в рейтинг...';
+    statusEl.textContent = '⏳ Отправка...';
 
     fetchScores(true).then(function(scores) {
         var myId = String(tgUser.id);
@@ -349,22 +716,24 @@ function submitScore(finalScore, finalTime, finalRevives) {
                 if (finalRevives < (existing.revives || 0)) better = true;
                 else if (finalRevives === (existing.revives || 0) && finalTime < (existing.time || 99999)) better = true;
             }
-            if (!better) { statusEl.textContent = '✓ Твой рекорд: ' + existing.score; return; }
+            if (!better) { statusEl.textContent = '✓ Рекорд: ' + existing.score; return; }
             existing.score = finalScore; existing.name = myName;
-            existing.time = Math.round(finalTime); existing.revives = finalRevives; existing.date = now;
+            existing.time = Math.round(finalTime); existing.revives = finalRevives;
+            existing.premium = isPremium; existing.date = now;
         } else {
-            scores.push({ id: myId, name: myName, score: finalScore, time: Math.round(finalTime), revives: finalRevives, date: now });
+            scores.push({ id: myId, name: myName, score: finalScore, time: Math.round(finalTime), revives: finalRevives, premium: isPremium, date: now });
         }
         sortScores(scores);
         return saveScores(scores.slice(0, 100)).then(function() {
-            statusEl.textContent = '✓ Результат отправлен!';
+            statusEl.textContent = '✓ Отправлено!';
         });
     }).catch(function(e) {
-        console.warn('submit failed', e);
-        statusEl.textContent = '⚠ Не удалось отправить';
+        console.warn(e);
+        statusEl.textContent = '⚠ Ошибка отправки';
     });
 }
 
+// LEADERBOARD
 function renderLeaderboard(forceRefresh) {
     var listEl = document.getElementById('lbList');
     var podiumEl = document.getElementById('podium');
@@ -372,7 +741,7 @@ function renderLeaderboard(forceRefresh) {
 
     if (!forceRefresh && scoresCache && (Date.now() - scoresCacheTime) < CACHE_TTL) {
         drawLeaderboard(scoresCache);
-        cacheEl.textContent = 'данные из кэша (' + Math.round((Date.now() - scoresCacheTime)/1000) + ' сек назад)';
+        cacheEl.textContent = '📦 из кэша (' + Math.round((Date.now() - scoresCacheTime)/1000) + 'с назад)';
         return;
     }
     listEl.innerHTML = '<div id="lbStatus">Загрузка...</div>';
@@ -381,14 +750,14 @@ function renderLeaderboard(forceRefresh) {
 
     fetchScores(forceRefresh).then(function(scores) {
         drawLeaderboard(scores);
-        cacheEl.textContent = 'обновлено только что';
+        cacheEl.textContent = '✅ только что';
     }).catch(function(e) {
-        console.warn('lb failed', e);
+        console.warn(e);
         if (scoresCache) {
             drawLeaderboard(scoresCache);
-            cacheEl.textContent = '⚠ сеть недоступна, показан кэш';
+            cacheEl.textContent = '⚠ оффлайн, кэш';
         } else {
-            listEl.innerHTML = '<div id="lbStatus">⚠ Не удалось загрузить рейтинг</div>';
+            listEl.innerHTML = '<div id="lbStatus">⚠ Не удалось загрузить</div>';
         }
     });
 }
@@ -407,6 +776,7 @@ function drawLeaderboard(scores) {
 
     if (scores.length >= 1) {
         var order = [1, 0, 2];
+        var heights = [52, 70, 40];
         var html = '';
         for (var k = 0; k < 3; k++) {
             var idx = order[k];
@@ -416,10 +786,11 @@ function drawLeaderboard(scores) {
                 continue;
             }
             var isMe = myId && s.id === myId;
-            var safeName = String(s.name || 'игрок').replace(/[<>&]/g, '').substring(0, 10);
+            var safeName = String(s.name || 'игрок').replace(/[<>&]/g, '').substring(0, 9);
             var initial = safeName.charAt(0).toUpperCase();
+            var crown = (s.premium || idx === 0) ? '<span class="crown">👑</span>' : '';
             html += '<div class="podium-place podium-' + (idx+1) + '">' +
-                '<div class="podium-avatar">' + initial + '</div>' +
+                '<div class="podium-avatar">' + initial + crown + '</div>' +
                 '<div class="podium-name">' + safeName + (isMe ? ' ★' : '') + '</div>' +
                 '<div class="podium-score">' + s.score + '</div>' +
                 '<div class="podium-bar">' + (idx+1) + '</div>' +
@@ -439,12 +810,13 @@ function drawLeaderboard(scores) {
         var isMe = myId && s.id === myId;
         var safeName = String(s.name || 'игрок').replace(/[<>&]/g, '');
         var timeStr = s.time ? formatTime(s.time) : '—';
-        var revStr = (s.revives !== undefined) ? (s.revives + ' возр.') : '—';
+        var revStr = (s.revives !== undefined) ? (s.revives + '🔄') : '—';
+        var crown = s.premium ? '👑 ' : '';
         html2 += '<div class="lbRow' + (isMe ? ' me' : '') + '">' +
             '<div class="lbRank">#' + (i + 4) + '</div>' +
             '<div class="lbMain">' +
-                '<div class="lbName">' + safeName + (isMe ? ' (ты)' : '') + '</div>' +
-                '<div class="lbSub">⏱ ' + timeStr + ' · 🔄 ' + revStr + '</div>' +
+                '<div class="lbName">' + crown + safeName + (isMe ? ' •ты' : '') + '</div>' +
+                '<div class="lbSub">⏱ ' + timeStr + ' · ' + revStr + '</div>' +
             '</div>' +
             '<div class="lbScore">' + s.score + '</div>' +
             '</div>';
@@ -452,6 +824,7 @@ function drawLeaderboard(scores) {
     listEl.innerHTML = html2;
 }
 
+// SCREENS
 function showScreen(id) {
     var all = document.querySelectorAll('.screen');
     for (var i = 0; i < all.length; i++) all[i].classList.remove('active');
@@ -467,69 +840,112 @@ function showScreen(id) {
 }
 
 function shareScore() {
-    var text = '🐍 Я набрал ' + highScore + ' очков в Змейка Баттл! Попробуй побить мой рекорд:';
+    var text = '🐍 Я набрал ' + highScore + ' очков в Змейка Баттл! Попробуй побить рекорд:';
     var url = 'https://t.me/BattleSnakes_bot';
     if (tg) tg.openTelegramLink('https://t.me/share/url?url=' + encodeURIComponent(url) + '&text=' + encodeURIComponent(text));
     else alert(text + ' ' + url);
 }
 
-function openStarsShop() {
-    var msg = '⭐ МАГАЗИН ЗВЁЗД\n\n' +
-              '💚 Вторая жизнь — 1⭐\n' +
-              '🎨 Скин «Космос» — 1⭐\n' +
-              '🎨 Скин «Неон» — 1⭐\n\n' +
-              'Цены временно снижены для теста.';
-    if (tg) tg.showAlert(msg); else alert(msg);
+// SHOP
+var currentTab = 'skins';
+
+function switchTab(tab) {
+    currentTab = tab;
+    var tabs = document.querySelectorAll('.shop-tab');
+    for (var i = 0; i < tabs.length; i++) tabs[i].classList.toggle('active', tabs[i].dataset.tab === tab);
+    renderShop();
+    haptic('light');
 }
 
 function renderShop() {
-    var grid = document.getElementById('skinGrid');
+    var c = document.getElementById('shopContent');
+    if (currentTab === 'skins') c.innerHTML = renderSkinsTab();
+    else if (currentTab === 'boosters') c.innerHTML = renderBoostersTab();
+    else if (currentTab === 'premium') c.innerHTML = renderPremiumTab();
+    else if (currentTab === 'support') c.innerHTML = renderSupportTab();
+}
+
+function renderSkinsTab() {
     var html = '';
     for (var i = 0; i < SKINS.length; i++) {
         var s = SKINS[i];
         var unlocked = isSkinUnlocked(s);
         var selected = s.id === selectedSkinId;
-        var isStars = s.type === 'stars';
-        var cls = 'skin-card' + (unlocked ? '' : ' locked') + (selected ? ' selected' : '') + (isStars && !unlocked ? ' stars-only' : '');
-        var preview = renderSkinPreview(s);
-        var reqText, reqCls;
+        var cls = 'shop-card';
+        if (selected) cls += ' selected';
+        if (!unlocked) cls += ' locked';
+
+        var desc, priceHtml;
         if (unlocked) {
-            reqText = selected ? '✓ Выбран' : 'Разблокирован';
-            reqCls = 'skin-req done';
-        } else if (isStars) {
-            reqText = '⭐ ' + s.req + ' звёзд';
-            reqCls = 'skin-req stars';
+            desc = selected ? '✓ Выбран' : 'Разблокирован';
+            priceHtml = '<div class="shop-owned">✓</div>';
+        } else if (s.type === 'stars') {
+            desc = isPremium ? 'Включён в Премиум' : 'Эксклюзивный скин';
+            priceHtml = '<div class="shop-price-value">' + s.price + '⭐</div><div class="shop-price-label">купить</div>';
         } else {
-            reqText = '🏅 Рекорд: ' + s.req;
-            reqCls = 'skin-req';
+            desc = 'Рекорд ' + s.req + ' 🏅';
+            priceHtml = '<div class="shop-price-value">' + s.req + '</div><div class="shop-price-label">рекорд</div>';
         }
+
+        var iconBg = s.head === 'rainbow' ? 'linear-gradient(135deg, #f87171, #facc15, #22d3ee)' : 'linear-gradient(135deg, ' + s.head + '44, ' + s.body + '44)';
+
         html += '<button class="' + cls + '" onclick="selectSkin(\'' + s.id + '\')">' +
-            '<div class="skin-preview">' + preview + '</div>' +
-            '<div class="skin-name">' + s.name + '</div>' +
-            '<div class="' + reqCls + '">' + reqText + '</div>' +
+            '<div class="shop-icon" style="background:' + iconBg + '; border-color: ' + (s.head === 'rainbow' ? '#8b5cf6' : s.head) + '44">' + s.emoji + '</div>' +
+            '<div class="shop-info"><div class="shop-name">' + s.name + '</div><div class="shop-desc">' + desc + '</div></div>' +
+            '<div class="shop-price">' + priceHtml + '</div>' +
             '</button>';
     }
-    grid.innerHTML = html;
+    return html;
 }
 
-function renderSkinPreview(s) {
-    var c1 = s.head === 'rainbow' ? '#f87171' : s.head;
-    var c2 = s.body === 'rainbow' ? '#22d3ee' : s.body;
-    var gradId = 'g_' + s.id;
-    var grad = s.id === 'rainbow'
-        ? '<linearGradient id="' + gradId + '" x1="0%" y1="0%" x2="100%" y2="100%">' +
-          '<stop offset="0%" stop-color="#f87171"/>' +
-          '<stop offset="50%" stop-color="#facc15"/>' +
-          '<stop offset="100%" stop-color="#22d3ee"/></linearGradient>'
-        : '<linearGradient id="' + gradId + '" x1="0%" y1="0%" x2="100%" y2="100%">' +
-          '<stop offset="0%" stop-color="' + c1 + '"/>' +
-          '<stop offset="100%" stop-color="' + c2 + '"/></linearGradient>';
-    return '<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">' +
-        '<defs>' + grad + '</defs>' +
-        '<rect x="2" y="14" width="10" height="10" rx="3" fill="url(#' + gradId + ')"/>' +
-        '<rect x="13" y="14" width="10" height="10" rx="2" fill="url(#' + gradId + ')" opacity="0.8"/>' +
-        '<rect x="24" y="14" width="10" height="10" rx="2" fill="url(#' + gradId + ')" opacity="0.6"/>' +
-        '</svg>';
+function renderBoostersTab() {
+    var items = [
+        { id: 'extra_life', icon: '💚', name: 'Вторая жизнь', desc: 'Продолжить партию после смерти', price: 5 },
+        { id: 'boost_x2', icon: '⚡', name: 'Буст ×2 очков', desc: 'Следующая партия с двойными очками', price: 10 },
+        { id: 'shield', icon: '🛡️', name: 'Щит от смерти', desc: 'Игнорирует одно столкновение', price: 10 }
+    ];
+    var html = '';
+    for (var i = 0; i < items.length; i++) {
+        var it = items[i];
+        html += '<button class="shop-card" onclick="buyItem(\'' + it.id + '\')">' +
+            '<div class="shop-icon">' + it.icon + '</div>' +
+            '<div class="shop-info"><div class="shop-name">' + it.name + '</div><div class="shop-desc">' + it.desc + '</div></div>' +
+            '<div class="shop-price"><div class="shop-price-value">' + it.price + '⭐</div><div class="shop-price-label">купить</div></div>' +
+            '</button>';
+    }
+    return html;
+}
+
+function renderPremiumTab() {
+    if (isPremium) {
+        return '<div class="shop-card premium" style="cursor:default">' +
+            '<div class="shop-icon">👑</div>' +
+            '<div class="shop-info"><div class="shop-name">Премиум активен</div><div class="shop-desc">Золотая рамка в топе • +10% к очкам • все премиум-скины</div></div>' +
+            '<div class="shop-owned">✓</div></div>';
+    }
+    return '<button class="shop-card premium" onclick="buyItem(\'premium\')">' +
+        '<div class="shop-icon">👑</div>' +
+        '<div class="shop-info"><div class="shop-name">Премиум навсегда</div><div class="shop-desc">👑 Золотая рамка в топе<br>+10% к очкам<br>Все премиум-скины</div></div>' +
+        '<div class="shop-price"><div class="shop-price-value">150⭐</div><div class="shop-price-label">навсегда</div></div>' +
+        '</button>';
+}
+
+function renderSupportTab() {
+    var items = [
+        { id: 'donate_10', icon: '☕', name: 'Кофе автору', desc: 'Небольшая поддержка проекта', price: 10 },
+        { id: 'donate_50', icon: '🍕', name: 'Пицца автору', desc: 'Средняя поддержка', price: 50 },
+        { id: 'donate_100', icon: '🎁', name: 'Большой подарок', desc: 'Мощная поддержка проекта', price: 100 }
+    ];
+    var html = '<div style="color:#94a3b8;font-size:11px;text-align:center;padding:8px 16px 14px;line-height:1.5;">Покупки в этой категории — <b style="color:#f472b6">добровольные пожертвования</b>. Никаких бонусов, только спасибо ❤️</div>';
+    for (var i = 0; i < items.length; i++) {
+        var it = items[i];
+        html += '<button class="shop-card donate" onclick="buyItem(\'' + it.id + '\')">' +
+            '<div class="shop-icon">' + it.icon + '</div>' +
+            '<div class="shop-info"><div class="shop-name">' + it.name + '</div><div class="shop-desc">' + it.desc + '</div></div>' +
+            '<div class="shop-price"><div class="shop-price-value">' + it.price + '⭐</div><div class="shop-price-label">донат</div></div>' +
+            '</button>';
+    }
+    return html;
 }
 
 function selectSkin(id) {
@@ -537,11 +953,8 @@ function selectSkin(id) {
     for (var i = 0; i < SKINS.length; i++) if (SKINS[i].id === id) { skin = SKINS[i]; break; }
     if (!skin) return;
     if (!isSkinUnlocked(skin)) {
-        if (skin.type === 'stars') {
-            buySkin(skin);
-        } else {
-            showToast('🔒 Набери рекорд ' + skin.req + ' очков');
-        }
+        if (skin.type === 'stars') buyItem('skin_' + skin.id);
+        else showToast('🔒 Набери ' + skin.req + ' очков');
         return;
     }
     selectedSkinId = id;
@@ -551,42 +964,63 @@ function selectSkin(id) {
     haptic('light');
 }
 
-function buySkin(skin) {
-    if (!tg || !tgUser) { showToast('Покупка только в Telegram'); return; }
+function buyItem(itemType) {
+    if (!tg || !tgUser) { showToast('Только в Telegram'); return; }
     showToast('⏳ Создание счёта...', 5000);
     fetch(WORKER_URL + '/create-invoice', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: tgUser.id, itemType: 'skin_' + skin.id })
+        body: JSON.stringify({ userId: tgUser.id, itemType: itemType })
     })
     .then(function(r) { return r.json(); })
     .then(function(data) {
         if (!data.ok || !data.invoiceLink) {
-            showToast('⚠ Не удалось создать счёт: ' + (data.description || ''));
+            showToast('⚠ Ошибка: ' + (data.description || data.error || ''));
             return;
         }
         tg.openInvoice(data.invoiceLink, function(status) {
-            if (status === 'paid') {
-                ownedStarsSkins.push(skin.id);
-                localStorage.setItem('ownedStarsSkins', JSON.stringify(ownedStarsSkins));
-                selectedSkinId = skin.id;
-                localStorage.setItem('snakeSkin', skin.id);
-                renderShop();
-                showToast('✓ Скин «' + skin.name + '» куплен!');
-                if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-            } else if (status === 'cancelled') {
-                showToast('Оплата отменена');
-            } else {
-                showToast('⚠ Оплата не прошла');
-            }
+            if (status === 'paid') handlePurchase(itemType);
+            else if (status === 'cancelled') showToast('Отменено');
+            else showToast('⚠ Не прошло');
         });
     })
-    .catch(function(e) {
-        console.warn(e);
-        showToast('⚠ Ошибка сети');
-    });
+    .catch(function(e) { console.warn(e); showToast('⚠ Ошибка сети'); });
 }
 
+function handlePurchase(itemType) {
+    if (itemType === 'extra_life') {
+        if (savedState) {
+            showToast('✓ Оплачено!');
+            startCountdown(function() { reviveSnake(); });
+        } else {
+            showToast('✓ Куплено. Используется при смерти');
+        }
+    } else if (itemType === 'boost_x2') {
+        activeBoost = true;
+        showToast('⚡ Буст ×2 активирован!');
+    } else if (itemType === 'shield') {
+        activeShield = true;
+        showToast('🛡️ Щит активирован!');
+    } else if (itemType === 'premium') {
+        isPremium = true;
+        localStorage.setItem('snakePremium', '1');
+        showToast('👑 Премиум активирован!');
+        renderShop();
+    } else if (itemType.indexOf('skin_') === 0) {
+        var skinId = itemType.replace('skin_', '');
+        if (ownedStarsSkins.indexOf(skinId) === -1) ownedStarsSkins.push(skinId);
+        localStorage.setItem('ownedStarsSkins', JSON.stringify(ownedStarsSkins));
+        selectedSkinId = skinId;
+        localStorage.setItem('snakeSkin', skinId);
+        showToast('✓ Скин куплен!');
+        renderShop();
+    } else if (itemType.indexOf('donate_') === 0) {
+        showToast('❤️ Спасибо!', 3500);
+    }
+    if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+}
+
+// GAME
 function startGame() {
     initCanvas();
     showScreen('gameScreen');
@@ -620,9 +1054,7 @@ function loop(timestamp) {
         deathAnim.t += 16;
         updateParticles(16.67);
         render(0);
-        if (deathAnim.t < deathAnim.max) {
-            rafId = requestAnimationFrame(loop);
-        }
+        if (deathAnim.t < deathAnim.max) rafId = requestAnimationFrame(loop);
         return;
     }
     if (!running) return;
@@ -639,19 +1071,46 @@ function tick() {
     for (var i = 0; i < snake.length; i++) oldSnake.push({x: snake[i].x, y: snake[i].y});
     dir = {x: nextDir.x, y: nextDir.y};
     var head = {x: snake[0].x + dir.x, y: snake[0].y + dir.y};
-    if (head.x < 0 || head.x >= GRID || head.y < 0 || head.y >= GRID) return endGame();
-    for (var i = 0; i < snake.length; i++) {
-        if (snake[i].x === head.x && snake[i].y === head.y) return endGame();
+
+    var collision = false;
+    if (head.x < 0 || head.x >= GRID || head.y < 0 || head.y >= GRID) collision = true;
+    if (!collision) {
+        for (var i = 0; i < snake.length; i++) {
+            if (snake[i].x === head.x && snake[i].y === head.y) { collision = true; break; }
+        }
     }
+
+    if (collision) {
+        if (activeShield) {
+            activeShield = false;
+            showToast('🛡️ Щит спас!');
+            haptic('heavy');
+            canvas.classList.add('shake');
+            setTimeout(function() { canvas.classList.remove('shake'); }, 150);
+            return;
+        }
+        return endGame();
+    }
+
     snake.unshift(head);
     if (head.x === food.x && head.y === food.y) {
-        score += food.points; foodEaten++;
+        var pts = food.points;
+        if (activeBoost) pts *= 2;
+        if (isPremium) pts = Math.round(pts * 1.1);
+        score += pts;
+        foodEaten++;
         speed = Math.max(MIN_SPEED, BASE_SPEED - foodEaten * SPEED_STEP);
         updateHud();
         haptic('light');
+
         var cx = food.x * cellSize + cellSize / 2;
         var cy = food.y * cellSize + cellSize / 2;
-        spawnParticles(cx, cy, food.golden ? '#facc15' : '#ef4444', 12);
+        spawnParticles(cx, cy, food.golden ? '#facc15' : '#ef4444', food.golden ? 20 : 12);
+        spawnScorePopup(cx - 15, cy - 20, '+' + pts, food.golden);
+
+        canvas.classList.add('shake');
+        setTimeout(function() { canvas.classList.remove('shake'); }, 150);
+
         placeFood();
     } else { snake.pop(); }
 }
@@ -672,8 +1131,8 @@ function placeFood() {
 function spawnParticles(x, y, color, count) {
     for (var i = 0; i < count; i++) {
         var a = Math.random() * Math.PI * 2;
-        var sp = 0.5 + Math.random() * 2.5;
-        particles.push({ x: x, y: y, vx: Math.cos(a)*sp, vy: Math.sin(a)*sp, life: 1, color: color, size: 2 + Math.random()*3 });
+        var sp = 0.5 + Math.random() * 3;
+        particles.push({ x: x, y: y, vx: Math.cos(a)*sp, vy: Math.sin(a)*sp, life: 1, color: color, size: 2 + Math.random()*4 });
     }
 }
 
@@ -691,7 +1150,7 @@ function updateParticles(dt) {
 function getSnakeColors(i, len) {
     var skin = getSkin();
     if (skin.id === 'rainbow') {
-        var hue = ((i * 30) + performance.now()/15) % 360;
+        var hue = ((i * 25) + performance.now()/12) % 360;
         return { head: 'hsl(' + hue + ', 85%, 65%)', body: 'hsl(' + ((hue+30)%360) + ', 75%, 55%)', glow: 'hsl(' + hue + ', 85%, 65%)' };
     }
     if (i === 0) return { head: skin.head, body: skin.head, glow: skin.glow };
@@ -700,8 +1159,10 @@ function getSnakeColors(i, len) {
 
 function render(progress) {
     var w = canvasSize, h = canvasSize;
-    ctx.fillStyle = '#0a0a14'; ctx.fillRect(0, 0, w, h);
-    ctx.strokeStyle = 'rgba(74, 222, 128, 0.05)'; ctx.lineWidth = 1;
+    ctx.fillStyle = '#050510'; ctx.fillRect(0, 0, w, h);
+
+    // Grid с градиентом
+    ctx.strokeStyle = 'rgba(74, 222, 128, 0.04)'; ctx.lineWidth = 1;
     ctx.beginPath();
     for (var i = 1; i < GRID; i++) {
         var p = i * cellSize;
@@ -710,20 +1171,35 @@ function render(progress) {
     }
     ctx.stroke();
 
+    // Food с двойным glow
     if (food) {
-        var pulse = 1 + Math.sin(performance.now() / 180) * 0.18;
+        var pulse = 1 + Math.sin(performance.now() / 200) * 0.2;
         var fx = food.x * cellSize + cellSize / 2;
         var fy = food.y * cellSize + cellSize / 2;
-        var fr = (cellSize / 2 - 1.5) * pulse;
-        ctx.shadowColor = food.golden ? '#facc15' : '#ef4444';
-        ctx.shadowBlur = food.golden ? 15 : 10;
-        ctx.fillStyle = food.golden ? '#facc15' : '#ef4444';
+        var fr = (cellSize / 2 - 2) * pulse;
+
+        var isG = food.golden;
+        ctx.shadowColor = isG ? '#facc15' : '#ef4444';
+        ctx.shadowBlur = 25;
+        ctx.fillStyle = isG ? '#facc15' : '#ef4444';
         ctx.beginPath(); ctx.arc(fx, fy, fr, 0, Math.PI * 2); ctx.fill();
+
+        // Внутренний блик
         ctx.shadowBlur = 0;
+        ctx.fillStyle = 'rgba(255,255,255,0.6)';
+        ctx.beginPath(); ctx.arc(fx - fr*0.3, fy - fr*0.3, fr*0.3, 0, Math.PI * 2); ctx.fill();
+
+        // Внешнее кольцо
+        ctx.strokeStyle = isG ? 'rgba(250, 204, 21, 0.4)' : 'rgba(239, 68, 68, 0.4)';
+        ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(fx, fy, fr + 4 + Math.sin(performance.now()/300)*2, 0, Math.PI * 2); ctx.stroke();
     }
 
+    // Snake с trail
     if (snake) {
         var len = snake.length;
+
+        // Trail (тень за головой)
         for (var i = len - 1; i >= 0; i--) {
             var newP = snake[i];
             var oldP = oldSnake[i] || newP;
@@ -732,38 +1208,80 @@ function render(progress) {
             if (Math.abs(newP.y - oldP.y) > 2) oy = newP.y;
             var x = ox + (newP.x - ox) * progress;
             var y = oy + (newP.y - oy) * progress;
-
             var colors = getSnakeColors(i, len);
+
+            // Свечение тела
             if (i === 0) {
-                ctx.fillStyle = colors.head;
                 ctx.shadowColor = colors.glow;
-                ctx.shadowBlur = 14;
+                ctx.shadowBlur = 20;
+                ctx.fillStyle = colors.head;
             } else {
-                ctx.fillStyle = colors.body;
+                ctx.shadowBlur = i < 3 ? 8 : 0;
                 if (getSkin().id !== 'rainbow') {
                     var t = i / Math.max(1, len);
-                    var darkness = 1 - t * 0.4;
+                    var darkness = 1 - t * 0.45;
                     ctx.fillStyle = shadeColor(colors.body, darkness);
+                } else {
+                    ctx.fillStyle = colors.body;
                 }
-                ctx.shadowBlur = 0;
+                if (i < 3) ctx.shadowColor = colors.glow;
             }
-            var pad = i === 0 ? 0.6 : 1.4;
+            var pad = i === 0 ? 0.5 : 1.2;
             var px = x * cellSize + pad, py = y * cellSize + pad, ps = cellSize - pad * 2;
             ctx.beginPath();
-            var rad = i === 0 ? ps * 0.35 : ps * 0.2;
+            var rad = i === 0 ? ps * 0.4 : ps * 0.22;
             roundRect(ctx, px, py, ps, ps, rad);
             ctx.fill();
+
+            // Внутренний блик на голове
+            if (i === 0) {
+                ctx.shadowBlur = 0;
+                ctx.fillStyle = 'rgba(255,255,255,0.35)';
+                ctx.beginPath();
+                ctx.arc(px + ps * 0.3, py + ps * 0.3, ps * 0.13, 0, Math.PI * 2);
+                ctx.fill();
+            }
         }
         ctx.shadowBlur = 0;
+
+        // Индикатор щита
+        if (activeShield && snake.length > 0) {
+            var head = snake[0];
+            var hx = head.x * cellSize + cellSize/2;
+            var hy = head.y * cellSize + cellSize/2;
+            ctx.strokeStyle = 'rgba(34, 211, 238, 0.9)';
+            ctx.lineWidth = 2.5;
+            ctx.shadowColor = '#22d3ee';
+            ctx.shadowBlur = 15;
+            ctx.beginPath();
+            ctx.arc(hx, hy, cellSize * 0.75 + Math.sin(performance.now()/150)*2, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.shadowBlur = 0;
+        }
+
+        // Индикатор буста
+        if (activeBoost) {
+            ctx.strokeStyle = 'rgba(250, 204, 21, 0.5)';
+            ctx.lineWidth = 1.5;
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            ctx.arc(snake[0].x * cellSize + cellSize/2, snake[0].y * cellSize + cellSize/2, cellSize * 1.1, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.setLineDash([]);
+        }
     }
 
+    // Частицы
     for (var i = 0; i < particles.length; i++) {
         var p = particles[i];
         ctx.globalAlpha = p.life;
         ctx.fillStyle = p.color;
+        ctx.shadowColor = p.color;
+        ctx.shadowBlur = 8;
         ctx.beginPath(); ctx.arc(p.x, p.y, p.size * p.life, 0, Math.PI * 2); ctx.fill();
     }
     ctx.globalAlpha = 1;
+    ctx.shadowBlur = 0;
 }
 
 function shadeColor(hex, factor) {
@@ -788,8 +1306,11 @@ function roundRect(ctx, x, y, w, h, r) {
 }
 
 function updateHud() {
-    document.getElementById('scoreHud').textContent = 'Счёт: ' + score;
-    document.getElementById('speedHud').textContent = 'x' + (BASE_SPEED / speed).toFixed(1);
+    var extra = '';
+    if (activeBoost) extra += ' ⚡';
+    if (isPremium) extra += ' 👑';
+    document.getElementById('scoreHud').textContent = '🎯 ' + score + extra;
+    document.getElementById('speedHud').textContent = '⚡ x' + (BASE_SPEED / speed).toFixed(1);
 }
 
 function endGame() {
@@ -804,7 +1325,7 @@ function endGame() {
             var cx = snake[i].x * cellSize + cellSize / 2;
             var cy = snake[i].y * cellSize + cellSize / 2;
             var skin = getSkin();
-            spawnParticles(cx, cy, skin.head === 'rainbow' ? '#22d3ee' : skin.head, 4);
+            spawnParticles(cx, cy, skin.head === 'rainbow' ? '#22d3ee' : skin.head, 5);
         }
     }
     snake = null;
@@ -822,9 +1343,11 @@ function endGame() {
             localStorage.setItem('snakeHigh', String(highScore));
             if (tg && tg.CloudStorage) tg.CloudStorage.setItem('snakeHighScore', String(highScore), function(){});
         }
-        document.getElementById('overScore').textContent = 'Счёт: ' + score;
-        document.getElementById('overInfo').textContent = '⏱ ' + formatTime(gameTime) + ' · 🔄 Возрождений: ' + reviveCount;
-        document.getElementById('overHigh').textContent = isNewRecord ? '🎉 НОВЫЙ РЕКОРД!' : 'Рекорд: ' + highScore;
+        document.getElementById('overScore').textContent = score;
+        document.getElementById('overInfo').innerHTML =
+            '<span>⏱ ' + formatTime(gameTime) + '</span>' +
+            '<span>🔄 ' + reviveCount + '</span>';
+        document.getElementById('overHigh').textContent = isNewRecord ? '🎉 НОВЫЙ РЕКОРД!' : '🏅 Рекорд: ' + highScore;
         document.getElementById('submitStatus').textContent = '';
         showScreen('overScreen');
         if (score > 0) submitScore(score, gameTime, reviveCount);
@@ -850,60 +1373,21 @@ function buyLife() {
     if (isBuyingLife || !savedState) return;
     isBuyingLife = true;
     var btn = document.getElementById('buyLifeBtn');
-    btn.textContent = '⏳ Создание счёта...';
-
-    fetch(WORKER_URL + '/create-invoice', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            userId: tgUser ? tgUser.id : 0,
-            itemType: 'extra_life'
-        })
-    })
-    .then(function(r) { return r.json(); })
-    .then(function(data) {
-        if (!data.ok || !data.invoiceLink) {
-            btn.textContent = '💚 Вторая жизнь за 1⭐';
-            isBuyingLife = false;
-            showToast('⚠ Не удалось создать счёт: ' + (data.description || data.error || ''));
-            return;
-        }
-        if (!tg) {
-            btn.textContent = '💚 Вторая жизнь за 1⭐';
-            isBuyingLife = false;
-            showToast('Оплата только в Telegram');
-            return;
-        }
-        tg.openInvoice(data.invoiceLink, function(status) {
-            btn.textContent = '💚 Вторая жизнь за 1⭐';
-            isBuyingLife = false;
-            if (status === 'paid') {
-                showToast('✓ Оплата прошла! Вторая жизнь активирована');
-                startCountdown(function() {
-                    reviveSnake();
-                    if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-                });
-            } else if (status === 'cancelled') {
-                showToast('Оплата отменена');
-            } else if (status === 'failed') {
-                showToast('⚠ Оплата не прошла');
-            }
-        });
-    })
-    .catch(function(e) {
-        console.warn('buy failed', e);
-        btn.textContent = '💚 Вторая жизнь за 1⭐';
+    btn.textContent = '⏳ Создание...';
+    buyItem('extra_life');
+    setTimeout(function() {
+        btn.textContent = '💚 Вторая жизнь за 5⭐';
         isBuyingLife = false;
-        showToast('⚠ Ошибка сети');
-    });
+    }, 1000);
 }
 
 function startCountdown(callback) {
     var el = document.getElementById('countdown');
+    var txt = document.getElementById('countdown-text');
     el.classList.add('show');
     var count = 3;
     function tickCount() {
-        el.textContent = count > 0 ? String(count) : 'GO!';
+        txt.textContent = count > 0 ? String(count) : 'GO!';
         el.classList.remove('pulse');
         void el.offsetWidth;
         el.classList.add('pulse');
@@ -925,7 +1409,6 @@ function reviveSnake() {
     for (var i = 0; i < len; i++) snake.push({ x: 10 - i, y: 10 });
     oldSnake = [];
     for (var i = 0; i < snake.length; i++) oldSnake.push({x: snake[i].x, y: snake[i].y});
-
     score = savedState.score;
     foodEaten = savedState.foodEaten;
     reviveCount++;
