@@ -39,25 +39,46 @@
         .btn { background: linear-gradient(180deg, rgba(74,222,128,0.14), rgba(74,222,128,0.06)); border: 2px solid rgba(74, 222, 128, 0.7); color: #4ade80; font-size: 32px; font-weight: bold; border-radius: 18px; display: flex; align-items: center; justify-content: center; transition: transform 0.06s, background 0.1s; box-shadow: 0 4px 0 rgba(34, 197, 94, 0.3); cursor: pointer; }
         .btn.pressed { background: #4ade80; color: #0f0f1a; transform: translateY(2px); box-shadow: 0 2px 0 rgba(34, 197, 94, 0.5); }
         #overTitle { font-size: 36px; color: #ef4444; margin-bottom: 10px; font-weight: 900; letter-spacing: -1px; }
-        #overScore { font-size: 22px; color: #4ade80; margin-bottom: 6px; font-weight: 700; }
+        #overScore { font-size: 22px; color: #4ade80; margin-bottom: 4px; font-weight: 700; }
+        #overInfo { font-size: 13px; color: #94a3b8; margin-bottom: 8px; }
         #overHigh { font-size: 14px; color: #facc15; margin-bottom: 16px; min-height: 20px; }
         #submitStatus { font-size: 12px; color: #64748b; min-height: 16px; margin-bottom: 12px; }
-        #lbTitle { font-size: 32px; font-weight: 900; margin-bottom: 16px; background: linear-gradient(135deg, #facc15, #4ade80); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-        #lbList { width: 100%; max-width: 380px; background: rgba(10, 10, 20, 0.6); border: 1px solid rgba(74, 222, 128, 0.2); border-radius: 16px; padding: 8px; max-height: 55vh; overflow-y: auto; -webkit-overflow-scrolling: touch; }
-        .lbRow { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; font-size: 15px; margin-bottom: 2px; }
+        #lbTitle { font-size: 30px; font-weight: 900; margin-bottom: 8px; background: linear-gradient(135deg, #facc15, #4ade80); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        #lbRules { font-size: 11px; color: #64748b; margin-bottom: 14px; text-align: center; line-height: 1.5; }
+        #lbList { width: 100%; max-width: 380px; background: rgba(10, 10, 20, 0.6); border: 1px solid rgba(74, 222, 128, 0.2); border-radius: 16px; padding: 8px; max-height: 50vh; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+        .lbRow { display: flex; align-items: center; gap: 8px; padding: 10px 10px; border-radius: 10px; font-size: 14px; margin-bottom: 3px; }
         .lbRow.me { background: rgba(74, 222, 128, 0.15); border: 1px solid rgba(74, 222, 128, 0.4); }
-        .lbRank { width: 34px; font-weight: 900; color: #94a3b8; text-align: center; flex-shrink: 0; }
+        .lbRank { width: 30px; font-weight: 900; color: #94a3b8; text-align: center; flex-shrink: 0; }
         .lbRank.top1 { color: #facc15; font-size: 18px; }
         .lbRank.top2 { color: #cbd5e1; font-size: 17px; }
         .lbRank.top3 { color: #f59e0b; font-size: 17px; }
-        .lbName { flex: 1; color: #e2e8f0; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .lbScore { color: #4ade80; font-weight: 900; font-size: 16px; }
+        .lbMain { flex: 1; min-width: 0; }
+        .lbName { color: #e2e8f0; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 14px; }
+        .lbSub { color: #64748b; font-size: 11px; margin-top: 2px; }
+        .lbScore { color: #4ade80; font-weight: 900; font-size: 18px; text-align: right; }
         #lbStatus { color: #64748b; font-size: 14px; padding: 40px 20px; text-align: center; }
-        #lbRefresh { margin-top: 16px; padding: 12px 28px; background: rgba(74, 222, 128, 0.1); border: 2px solid rgba(74, 222, 128, 0.5); color: #4ade80; border-radius: 12px; font-weight: 700; font-size: 14px; cursor: pointer; }
-        #lbCacheInfo { color: #475569; font-size: 11px; margin-top: 8px; }
+        #lbRefresh { margin-top: 14px; padding: 12px 28px; background: rgba(74, 222, 128, 0.1); border: 2px solid rgba(74, 222, 128, 0.5); color: #4ade80; border-radius: 12px; font-weight: 700; font-size: 14px; cursor: pointer; }
+        #lbCacheInfo { color: #475569; font-size: 11px; margin-top: 8px; min-height: 14px; }
+        #countdown {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            display: none; align-items: center; justify-content: center;
+            background: rgba(0,0,0,0.75); z-index: 1000;
+            font-size: 140px; font-weight: 900; color: #4ade80;
+            text-shadow: 0 0 40px #4ade80, 0 0 80px #22c55e;
+            font-family: -apple-system, sans-serif;
+        }
+        #countdown.show { display: flex; }
+        #countdown.pulse { animation: pulse 0.9s ease-out; }
+        @keyframes pulse {
+            0% { transform: scale(1.6); opacity: 0.3; }
+            60% { transform: scale(0.95); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
     </style>
 </head>
 <body>
+
+    <div id="countdown"></div>
 
     <div id="menuScreen" class="screen active">
         <div id="userBox">
@@ -93,6 +114,7 @@
     <div id="overScreen" class="screen">
         <div id="overTitle">ИГРА ОКОНЧЕНА</div>
         <div id="overScore">Счёт: 0</div>
+        <div id="overInfo"></div>
         <div id="overHigh"></div>
         <div id="submitStatus"></div>
         <button class="buy-btn" data-action="buyLife" id="buyLifeBtn">💚 Вторая жизнь за 15⭐</button>
@@ -103,6 +125,9 @@
 
     <div id="leaderboardScreen" class="screen">
         <div id="lbTitle">🏆  ТОП ИГРОКОВ</div>
+        <div id="lbRules">
+            1️⃣ Больше очков &nbsp;•&nbsp; 2️⃣ Меньше возрождений &nbsp;•&nbsp; 3️⃣ Меньше времени
+        </div>
         <div id="lbList"><div id="lbStatus">Загрузка...</div></div>
         <div id="lbCacheInfo"></div>
         <button id="lbRefresh" data-action="lbRefresh">🔄  Обновить</button>
@@ -139,6 +164,12 @@ let highScore = parseInt(localStorage.getItem('snakeHigh') || '0', 10);
 let leaderboardOpen = false, lbInterval = null;
 let isBuyingLife = false;
 
+// Текущая партия
+let gameStartTime = 0;
+let gameTime = 0;
+let reviveCount = 0;
+let savedState = null;
+
 function initCanvas() {
     canvas = document.getElementById('game');
     ctx = canvas.getContext('2d');
@@ -164,6 +195,14 @@ function setupUser() {
     document.getElementById('userAvatar').textContent = name.charAt(0).toUpperCase();
 }
 
+function formatTime(sec) {
+    sec = Math.floor(sec);
+    if (sec < 60) return sec + ' сек';
+    const m = Math.floor(sec / 60);
+    const s = sec % 60;
+    return m + ' мин ' + (s > 0 ? s + ' сек' : '');
+}
+
 async function fetchScores(forceRefresh) {
     const now = Date.now();
     if (!forceRefresh && scoresCache && (now - scoresCacheTime) < CACHE_TTL) return scoresCache;
@@ -181,7 +220,7 @@ async function saveScores(scores) {
     const res = await fetch(API_BASE + BIN_ID, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', 'X-Master-Key': MASTER_KEY },
-        body: JSON.stringify({ scores })
+        body: JSON.stringify({ scores: scores })
     });
     if (!res.ok) throw new Error('HTTP ' + res.status);
     scoresCache = scores;
@@ -189,7 +228,18 @@ async function saveScores(scores) {
     return await res.json();
 }
 
-async function submitScore(finalScore) {
+function sortScores(arr) {
+    arr.sort(function(a, b) {
+        if (b.score !== a.score) return b.score - a.score;
+        const aR = a.revives || 0, bR = b.revives || 0;
+        if (aR !== bR) return aR - bR;
+        const aT = a.time || 0, bT = b.time || 0;
+        return aT - bT;
+    });
+    return arr;
+}
+
+async function submitScore(finalScore, finalTime, finalRevives) {
     if (!tgUser || finalScore <= 0) return;
     const now = Date.now();
     if (now - lastSubmitTime < SUBMIT_COOLDOWN) return;
@@ -200,20 +250,31 @@ async function submitScore(finalScore) {
         const scores = await fetchScores(true);
         const myId = String(tgUser.id);
         const myName = (tgUser.first_name || tgUser.username || 'игрок').substring(0, 30);
-        const existing = scores.find(s => s.id === myId);
+        const existing = scores.find(function(s) { return s.id === myId; });
+
+        const newEntry = { id: myId, name: myName, score: finalScore, time: Math.round(finalTime), revives: finalRevives, date: now };
+
         if (existing) {
-            if (finalScore > existing.score) {
-                existing.score = finalScore;
-                existing.name = myName;
-                existing.date = now;
-            } else {
+            // Сравниваем по нашей логике: очки → возрождения → время
+            let better = false;
+            if (finalScore > (existing.score || 0)) better = true;
+            else if (finalScore === (existing.score || 0)) {
+                if (finalRevives < (existing.revives || 0)) better = true;
+                else if (finalRevives === (existing.revives || 0) && finalTime < (existing.time || 99999)) better = true;
+            }
+            if (!better) {
                 statusEl.textContent = '✓ В рейтинге твой рекорд: ' + existing.score;
                 return;
             }
+            existing.score = finalScore;
+            existing.name = myName;
+            existing.time = Math.round(finalTime);
+            existing.revives = finalRevives;
+            existing.date = now;
         } else {
-            scores.push({ id: myId, name: myName, score: finalScore, date: now });
+            scores.push(newEntry);
         }
-        scores.sort((a, b) => b.score - a.score);
+        sortScores(scores);
         await saveScores(scores.slice(0, 100));
         statusEl.textContent = '✓ Результат отправлен в рейтинг!';
     } catch (e) {
@@ -254,18 +315,24 @@ function drawLeaderboard(scores) {
         listEl.innerHTML = '<div id="lbStatus">Пока никто не играл.<br>Стань первым! 🐍</div>';
         return;
     }
+    sortScores(scores);
     const myId = tgUser ? String(tgUser.id) : null;
     const top = scores.slice(0, 10);
     const medals = ['🥇', '🥈', '🥉'];
     let html = '';
-    top.forEach((s, i) => {
+    top.forEach(function(s, i) {
         const isMe = myId && s.id === myId;
         const rankCls = i === 0 ? 'top1' : i === 1 ? 'top2' : i === 2 ? 'top3' : '';
         const rankContent = i < 3 ? medals[i] : '#' + (i + 1);
         const safeName = String(s.name || 'игрок').replace(/[<>&]/g, '');
+        const timeStr = s.time ? formatTime(s.time) : '—';
+        const revStr = (s.revives !== undefined) ? (s.revives + ' возр.') : '—';
         html += '<div class="lbRow' + (isMe ? ' me' : '') + '">' +
             '<div class="lbRank ' + rankCls + '">' + rankContent + '</div>' +
-            '<div class="lbName">' + safeName + (isMe ? ' (ты)' : '') + '</div>' +
+            '<div class="lbMain">' +
+                '<div class="lbName">' + safeName + (isMe ? ' (ты)' : '') + '</div>' +
+                '<div class="lbSub">⏱ ' + timeStr + ' · 🔄 ' + revStr + '</div>' +
+            '</div>' +
             '<div class="lbScore">' + s.score + '</div>' +
             '</div>';
     });
@@ -273,14 +340,14 @@ function drawLeaderboard(scores) {
 }
 
 function showScreen(id) {
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
     document.getElementById(id).classList.add('active');
     leaderboardOpen = (id === 'leaderboardScreen');
     if (lbInterval) { clearInterval(lbInterval); lbInterval = null; }
     if (id === 'menuScreen') document.getElementById('menuHigh').textContent = highScore;
     if (id === 'leaderboardScreen') {
         renderLeaderboard(false);
-        lbInterval = setInterval(() => { if (leaderboardOpen) renderLeaderboard(false); }, CACHE_TTL);
+        lbInterval = setInterval(function() { if (leaderboardOpen) renderLeaderboard(false); }, CACHE_TTL);
     }
 }
 
@@ -301,11 +368,15 @@ function startGame() {
     initCanvas();
     showScreen('gameScreen');
     snake = [{x: 9, y: 10}, {x: 8, y: 10}, {x: 7, y: 10}];
-    oldSnake = snake.map(s => ({x: s.x, y: s.y}));
+    oldSnake = snake.map(function(s) { return {x: s.x, y: s.y}; });
     dir = {x: 1, y: 0}; nextDir = {x: 1, y: 0};
     score = 0; foodEaten = 0; speed = BASE_SPEED; running = true;
     lastTick = 0; lastFrameTime = 0; particles = [];
     frameCount = 0; fpsLastUpdate = 0;
+    gameStartTime = performance.now();
+    gameTime = 0;
+    reviveCount = 0;
+    savedState = null;
     placeFood(); updateHud();
     if (rafId) cancelAnimationFrame(rafId);
     rafId = requestAnimationFrame(loop);
@@ -330,7 +401,7 @@ function loop(timestamp) {
 }
 
 function tick() {
-    oldSnake = snake.map(s => ({x: s.x, y: s.y}));
+    oldSnake = snake.map(function(s) { return {x: s.x, y: s.y}; });
     dir = {x: nextDir.x, y: nextDir.y};
     const head = {x: snake[0].x + dir.x, y: snake[0].y + dir.y};
     if (head.x < 0 || head.x >= GRID || head.y < 0 || head.y >= GRID) return endGame();
@@ -343,7 +414,7 @@ function tick() {
         speed = Math.max(MIN_SPEED, BASE_SPEED - foodEaten * SPEED_STEP);
         updateHud(); haptic('light');
         canvas.classList.add('shake');
-        setTimeout(() => canvas.classList.remove('shake'), 80);
+        setTimeout(function() { canvas.classList.remove('shake'); }, 80);
         const cx = food.x * cellSize + cellSize / 2;
         const cy = food.y * cellSize + cellSize / 2;
         spawnParticles(cx, cy, food.golden ? '#facc15' : '#ef4444');
@@ -355,7 +426,8 @@ function placeFood() {
     while (true) {
         const f = { x: Math.floor(Math.random() * GRID), y: Math.floor(Math.random() * GRID) };
         let busy = false;
-        for (const s of snake) if (s.x === f.x && s.y === f.y) { busy = true; break; }
+        for (const s of snake) if (s.x === f.x && s.y === f.y)';
+ { busy = true; break; }
         if (!busy) {
             f.golden = Math.random() < 0.15;
             f.points = f.golden ? 5 : 1;
@@ -398,8 +470,7 @@ function render(progress) {
     const fx = food.x * cellSize + cellSize / 2;
     const fy = food.y * cellSize + cellSize / 2;
     const fr = (cellSize / 2 - 1.5) * pulse;
-    ctx.shadowColor = food.golden ? '#facc15' : '#ef4444';
-    ctx.shadowBlur = food.golden ? 15 : 10;
+    ctx.shadowColor = food.golden ? '#facc15' : '#ef4444    ctx.shadowBlur = food.golden ? 15 : 10;
     ctx.fillStyle = food.golden ? '#facc15' : '#ef4444';
     ctx.beginPath(); ctx.arc(fx, fy, fr, 0, Math.PI * 2); ctx.fill();
     ctx.shadowBlur = 0;
@@ -459,6 +530,17 @@ function endGame() {
     running = false;
     if (rafId) cancelAnimationFrame(rafId);
     haptic('medium');
+
+    // Фиксируем время партии
+    gameTime = (performance.now() - gameStartTime) / 1000;
+
+    // Сохраняем состояние для возможного возрождения
+    savedState = {
+        score: score,
+        foodEaten: foodEaten,
+        snakeLen: snake.length
+    };
+
     const isNewRecord = score > highScore;
     if (isNewRecord) {
         highScore = score;
@@ -466,10 +548,11 @@ function endGame() {
         if (tg && tg.CloudStorage) tg.CloudStorage.setItem('snakeHighScore', String(highScore), function(){});
     }
     document.getElementById('overScore').textContent = 'Счёт: ' + score;
+    document.getElementById('overInfo').textContent = '⏱ ' + formatTime(gameTime) + ' · 🔄 Возрождений: ' + reviveCount;
     document.getElementById('overHigh').textContent = isNewRecord ? '🎉 НОВЫЙ РЕКОРД!' : 'Рекорд: ' + highScore;
     document.getElementById('submitStatus').textContent = '';
     showScreen('overScreen');
-    if (score > 0) submitScore(score);
+    if (score > 0) submitScore(score, gameTime, reviveCount);
 }
 
 function setDir(d) {
@@ -488,28 +571,68 @@ function haptic(type) {
 }
 
 function buyLife() {
-    if (isBuyingLife) return;
+    if (isBuyingLife || !savedState) return;
     isBuyingLife = true;
     const btn = document.getElementById('buyLifeBtn');
     btn.textContent = '⏳ Создание счёта...';
 
-    // ЗАГЛУШКА. Настоящая оплата заработает после подключения бэкенда.
+    // ЗАГЛУШКА. Настоящая оплата через Telegram Stars — после подключения бэкенда.
     setTimeout(function() {
         btn.textContent = '💚 Вторая жизнь за 15⭐';
         isBuyingLife = false;
-        reviveSnake();
-        if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-        if (tg) tg.showAlert('Тест: оплата прошла! Ты получаешь вторую жизнь. В релизе тут будет настоящая оплата ⭐');
-        else alert('Тест: вторая жизнь активирована');
-    }, 800);
+        startCountdown(function() {
+            reviveSnake();
+            if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+        });
+    }, 700);
+}
+
+function startCountdown(callback) {
+    const el = document.getElementById('countdown');
+    el.classList.add('show');
+    let count = 3;
+
+    function tickCount() {
+        el.textContent = count > 0 ? count : 'GO!';
+        el.classList.remove('pulse');
+        void el.offsetWidth;
+        el.classList.add('pulse');
+        haptic('medium');
+
+        if (count < 0) {
+            el.classList.remove('show');
+            el.classList.remove('pulse');
+            callback();
+            return;
+        }
+        count--;
+        setTimeout(tickCount, 1000);
+    }
+    tickCount();
 }
 
 function reviveSnake() {
-    snake = [{x: 10, y: 10}, {x: 9, y: 10}, {x: 8, y: 10}];
-    oldSnake = snake.map(s => ({x: s.x, y: s.y}));
+    if (!savedState) return;
+
+    // Восстанавливаем змейку той же длины, но в центре, идущей вправо
+    const len = Math.min(savedState.snakeLen, 10);
+    snake = [];
+    const startX = 10, startY = 10;
+    for (let i = 0; i < len; i++) {
+        snake.push({ x: startX - i, y: startY });
+    }
+    oldSnake = snake.map(function(s) { return {x: s.x, y: s.y}; });
+
+    score = savedState.score;
+    foodEaten = savedState.foodEaten;
+    reviveCount++;
+
     dir = {x: 1, y: 0};
     nextDir = {x: 1, y: 0};
-    speed = Math.max(MIN_SPEED, speed * 0.8);
+
+    // Немного замедляем после возрождения
+    speed = Math.min(BASE_SPEED, Math.max(MIN_SPEED, BASE_SPEED - foodEaten * SPEED_STEP + 30));
+
     running = true;
     lastTick = 0;
     lastFrameTime = 0;
