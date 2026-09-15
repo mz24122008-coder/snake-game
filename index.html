@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Змейка Баттл</title>
     <style>
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body {
             margin: 0;
             background: #0f0f1a;
@@ -14,50 +15,51 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 100vh;
+            min-height: 100vh;
             overflow: hidden;
             user-select: none;
+            padding: 10px;
         }
         #score {
-            font-size: 24px;
-            margin-bottom: 10px;
+            font-size: 22px;
+            margin-bottom: 12px;
             font-weight: bold;
             color: #4ade80;
         }
-        canvas {
+        #game {
             background: #1a1a2e;
             border-radius: 12px;
-            box-shadow: 0 0 20px rgba(74, 222, 128, 0.2);
+            box-shadow: 0 0 20px rgba(74, 222, 128, 0.25);
             touch-action: none;
+            max-width: 90vw;
+            max-height: 55vh;
         }
         #controls {
-            margin-top: 20px;
+            margin-top: 16px;
             display: grid;
-            grid-template-columns: repeat(3, 60px);
-            grid-template-rows: repeat(2, 60px);
+            grid-template-columns: repeat(3, 64px);
+            grid-template-rows: repeat(2, 64px);
             gap: 10px;
-            justify-content: center;
         }
         .btn {
             background: #2a2a40;
-            border: 1px solid #4ade80;
+            border: 2px solid #4ade80;
             color: white;
-            font-size: 24px;
-            border-radius: 10px;
+            font-size: 26px;
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            cursor: pointer;
         }
         .btn:active { background: #4ade80; color: #0f0f1a; }
         #restart {
             display: none;
-            margin-top: 15px;
-            padding: 10px 20px;
+            margin-top: 14px;
+            padding: 12px 24px;
             background: #4ade80;
             color: #0f0f1a;
             border: none;
-            border-radius: 8px;
+            border-radius: 10px;
             font-weight: bold;
             font-size: 16px;
         }
@@ -77,56 +79,59 @@
     </div>
 
 <script>
-    const canvas = document.getElementById('game');
-    const ctx = canvas.getContext('2d');
-    const scoreEl = document.getElementById('score');
-    const restartBtn = document.getElementById('restart');
+    var canvas = document.getElementById('game');
+    var ctx = canvas.getContext('2d');
+    var scoreEl = document.getElementById('score');
+    var restartBtn = document.getElementById('restart');
 
-    const gridSize = 15;
-    const cellSize = canvas.width / gridSize;
-    let snake, food, direction, nextDirection, score, gameLoop, isGameOver           ;
+    var gridSize = 15;
+    var cellSize = canvas.width / gridSize;
+    var snake, food, direction, nextDirection, score, gameLoop, isGameOver;
 
     function init() {
-        return snake = [{x:  end7, y: 7}];
-       Game direction = {x: 0, y: ();
-0};
-        nextDirection =        {x: 0, y: 0};
+        snake = [{x: 7, y: 7}, {x: 6, y: 7}, {x: 5, y: 7}];
+        direction = {x: 1, y: 0};      // едет вправо
+        nextDirection = {x: 1, y: 0};
         score = 0;
         isGameOver = false;
         scoreEl.textContent = 'Счёт: 0';
         restartBtn.style.display = 'none';
         placeFood();
+        draw();                        // сразу рисуем поле
         if (gameLoop) clearInterval(gameLoop);
-        gameLoop = setInterval(update, 150);
+        gameLoop = setInterval(update, 180);
     }
 
     function placeFood() {
-        let newFood;
         while (true) {
-            newFood = {
+            var f = {
                 x: Math.floor(Math.random() * gridSize),
                 y: Math.floor(Math.random() * gridSize)
             };
-            if (!snake.some(s => s.x === newFood.x && s.y === newFood.y)) break;
+            var onSnake = false;
+            for (var i = 0; i < snake.length; i++) {
+                if (snake[i].x === f.x && snake[i].y === f.y) { onSnake = true; break; }
+            }
+            if (!onSnake) { food = f; return; }
         }
-        food = newFood;
     }
 
     function update() {
         if (isGameOver) return;
 
-        direction = {...nextDirection};
-        if (direction.x === 0 && direction.y === 0) return;
+        direction = {x: nextDirection.x, y: nextDirection.y};
+        var head = {x: snake[0].x + direction.x, y: snake[0].y + direction.y};
 
-        const head = {x: snake[0].x + direction.x, y: snake[0].y + direction.y};
-
-        // Стены
+        // столкновение со стеной
         if (head.x < 0 || head.x >= gridSize || head.y < 0 || head.y >= gridSize) {
             return endGame();
         }
-        // Себя
-        if (snake.some(s => s.x === head.x && s.y === head.y)) {
- }
+        // столкновение с собой
+        for (var i = 0; i < snake.length; i++) {
+            if (snake[i].x === head.x && snake[i].y === head.y) {
+                return endGame();
+            }
+        }
 
         snake.unshift(head);
 
@@ -142,20 +147,30 @@
     }
 
     function draw() {
+        // фон
         ctx.fillStyle = '#1a1a2e';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // Еда
+        // еда
         ctx.fillStyle = '#ef4444';
         ctx.beginPath();
-        ctx.arc(food.x * cellSize + cellSize/2, food.y * cellSize + cellSize/2, cellSize/2 - 2, 0, Math.PI * 2);
+        ctx.arc(
+            food.x * cellSize + cellSize / 2,
+            food.y * cellSize + cellSize / 2,
+            cellSize / 2 - 2, 0, Math.PI * 2
+        );
         ctx.fill();
 
-        // Змейка
-        snake.forEach((seg, i) => {
-            ctx.fillStyle = i === 0 ? '#4ade80' : '#22c55e';
-            ctx.fillRect(seg.x * cellSize + 1, seg.y * cellSize + 1, cellSize - 2, cellSize - 2);
-        });
+        // змейка
+        for (var i = 0; i < snake.length; i++) {
+            ctx.fillStyle = (i === 0) ? '#4ade80' : '#22c55e';
+            ctx.fillRect(
+                snake[i].x * cellSize + 1,
+                snake[i].y * cellSize + 1,
+                cellSize - 2,
+                cellSize - 2
+            );
+        }
     }
 
     function endGame() {
@@ -166,34 +181,38 @@
 
     function setDirection(dir) {
         if (isGameOver) return;
-        const dirs = {
-            up: {x: 0, y: -1},
-            down: {x: 0, y: 1},
-            left: {x: -1, y: 0},
-            right: {x: 1, y: 0}
+        var dirs = {
+            up:    {x: 0,  y: -1},
+            down:  {x: 0,  y: 1},
+            left:  {x: -1, y: 0},
+            right: {x: 1,  y: 0}
         };
-        const newDir = dirs[dir];
-        // Нельзя развернуться на 180
-        if (newDir.x === -direction.x && newDir.y === -direction.y) return;
-        nextDirection = newDir;
+        var nd = dirs[dir];
+        if (!nd) return;
+        // нельзя развернуться на 180°
+        if (nd.x === -direction.x && nd.y === -direction.y) return;
+        nextDirection = nd;
     }
 
-    // Кнопки
-    document.querySelectorAll('.btn').forEach(btn => {
-        btn.addEventListener('click', () => setDirection(btn.dataset.dir));
-    });
+    // кнопки
+    var btns = document.querySelectorAll('.btn');
+    for (var i = 0; i < btns.length; i++) {
+        (function(b){
+            b.addEventListener('click', function(){ setDirection(b.dataset.dir); });
+        })(btns[i]);
+    }
 
-    // Свайпы
-    let touchStartX, touchStartY;
-    canvas.addEventListener('touchstart', e => {
+    // свайпы
+    var touchStartX = null, touchStartY = null;
+    canvas.addEventListener('touchstart', function(e){
         touchStartX = e.touches[0].clientX;
         touchStartY = e.touches[0].clientY;
     }, {passive: true});
 
-    canvas.addEventListener('touchend', e => {
-        if (!touchStartX) return;
-        const dx = e.changedTouches[0].clientX - touchStartX;
-        const dy = e.changedTouches[0].clientY - touchStartY;
+    canvas.addEventListener('touchend', function(e){
+        if (touchStartX === null) return;
+        var dx = e.changedTouches[0].clientX - touchStartX;
+        var dy = e.changedTouches[0].clientY - touchStartY;
         if (Math.abs(dx) > Math.abs(dy)) {
             setDirection(dx > 0 ? 'right' : 'left');
         } else {
@@ -202,9 +221,9 @@
         touchStartX = null;
     }, {passive: true});
 
-    // Стрелки клавиатуры (на всякий)
-    document.addEventListener('keydown', e => {
-        const map = {ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right'};
+    // клавиатура (на всякий)
+    document.addEventListener('keydown', function(e){
+        var map = {ArrowUp:'up', ArrowDown:'down', ArrowLeft:'left', ArrowRight:'right'};
         if (map[e.key]) setDirection(map[e.key]);
     });
 
