@@ -88,8 +88,6 @@
         #errorBox { position: fixed; top: 0; left: 0; right: 0; background: #ef4444; color: white; padding: 12px; font-size: 12px; z-index: 9999; display: none; word-break: break-all; max-height: 40vh; overflow-y: auto; }
         #toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px); background: rgba(30, 41, 59, 0.95); color: white; padding: 12px 24px; border-radius: 12px; font-size: 14px; font-weight: 600; z-index: 9998; border: 1px solid rgba(74, 222, 128, 0.4); transition: transform 0.3s ease-out; max-width: 90vw; text-align: center; backdrop-filter: blur(10px); }
         #toast.show { transform: translateX(-50%) translateY(0); }
-
-        /* ЮРИДИЧЕСКАЯ СТРАНИЦА */
         #legalScreen .legal-content { width: 100%; max-width: 380px; background: rgba(10, 10, 20, 0.6); border: 1px solid rgba(74, 222, 128, 0.2); border-radius: 16px; padding: 20px; max-height: 65vh; overflow-y: auto; -webkit-overflow-scrolling: touch; backdrop-filter: blur(10px); font-size: 13px; line-height: 1.6; color: #cbd5e1; }
         #legalScreen h2 { font-size: 18px; color: #4ade80; margin-bottom: 12px; font-weight: 800; }
         #legalScreen h3 { font-size: 14px; color: #22d3ee; margin: 14px 0 6px; font-weight: 700; }
@@ -106,7 +104,6 @@
     <div id="countdown"></div>
     <div id="toast"></div>
 
-    <!-- МЕНЮ -->
     <div id="menuScreen" class="screen active">
         <div id="userBox">
             <div id="userAvatar">?</div>
@@ -123,7 +120,6 @@
         <div class="high-score">🏅 Рекорд: <span id="menuHigh">0</span></div>
     </div>
 
-    <!-- ИГРА -->
     <div id="gameScreen" class="screen">
         <div id="hud">
             <span id="scoreHud">Счёт: 0</span>
@@ -141,20 +137,18 @@
         </div>
     </div>
 
-    <!-- GAME OVER -->
     <div id="overScreen" class="screen">
         <div id="overTitle">ИГРА ОКОНЧЕНА</div>
         <div id="overScore">Счёт: 0</div>
         <div id="overInfo"></div>
         <div id="overHigh"></div>
         <div id="submitStatus"></div>
-        <button class="buy-btn" onclick="buyLife()" id="buyLifeBtn">💚 Вторая жизнь за 15⭐</button>
+        <button class="buy-btn" onclick="buyLife()" id="buyLifeBtn">💚 Вторая жизнь за 1⭐</button>
         <button class="menu-btn primary" onclick="startGame()">🔄  Ещё раз</button>
         <button class="menu-btn" onclick="showScreen('leaderboardScreen')">🏆  Рейтинг</button>
         <button class="menu-btn" onclick="showScreen('menuScreen')">🏠  Меню</button>
     </div>
 
-    <!-- РЕЙТИНГ -->
     <div id="leaderboardScreen" class="screen">
         <div id="lbTitle">🏆  ТОП ИГРОКОВ</div>
         <div id="lbRules">1️⃣ Больше очков • 2️⃣ Меньше возрождений • 3️⃣ Меньше времени</div>
@@ -165,7 +159,6 @@
         <button class="menu-btn" onclick="showScreen('menuScreen')" style="margin-top:8px;">🏠  В меню</button>
     </div>
 
-    <!-- МАГАЗИН СКИНОВ -->
     <div id="shopScreen" class="screen">
         <div id="shopTitle">🎨  СКИНЫ</div>
         <div id="shopSub">Разблокируй скины, побивая рекорды, или купи эксклюзив за звёзды</div>
@@ -173,7 +166,6 @@
         <button class="menu-btn" onclick="showScreen('menuScreen')">🏠  В меню</button>
     </div>
 
-    <!-- ЮРИДИЧЕСКАЯ СТРАНИЦА -->
     <div id="legalScreen" class="screen">
         <div class="legal-content">
             <h2>📜 Условия использования</h2>
@@ -212,23 +204,21 @@ window.onerror = function(msg, url, line) {
 var BIN_ID = '6aa93256ac6210605acffcdf';
 var MASTER_KEY = '$2a$10$3jAxvBubFU/n15BoFgKVS.SIL5E/j1fcLADrALJEk3hrvhiOXvNvi';
 var API_BASE = 'https://api.jsonbin.io/v3/b/';
+var WORKER_URL = 'https://snake-battle-payments.mz24122008.workers.dev';
 
 var CACHE_TTL = 3 * 60 * 1000;
 var scoresCache = null, scoresCacheTime = 0, lastSubmitTime = 0;
 var SUBMIT_COOLDOWN = 5000;
 
-// ================== СКИНЫ (8 штук) ==================
 var SKINS = [
-    // Бесплатные (за очки)
     { id: 'classic', name: 'Классик',   req: 0,    type: 'score', head: '#4ade80', body: '#22c55e', glow: '#4ade80' },
     { id: 'ocean',   name: 'Океан',     req: 50,   type: 'score', head: '#22d3ee', body: '#0891b2', glow: '#22d3ee' },
     { id: 'violet',  name: 'Фиолет',    req: 150,  type: 'score', head: '#a78bfa', body: '#7c3aed', glow: '#a78bfa' },
     { id: 'fire',    name: 'Огонь',     req: 300,  type: 'score', head: '#f87171', body: '#dc2626', glow: '#f87171' },
     { id: 'gold',    name: 'Золото',    req: 500,  type: 'score', head: '#facc15', body: '#f59e0b', glow: '#facc15' },
     { id: 'rainbow', name: 'Радуга',    req: 1000, type: 'score', head: 'rainbow', body: 'rainbow', glow: '#8b5cf6' },
-    // Эксклюзивные (за звёзды)
-    { id: 'cosmos',  name: 'Космос',    req: 50,   type: 'stars', head: '#e879f9', body: '#7c3aed', glow: '#e879f9' },
-    { id: 'neon',    name: 'Неон',      req: 100,  type: 'stars', head: '#22ff88', body: '#00ccff', glow: '#22ff88' }
+    { id: 'cosmos',  name: 'Космос',    req: 1,    type: 'stars', head: '#e879f9', body: '#7c3aed', glow: '#e879f9' },
+    { id: 'neon',    name: 'Неон',      req: 1,    type: 'stars', head: '#22ff88', body: '#00ccff', glow: '#22ff88' }
 ];
 
 var selectedSkinId = localStorage.getItem('snakeSkin') || 'classic';
@@ -432,7 +422,6 @@ function drawLeaderboard(scores) {
                 '<div class="podium-avatar">' + initial + '</div>' +
                 '<div class="podium-name">' + safeName + (isMe ? ' ★' : '') + '</div>' +
                 '<div class="podium-score">' + s.score + '</div>' +
-                '<div class="podium-info">⏱ ' + (s.time ? formatTime(s.time) : '—') + '</div>' +
                 '<div class="podium-bar">' + (idx+1) + '</div>' +
                 '</div>';
         }
@@ -486,12 +475,10 @@ function shareScore() {
 
 function openStarsShop() {
     var msg = '⭐ МАГАЗИН ЗВЁЗД\n\n' +
-              '💚 Вторая жизнь — 15⭐\n' +
-              '⚡ Ускорение x2 на 1 партию — 25⭐\n' +
-              '🎨 Скин «Космос» — 50⭐\n' +
-              '🎨 Скин «Неон» — 100⭐\n' +
-              '💰 +50% очков на 1 партию — 20⭐\n\n' +
-              '⚠ Настоящая оплата заработает после подключения бэкенда. Пока всё работает за внутриигровые очки.';
+              '💚 Вторая жизнь — 1⭐\n' +
+              '🎨 Скин «Космос» — 1⭐\n' +
+              '🎨 Скин «Неон» — 1⭐\n\n' +
+              'Цены временно снижены для теста.';
     if (tg) tg.showAlert(msg); else alert(msg);
 }
 
@@ -551,7 +538,7 @@ function selectSkin(id) {
     if (!skin) return;
     if (!isSkinUnlocked(skin)) {
         if (skin.type === 'stars') {
-            showToast('⭐ Скин «' + skin.name + '» — ' + skin.req + ' звёзд. Покупка за звёзды скоро!');
+            buySkin(skin);
         } else {
             showToast('🔒 Набери рекорд ' + skin.req + ' очков');
         }
@@ -562,6 +549,42 @@ function selectSkin(id) {
     renderShop();
     showToast('✓ Скин «' + skin.name + '» выбран');
     haptic('light');
+}
+
+function buySkin(skin) {
+    if (!tg || !tgUser) { showToast('Покупка только в Telegram'); return; }
+    showToast('⏳ Создание счёта...', 5000);
+    fetch(WORKER_URL + '/create-invoice', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: tgUser.id, itemType: 'skin_' + skin.id })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+        if (!data.ok || !data.invoiceLink) {
+            showToast('⚠ Не удалось создать счёт: ' + (data.description || ''));
+            return;
+        }
+        tg.openInvoice(data.invoiceLink, function(status) {
+            if (status === 'paid') {
+                ownedStarsSkins.push(skin.id);
+                localStorage.setItem('ownedStarsSkins', JSON.stringify(ownedStarsSkins));
+                selectedSkinId = skin.id;
+                localStorage.setItem('snakeSkin', skin.id);
+                renderShop();
+                showToast('✓ Скин «' + skin.name + '» куплен!');
+                if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+            } else if (status === 'cancelled') {
+                showToast('Оплата отменена');
+            } else {
+                showToast('⚠ Оплата не прошла');
+            }
+        });
+    })
+    .catch(function(e) {
+        console.warn(e);
+        showToast('⚠ Ошибка сети');
+    });
 }
 
 function startGame() {
@@ -829,14 +852,50 @@ function buyLife() {
     var btn = document.getElementById('buyLifeBtn');
     btn.textContent = '⏳ Создание счёта...';
 
-    setTimeout(function() {
-        btn.textContent = '💚 Вторая жизнь за 15⭐';
-        isBuyingLife = false;
-        startCountdown(function() {
-            reviveSnake();
-            if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+    fetch(WORKER_URL + '/create-invoice', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            userId: tgUser ? tgUser.id : 0,
+            itemType: 'extra_life'
+        })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+        if (!data.ok || !data.invoiceLink) {
+            btn.textContent = '💚 Вторая жизнь за 1⭐';
+            isBuyingLife = false;
+            showToast('⚠ Не удалось создать счёт: ' + (data.description || data.error || ''));
+            return;
+        }
+        if (!tg) {
+            btn.textContent = '💚 Вторая жизнь за 1⭐';
+            isBuyingLife = false;
+            showToast('Оплата только в Telegram');
+            return;
+        }
+        tg.openInvoice(data.invoiceLink, function(status) {
+            btn.textContent = '💚 Вторая жизнь за 1⭐';
+            isBuyingLife = false;
+            if (status === 'paid') {
+                showToast('✓ Оплата прошла! Вторая жизнь активирована');
+                startCountdown(function() {
+                    reviveSnake();
+                    if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+                });
+            } else if (status === 'cancelled') {
+                showToast('Оплата отменена');
+            } else if (status === 'failed') {
+                showToast('⚠ Оплата не прошла');
+            }
         });
-    }, 700);
+    })
+    .catch(function(e) {
+        console.warn('buy failed', e);
+        btn.textContent = '💚 Вторая жизнь за 1⭐';
+        isBuyingLife = false;
+        showToast('⚠ Ошибка сети');
+    });
 }
 
 function startCountdown(callback) {
