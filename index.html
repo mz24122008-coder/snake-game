@@ -7,49 +7,82 @@
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
-html, body { height: 100%; overflow: hidden; background: #050510; color: white; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
+html, body { height: 100%; overflow: hidden; background: #030308; color: white; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
 
-body::before {
-    content: ''; position: fixed; inset: -30%; z-index: 0; pointer-events: none;
-    background:
-        radial-gradient(circle at 25% 15%, rgba(74, 222, 128, 0.16) 0%, transparent 38%),
-        radial-gradient(circle at 75% 85%, rgba(34, 211, 238, 0.12) 0%, transparent 38%),
-        radial-gradient(circle at 85% 15%, rgba(168, 85, 247, 0.1) 0%, transparent 40%);
-    animation: bgFloat 22s ease-in-out infinite;
+/* АНИМИРОВАННЫЕ ОРБЫ */
+.orb { position: fixed; border-radius: 50%; filter: blur(60px); pointer-events: none; z-index: 0; opacity: 0.5; }
+.orb-1 { width: 280px; height: 280px; background: #4ade80; top: -80px; left: -60px; animation: orb1 18s ease-in-out infinite; }
+.orb-2 { width: 240px; height: 240px; background: #22d3ee; bottom: -80px; right: -60px; animation: orb2 22s ease-in-out infinite; }
+.orb-3 { width: 200px; height: 200px; background: #a78bfa; top: 40%; right: -100px; animation: orb3 20s ease-in-out infinite; opacity: 0.35; }
+@keyframes orb1 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(80px, 100px) scale(1.15); } }
+@keyframes orb2 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(-100px, -60px) scale(1.2); } }
+@keyframes orb3 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(-60px, 80px) scale(0.9); } }
+
+body { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 8px; position: relative; min-height: 100vh; }
+
+.screen { display: none; flex-direction: column; align-items: center; justify-content: center; width: 100%; max-width: 440px; height: 100%; position: relative; z-index: 1; }
+.screen.active { display: flex; animation: fadeSlide 0.35s cubic-bezier(0.34, 1.2, 0.64, 1); }
+@keyframes fadeSlide { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+
+/* КАРТОЧКА ИГРОКА */
+.hero-card {
+    width: 100%; padding: 16px;
+    background: linear-gradient(135deg, rgba(74, 222, 128, 0.12), rgba(34, 211, 238, 0.06), rgba(20, 25, 40, 0.7));
+    border: 1.5px solid rgba(74, 222, 128, 0.25);
+    border-radius: 22px;
+    backdrop-filter: blur(30px);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    margin-bottom: 16px;
+    position: relative; overflow: hidden;
 }
-@keyframes bgFloat {
-    0%, 100% { transform: translate(0, 0) scale(1); }
-    50% { transform: translate(2%, -2%) scale(1.05); }
+.hero-card::before {
+    content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+    background: linear-gradient(45deg, transparent 40%, rgba(74, 222, 128, 0.08) 50%, transparent 60%);
+    animation: shine 6s ease-in-out infinite; pointer-events: none;
 }
-
-body { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 16px; position: relative; min-height: 100vh; }
-
-.screen { display: none; flex-direction: column; align-items: center; justify-content: center; width: 100%; max-width: 420px; height: 100%; position: relative; z-index: 1; }
-.screen.active { display: flex; animation: fadeIn 0.3s ease-out; }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-
-/* ПРОФИЛЬ (компактный) */
-.user-chip {
-    display: none; align-items: center; gap: 8px;
-    padding: 6px 14px 6px 6px;
-    background: rgba(20, 25, 40, 0.6);
-    border: 1px solid rgba(74, 222, 128, 0.2);
-    border-radius: 50px; margin-bottom: 22px;
-    font-size: 12px; color: #cbd5e1;
-    backdrop-filter: blur(20px);
-}
-.user-chip.show { display: flex; }
-.user-chip .av {
-    width: 26px; height: 26px; border-radius: 50%;
+@keyframes shine { 0%, 100% { transform: translateX(-100%); } 50% { transform: translateX(100%); } }
+.hero-top { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; position: relative; z-index: 1; }
+.hero-avatar {
+    width: 48px; height: 48px; border-radius: 50%;
     background: linear-gradient(135deg, #4ade80, #22d3ee);
     display: flex; align-items: center; justify-content: center;
-    font-weight: 800; color: #0a0a14; font-size: 12px;
+    font-weight: 900; color: #0a0a14; font-size: 20px;
+    box-shadow: 0 0 25px rgba(74, 222, 128, 0.6);
+    border: 2px solid rgba(255, 255, 255, 0.2);
 }
-.user-chip .nm { font-weight: 700; color: #4ade80; }
+.hero-name { flex: 1; min-width: 0; }
+.hero-greet { font-size: 11px; color: #94a3b8; letter-spacing: 0.5px; margin-bottom: 2px; }
+.hero-nick { font-size: 17px; font-weight: 800; color: #e2e8f0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hero-level-badge {
+    padding: 6px 12px;
+    background: linear-gradient(135deg, #facc15, #f59e0b);
+    color: #422006; font-weight: 900; font-size: 13px;
+    border-radius: 50px;
+    box-shadow: 0 4px 15px rgba(250, 204, 21, 0.4);
+    letter-spacing: 0.5px;
+}
+.hero-stats { display: flex; gap: 8px; position: relative; z-index: 1; }
+.hero-stat {
+    flex: 1; padding: 10px 8px;
+    background: rgba(0, 0, 0, 0.25);
+    border-radius: 14px; text-align: center;
+    border: 1px solid rgba(255,255,255,0.04);
+}
+.hero-stat .v { font-size: 17px; font-weight: 900; color: #4ade80; line-height: 1; margin-bottom: 3px; }
+.hero-stat .l { font-size: 9px; color: #64748b; letter-spacing: 0.5px; text-transform: uppercase; font-weight: 700; }
+.hero-progress { margin-top: 12px; position: relative; z-index: 1; }
+.hero-progress-info { display: flex; justify-content: space-between; font-size: 10px; color: #64748b; margin-bottom: 5px; letter-spacing: 0.5px; font-weight: 700; }
+.hero-progress-bar { height: 6px; background: rgba(0, 0, 0, 0.4); border-radius: 3px; overflow: hidden; }
+.hero-progress-fill {
+    height: 100%; background: linear-gradient(90deg, #4ade80, #22d3ee);
+    border-radius: 3px; transition: width 0.6s cubic-bezier(0.34, 1.2, 0.64, 1);
+    box-shadow: 0 0 15px rgba(74, 222, 128, 0.6);
+}
 
 /* ЛОГО */
+.logo-wrap { text-align: center; margin-bottom: 18px; }
 h1 {
-    font-size: 52px; font-weight: 900; letter-spacing: -3px;
+    font-size: 46px; font-weight: 900; letter-spacing: -2.5px;
     background: linear-gradient(135deg, #4ade80 0%, #22d3ee 50%, #a78bfa 100%);
     background-size: 200% 200%;
     -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
@@ -57,182 +90,148 @@ h1 {
     line-height: 1;
 }
 @keyframes gradientShift { 0%, 100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
-.subtitle { color: #475569; margin-bottom: 28px; font-size: 10px; letter-spacing: 5px; font-weight: 700; margin-top: 4px; }
+.logo-sub { color: #475569; font-size: 9px; letter-spacing: 6px; font-weight: 800; margin-top: 4px; }
 
 /* ГЛАВНАЯ КНОПКА */
-.btn-hero {
+.btn-play {
     width: 100%; padding: 20px; margin-bottom: 12px;
     background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
     color: #052e16; font-size: 20px; font-weight: 900;
     letter-spacing: 0.5px;
-    border: none; border-radius: 20px;
+    border: none; border-radius: 22px;
     cursor: pointer; -webkit-appearance: none; appearance: none; font-family: inherit;
-    box-shadow: 0 10px 40px rgba(74, 222, 128, 0.35), inset 0 1px 0 rgba(255,255,255,0.3);
+    box-shadow: 0 15px 50px rgba(74, 222, 128, 0.4), inset 0 1px 0 rgba(255,255,255,0.35);
     transition: transform 0.1s;
     display: flex; align-items: center; justify-content: center; gap: 12px;
     position: relative; overflow: hidden;
 }
-.btn-hero::after {
+.btn-play::after {
     content: ''; position: absolute; inset: 0;
-    background: radial-gradient(circle at 30% 0%, rgba(255,255,255,0.3), transparent 50%);
+    background: radial-gradient(circle at 30% 0%, rgba(255,255,255,0.35), transparent 55%);
     pointer-events: none;
 }
-.btn-hero:active { transform: scale(0.97); }
-.btn-hero .icon { font-size: 26px; }
-
-/* СЕТКА 2×2 */
-.grid-2 {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
-    width: 100%; margin-bottom: 12px;
+.btn-play:active { transform: scale(0.97); }
+.btn-play .play-icon {
+    width: 32px; height: 32px;
+    background: rgba(0,0,0,0.15); border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
 }
+
+/* СЕТКА КНОПОК */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; }
 .btn-tile {
-    padding: 18px 12px;
+    padding: 16px 12px;
     background: rgba(20, 25, 40, 0.6);
     border: 1.5px solid rgba(74, 222, 128, 0.15);
     color: #e2e8f0;
-    border-radius: 18px; cursor: pointer;
+    border-radius: 20px; cursor: pointer;
     -webkit-appearance: none; appearance: none; font-family: inherit;
-    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+    display: flex; align-items: center; gap: 10px;
     backdrop-filter: blur(20px);
     transition: all 0.15s;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.04);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.04);
+    text-align: left;
 }
-.btn-tile:active { transform: scale(0.95); background: rgba(74, 222, 128, 0.12); border-color: rgba(74, 222, 128, 0.4); }
-.btn-tile .ti { font-size: 24px; }
-.btn-tile .tt { font-size: 13px; font-weight: 700; }
-.btn-tile.premium { border-color: rgba(250, 204, 21, 0.35); background: rgba(250, 204, 21, 0.06); }
-.btn-tile.premium .tt { color: #facc15; }
-.btn-tile.premium:active { background: rgba(250, 204, 21, 0.18); }
-
-/* РЕКОРД */
-.record-bar {
-    display: flex; align-items: center; gap: 10px;
-    padding: 12px 22px;
-    background: rgba(20, 25, 40, 0.5);
-    border: 1px solid rgba(250, 204, 21, 0.25);
-    border-radius: 50px;
-    backdrop-filter: blur(20px);
-    width: 100%; justify-content: center;
-}
-.record-bar .ico { font-size: 20px; }
-.record-bar .lbl { color: #94a3b8; font-size: 11px; letter-spacing: 1.5px; font-weight: 700; text-transform: uppercase; }
-.record-bar .val { color: #facc15; font-size: 22px; font-weight: 900; margin-left: 4px; }
-
-/* Кнопка "правила" в самом низу */
-.legal-link {
-    background: transparent; border: none;
-    color: #475569; font-size: 11px;
-    margin-top: 14px;
-    cursor: pointer; font-family: inherit;
-    text-decoration: underline;
-    padding: 8px;
-}
-
-/* HUD ИГРЫ */
-#hud { display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 0 4px 10px; gap: 6px; }
-.hud-item {
-    padding: 6px 10px; border-radius: 10px;
-    background: rgba(20, 25, 40, 0.7);
+.btn-tile:active { transform: scale(0.96); background: rgba(74, 222, 128, 0.1); border-color: rgba(74, 222, 128, 0.4); }
+.btn-tile .ti-wrap {
+    width: 34px; height: 34px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; flex-shrink: 0;
+    background: rgba(74, 222, 128, 0.12);
     border: 1px solid rgba(74, 222, 128, 0.15);
-    font-size: 12px; font-weight: 800;
+}
+.btn-tile .tt { font-size: 13px; font-weight: 800; }
+.btn-tile.premium { border-color: rgba(250, 204, 21, 0.3); background: rgba(250, 204, 21, 0.05); }
+.btn-tile.premium .ti-wrap { background: rgba(250, 204, 21, 0.15); border-color: rgba(250, 204, 21, 0.25); }
+.btn-tile.premium .tt { color: #facc15; }
+
+/* ИГРА */
+#gameScreen { justify-content: flex-start; padding-top: 0; }
+#hud { display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 0 4px 8px; gap: 6px; }
+.hud-item {
+    padding: 7px 12px; border-radius: 12px;
+    background: rgba(20, 25, 40, 0.75);
+    border: 1px solid rgba(74, 222, 128, 0.18);
+    font-size: 13px; font-weight: 800;
     backdrop-filter: blur(10px);
 }
 #scoreHud { color: #4ade80; }
 #speedHud { color: #22d3ee; }
 #fpsHud { color: #475569; font-size: 10px; }
-#game { border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(74, 222, 128, 0.15); touch-action: none; display: block; background: #050510; }
+#game {
+    border-radius: 22px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.7), 0 0 0 1px rgba(74, 222, 128, 0.15);
+    touch-action: none; display: block; background: #030308;
+}
 #game.shake { animation: shake 0.15s; }
 @keyframes shake { 0%, 100% { transform: translate(0,0); } 25% { transform: translate(-2px, 1px); } 50% { transform: translate(2px, -1px); } 75% { transform: translate(-1px, -2px); } }
 
-#controls { margin-top: 16px; display: grid; grid-template-columns: repeat(3, 76px); grid-template-rows: repeat(2, 76px); gap: 10px; }
+#controls { margin-top: 14px; display: grid; grid-template-columns: repeat(3, 90px); grid-template-rows: repeat(2, 90px); gap: 10px; }
 .btn {
-    background: rgba(20, 25, 40, 0.8);
-    border: 1.5px solid rgba(74, 222, 128, 0.4);
-    color: #4ade80; font-size: 32px; font-weight: 300;
-    border-radius: 20px; display: flex; align-items: center; justify-content: center;
+    background: rgba(20, 25, 40, 0.85);
+    border: 2px solid rgba(74, 222, 128, 0.45);
+    color: #4ade80; font-size: 38px; font-weight: 300;
+    border-radius: 22px; display: flex; align-items: center; justify-content: center;
     cursor: pointer; -webkit-appearance: none; appearance: none; font-family: inherit;
     backdrop-filter: blur(10px);
-    box-shadow: 0 6px 16px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05);
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255,255,255,0.06);
     transition: all 0.08s;
 }
-.btn.pressed { background: #4ade80; color: #0a0a14; transform: scale(0.94); box-shadow: 0 0 25px rgba(74, 222, 128, 0.6); }
+.btn.pressed { background: #4ade80; color: #0a0a14; transform: scale(0.93); box-shadow: 0 0 35px rgba(74, 222, 128, 0.7); }
 
 /* GAME OVER */
-#overTitle {
-    font-size: 34px; font-weight: 900; letter-spacing: -1.5px;
-    background: linear-gradient(135deg, #ef4444, #f472b6);
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-    margin-bottom: 10px;
-}
-#overScore { font-size: 60px; color: #4ade80; font-weight: 900; line-height: 1; margin-bottom: 8px; text-shadow: 0 0 40px rgba(74, 222, 128, 0.5); }
+#overTitle { font-size: 32px; font-weight: 900; letter-spacing: -1.5px; background: linear-gradient(135deg, #ef4444, #f472b6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 8px; }
+#overScore { font-size: 64px; color: #4ade80; font-weight: 900; line-height: 1; margin-bottom: 6px; text-shadow: 0 0 50px rgba(74, 222, 128, 0.6); }
 #overInfo { font-size: 12px; color: #94a3b8; margin-bottom: 10px; display: flex; gap: 16px; }
-#overInfo span { display: flex; align-items: center; gap: 4px; }
-#overHigh { font-size: 14px; color: #facc15; margin-bottom: 18px; min-height: 20px; font-weight: 800; }
+#overInfo span { display: flex; align-items: center; gap: 4px; padding: 6px 12px; background: rgba(20,25,40,0.6); border-radius: 50px; border: 1px solid rgba(74,222,128,0.15); }
+#overHigh { font-size: 14px; color: #facc15; margin-bottom: 16px; min-height: 20px; font-weight: 800; }
 #submitStatus { font-size: 11px; color: #64748b; min-height: 14px; margin-bottom: 14px; }
 
 .buy-btn {
-    width: 100%; max-width: 300px; padding: 16px; margin: 6px 0;
+    width: 100%; max-width: 320px; padding: 16px; margin: 6px 0;
     background: linear-gradient(135deg, #facc15 0%, #f59e0b 100%);
     color: #422006; font-size: 15px; font-weight: 900;
-    border: none; border-radius: 16px;
+    border: none; border-radius: 18px;
     cursor: pointer; -webkit-appearance: none; appearance: none; font-family: inherit;
-    box-shadow: 0 8px 30px rgba(250, 204, 21, 0.35), inset 0 1px 0 rgba(255,255,255,0.3);
+    box-shadow: 0 10px 35px rgba(250, 204, 21, 0.4), inset 0 1px 0 rgba(255,255,255,0.35);
     display: flex; align-items: center; justify-content: center; gap: 8px;
 }
 .buy-btn:active { transform: scale(0.97); }
 
-/* ОБЩИЕ КНОПКИ */
 .btn-wide {
-    width: 100%; max-width: 300px;
+    width: 100%; max-width: 320px;
     padding: 14px 18px;
     background: rgba(20, 25, 40, 0.6);
     border: 1.5px solid rgba(74, 222, 128, 0.3);
-    color: #e2e8f0;
-    border-radius: 16px; cursor: pointer;
-    -webkit-appearance: none; appearance: none; font-family: inherit;
-    font-size: 14px; font-weight: 700;
+    color: #e2e8f0; border-radius: 18px;
+    cursor: pointer; -webkit-appearance: none; appearance: none; font-family: inherit;
+    font-size: 14px; font-weight: 800;
     margin: 5px 0;
     display: flex; align-items: center; justify-content: center; gap: 8px;
     backdrop-filter: blur(20px);
     transition: all 0.15s;
 }
 .btn-wide:active { background: rgba(74, 222, 128, 0.15); border-color: rgba(74, 222, 128, 0.6); }
-.btn-wide.green { background: linear-gradient(135deg, #4ade80, #22c55e); color: #052e16; border-color: transparent; box-shadow: 0 8px 24px rgba(74, 222, 128, 0.3); }
+.btn-wide.green { background: linear-gradient(135deg, #4ade80, #22c55e); color: #052e16; border-color: transparent; box-shadow: 0 10px 30px rgba(74, 222, 128, 0.35); }
 
 /* РЕЙТИНГ */
-#lbTitle {
-    font-size: 28px; font-weight: 900; margin-bottom: 4px;
-    background: linear-gradient(135deg, #facc15, #f59e0b);
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-    letter-spacing: -1px;
-}
-#lbRules { font-size: 10px; color: #64748b; margin-bottom: 14px; text-align: center; letter-spacing: 0.3px; }
-
+#lbTitle { font-size: 26px; font-weight: 900; margin-bottom: 4px; background: linear-gradient(135deg, #facc15, #f59e0b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; letter-spacing: -1px; }
+#lbRules { font-size: 10px; color: #64748b; margin-bottom: 14px; text-align: center; }
 #podium { display: flex; align-items: flex-end; justify-content: center; gap: 8px; margin-bottom: 14px; min-height: 140px; width: 100%; padding: 0 10px; }
 .podium-place { display: flex; flex-direction: column; align-items: center; flex: 1; position: relative; }
-.podium-avatar {
-    width: 50px; height: 50px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-weight: 900; font-size: 18px; color: #0a0a14;
-    margin-bottom: 6px; border: 3px solid; position: relative;
-}
-.podium-1 .podium-avatar { border-color: #facc15; background: linear-gradient(135deg, #facc15, #f59e0b); box-shadow: 0 0 28px rgba(250, 204, 21, 0.55); }
+.podium-avatar { width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 18px; color: #0a0a14; margin-bottom: 6px; border: 3px solid; position: relative; }
+.podium-1 .podium-avatar { border-color: #facc15; background: linear-gradient(135deg, #facc15, #f59e0b); box-shadow: 0 0 30px rgba(250, 204, 21, 0.6); }
 .podium-2 .podium-avatar { border-color: #cbd5e1; background: linear-gradient(135deg, #e2e8f0, #94a3b8); }
 .podium-3 .podium-avatar { border-color: #f59e0b; background: linear-gradient(135deg, #fb923c, #b45309); }
 .podium-avatar .crown { position: absolute; top: -13px; font-size: 18px; }
 .podium-name { font-size: 10px; color: #e2e8f0; font-weight: 800; max-width: 90px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: center; margin-bottom: 3px; }
 .podium-score { font-size: 16px; font-weight: 900; color: #4ade80; margin-bottom: 5px; }
-.podium-bar {
-    width: 100%; border-radius: 8px 8px 0 0;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 22px; font-weight: 900; color: #0a0a14;
-    position: relative;
-}
+.podium-bar { width: 100%; border-radius: 8px 8px 0 0; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 900; color: #0a0a14; }
 .podium-1 .podium-bar { height: 60px; background: linear-gradient(180deg, #facc15, #f59e0b); box-shadow: 0 0 30px rgba(250, 204, 21, 0.4); }
 .podium-2 .podium-bar { height: 46px; background: linear-gradient(180deg, #e2e8f0, #94a3b8); }
 .podium-3 .podium-bar { height: 36px; background: linear-gradient(180deg, #fb923c, #b45309); }
-
-#lbList { width: 100%; background: rgba(20, 25, 40, 0.5); border: 1px solid rgba(74, 222, 128, 0.12); border-radius: 18px; padding: 6px; max-height: 30vh; overflow-y: auto; -webkit-overflow-scrolling: touch; backdrop-filter: blur(20px); }
+#lbList { width: 100%; background: rgba(20, 25, 40, 0.5); border: 1px solid rgba(74, 222, 128, 0.12); border-radius: 18px; padding: 6px; max-height: 30vh; overflow-y: auto; backdrop-filter: blur(20px); }
 .lbRow { display: flex; align-items: center; gap: 8px; padding: 9px 10px; border-radius: 12px; font-size: 13px; margin-bottom: 2px; }
 .lbRow.me { background: rgba(74, 222, 128, 0.1); border: 1px solid rgba(74, 222, 128, 0.25); }
 .lbRank { width: 28px; font-weight: 900; color: #64748b; text-align: center; flex-shrink: 0; font-size: 12px; }
@@ -244,52 +243,33 @@ h1 {
 #lbCacheInfo { color: #475569; font-size: 10px; margin-top: 6px; min-height: 12px; }
 
 /* МАГАЗИН */
-#shopTitle {
-    font-size: 26px; font-weight: 900; margin-bottom: 4px;
-    background: linear-gradient(135deg, #a78bfa, #22d3ee);
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-    letter-spacing: -1px;
-}
-#shopSub { font-size: 11px; color: #64748b; margin-bottom: 12px; text-align: center; }
-#shopTabs { display: flex; gap: 5px; margin-bottom: 12px; width: 100%; }
-.shop-tab {
-    flex: 1; padding: 10px 2px;
-    background: rgba(20, 25, 40, 0.6);
-    border: 1.5px solid rgba(74, 222, 128, 0.12);
-    color: #64748b; border-radius: 14px;
-    font-size: 10px; font-weight: 800;
-    cursor: pointer; -webkit-appearance: none; appearance: none; font-family: inherit;
-    transition: all 0.15s;
-    backdrop-filter: blur(10px);
-}
-.shop-tab.active { background: linear-gradient(135deg, rgba(74, 222, 128, 0.2), rgba(34, 211, 238, 0.08)); border-color: #4ade80; color: #4ade80; }
-.shop-tab .icon { display: block; font-size: 18px; margin-bottom: 2px; }
-#shopContent { width: 100%; max-height: 55vh; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 2px; }
+#shopTitle { font-size: 26px; font-weight: 900; margin-bottom: 4px; background: linear-gradient(135deg, #a78bfa, #22d3ee); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; letter-spacing: -1px; }
+#shopSub { font-size: 11px; color: #64748b; margin-bottom: 12px; }
+#shopTabs { display: flex; gap: 4px; margin-bottom: 12px; width: 100%; }
+.shop-tab { flex: 1; padding: 10px 2px; background: rgba(20, 25, 40, 0.6); border: 1.5px solid rgba(74, 222, 128, 0.12); color: #64748b; border-radius: 14px; font-size: 9px; font-weight: 800; cursor: pointer; -webkit-appearance: none; appearance: none; font-family: inherit; transition: all 0.15s; backdrop-filter: blur(10px); }
+.shop-tab.active { background: linear-gradient(135deg, rgba(74, 222, 128, 0.2), rgba(34, 211, 238, 0.08)); border-color: #4ade80; color: #4ade80; box-shadow: 0 4px 15px rgba(74, 222, 128, 0.2); }
+.shop-tab .icon { display: block; font-size: 17px; margin-bottom: 2px; }
+#shopContent { width: 100%; max-height: 58vh; overflow-y: auto; padding: 2px; }
 
-.shop-card {
-    display: flex; align-items: center; gap: 12px;
-    padding: 13px; margin-bottom: 8px;
-    background: rgba(20, 25, 40, 0.65);
-    border: 1.5px solid rgba(74, 222, 128, 0.12);
-    border-radius: 16px;
-    cursor: pointer; -webkit-appearance: none; appearance: none; font-family: inherit;
-    transition: all 0.15s; text-align: left; width: 100%;
-    backdrop-filter: blur(20px);
-    position: relative; overflow: hidden;
-}
+.shop-card { display: flex; align-items: center; gap: 12px; padding: 13px; margin-bottom: 8px; background: rgba(20, 25, 40, 0.65); border: 1.5px solid rgba(74, 222, 128, 0.12); border-radius: 18px; cursor: pointer; -webkit-appearance: none; appearance: none; font-family: inherit; transition: all 0.15s; text-align: left; width: 100%; backdrop-filter: blur(20px); position: relative; overflow: hidden; }
 .shop-card:active { transform: scale(0.98); border-color: rgba(74, 222, 128, 0.4); }
-.shop-card.selected { border-color: #4ade80; box-shadow: 0 0 22px rgba(74, 222, 128, 0.2); background: rgba(74, 222, 128, 0.06); }
+.shop-card.selected { border-color: #4ade80; box-shadow: 0 0 25px rgba(74, 222, 128, 0.25); background: rgba(74, 222, 128, 0.06); }
 .shop-card.locked { opacity: 0.65; }
 .shop-card.premium { border-color: rgba(250, 204, 21, 0.35); background: linear-gradient(135deg, rgba(250, 204, 21, 0.06), rgba(20, 25, 40, 0.65)); }
 .shop-card.donate { border-color: rgba(244, 114, 182, 0.35); background: linear-gradient(135deg, rgba(244, 114, 182, 0.06), rgba(20, 25, 40, 0.65)); }
 
-.shop-icon {
-    width: 50px; height: 50px; border-radius: 14px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 24px; flex-shrink: 0;
-    background: rgba(74, 222, 128, 0.08);
-    border: 1px solid rgba(74, 222, 128, 0.15);
+.rarity {
+    position: absolute; top: 8px; right: 8px;
+    font-size: 8px; font-weight: 900; letter-spacing: 0.8px;
+    padding: 3px 7px; border-radius: 50px;
+    text-transform: uppercase;
 }
+.rarity.common { background: rgba(100, 116, 139, 0.3); color: #cbd5e1; }
+.rarity.rare { background: rgba(34, 211, 238, 0.25); color: #22d3ee; }
+.rarity.epic { background: rgba(168, 85, 247, 0.25); color: #c084fc; }
+.rarity.legendary { background: rgba(250, 204, 21, 0.25); color: #facc15; }
+
+.shop-icon { width: 52px; height: 52px; border-radius: 15px; display: flex; align-items: center; justify-content: center; font-size: 25px; flex-shrink: 0; background: rgba(74, 222, 128, 0.08); border: 1px solid rgba(74, 222, 128, 0.15); }
 .shop-info { flex: 1; min-width: 0; }
 .shop-name { font-size: 14px; font-weight: 800; color: #e2e8f0; margin-bottom: 2px; }
 .shop-desc { font-size: 11px; color: #94a3b8; line-height: 1.35; }
@@ -298,66 +278,42 @@ h1 {
 .shop-price-label { font-size: 9px; color: #64748b; letter-spacing: 0.5px; text-transform: uppercase; }
 .shop-owned { color: #4ade80; font-size: 20px; font-weight: 900; }
 
+.set-card { padding: 16px; margin-bottom: 10px; background: rgba(20, 25, 40, 0.65); border: 1.5px solid rgba(74, 222, 128, 0.15); border-radius: 20px; backdrop-filter: blur(20px); position: relative; overflow: hidden; }
+.set-card.complete { border-color: #4ade80; box-shadow: 0 0 30px rgba(74, 222, 128, 0.25); background: linear-gradient(135deg, rgba(74, 222, 128, 0.08), rgba(20, 25, 40, 0.65)); }
+.set-card.cosmos { border-color: rgba(168, 85, 247, 0.35); }
+.set-card.cosmos.complete { border-color: #a78bfa; box-shadow: 0 0 30px rgba(168, 85, 247, 0.3); background: linear-gradient(135deg, rgba(168, 85, 247, 0.08), rgba(20, 25, 40, 0.65)); }
+.set-card.legend { border-color: rgba(250, 204, 21, 0.35); }
+.set-card.legend.complete { border-color: #facc15; box-shadow: 0 0 30px rgba(250, 204, 21, 0.3); background: linear-gradient(135deg, rgba(250, 204, 21, 0.08), rgba(20, 25, 40, 0.65)); }
+.set-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.set-emoji { font-size: 28px; }
+.set-title { flex: 1; }
+.set-name { font-size: 15px; font-weight: 900; color: #e2e8f0; margin-bottom: 2px; }
+.set-desc { font-size: 11px; color: #94a3b8; }
+.set-progress-text { font-size: 12px; font-weight: 800; color: #4ade80; }
+.set-progress-bar { height: 8px; background: rgba(0,0,0,0.4); border-radius: 4px; overflow: hidden; margin-bottom: 10px; }
+.set-progress-fill { height: 100%; background: linear-gradient(90deg, #4ade80, #22d3ee); border-radius: 4px; transition: width 0.5s; box-shadow: 0 0 12px rgba(74, 222, 128, 0.5); }
+.set-items { display: flex; gap: 6px; flex-wrap: wrap; }
+.set-item { flex: 1; min-width: 0; padding: 8px 4px; background: rgba(0,0,0,0.3); border-radius: 10px; font-size: 10px; font-weight: 700; text-align: center; color: #64748b; display: flex; flex-direction: column; align-items: center; gap: 3px; }
+.set-item.unlocked { color: #e2e8f0; background: rgba(74, 222, 128, 0.08); border: 1px solid rgba(74, 222, 128, 0.2); }
+.set-item .em { font-size: 16px; }
+.set-reward { margin-top: 10px; padding: 8px 12px; background: rgba(0,0,0,0.25); border-radius: 10px; font-size: 11px; color: #94a3b8; display: flex; align-items: center; gap: 6px; }
+.set-reward.done { color: #4ade80; }
+
 /* COUNTDOWN */
-#countdown {
-    position: fixed; inset: 0; display: none; align-items: center; justify-content: center;
-    background: radial-gradient(circle at center, rgba(0,0,0,0.85), rgba(0,0,0,0.96));
-    z-index: 1000;
-}
+#countdown { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; background: radial-gradient(circle at center, rgba(0,0,0,0.85), rgba(0,0,0,0.96)); z-index: 1000; }
 #countdown.show { display: flex; }
-#countdown-text {
-    font-size: 150px; font-weight: 900; line-height: 1;
-    background: linear-gradient(135deg, #4ade80, #22d3ee);
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-    filter: drop-shadow(0 0 40px rgba(74, 222, 128, 0.7));
-}
+#countdown-text { font-size: 150px; font-weight: 900; line-height: 1; background: linear-gradient(135deg, #4ade80, #22d3ee); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; filter: drop-shadow(0 0 40px rgba(74, 222, 128, 0.7)); }
 #countdown.pulse #countdown-text { animation: countPulse 0.9s ease-out; }
-@keyframes countPulse {
-    0% { transform: scale(0.3); opacity: 0; }
-    40% { transform: scale(1.15); opacity: 1; }
-    100% { transform: scale(1); opacity: 1; }
-}
+@keyframes countPulse { 0% { transform: scale(0.3); opacity: 0; } 40% { transform: scale(1.15); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
 
-/* SCORE POPUP */
-.score-popup {
-    position: fixed; pointer-events: none; z-index: 100;
-    font-size: 26px; font-weight: 900;
-    color: #4ade80;
-    text-shadow: 0 0 20px rgba(74, 222, 128, 0.8), 0 2px 4px rgba(0,0,0,0.8);
-    animation: scoreFloat 1s ease-out forwards;
-}
+.score-popup { position: fixed; pointer-events: none; z-index: 100; font-size: 26px; font-weight: 900; color: #4ade80; text-shadow: 0 0 20px rgba(74, 222, 128, 0.8), 0 2px 4px rgba(0,0,0,0.8); animation: scoreFloat 1s ease-out forwards; }
 .score-popup.golden { color: #facc15; text-shadow: 0 0 20px rgba(250, 204, 21, 0.8), 0 2px 4px rgba(0,0,0,0.8); font-size: 32px; }
-@keyframes scoreFloat {
-    0% { transform: translateY(0) scale(0.5); opacity: 0; }
-    20% { transform: translateY(-15px) scale(1.2); opacity: 1; }
-    100% { transform: translateY(-70px) scale(1); opacity: 0; }
-}
+@keyframes scoreFloat { 0% { transform: translateY(0) scale(0.5); opacity: 0; } 20% { transform: translateY(-15px) scale(1.2); opacity: 1; } 100% { transform: translateY(-70px) scale(1); opacity: 0; } }
 
-/* TOAST */
-#toast {
-    position: fixed; bottom: 40px; left: 50%;
-    transform: translateX(-50%) translateY(120px);
-    background: rgba(20, 25, 40, 0.95);
-    color: white; padding: 13px 22px; border-radius: 14px;
-    font-size: 14px; font-weight: 700; z-index: 9998;
-    border: 1.5px solid rgba(74, 222, 128, 0.35);
-    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
-    max-width: 90vw; text-align: center;
-    backdrop-filter: blur(20px);
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
-}
+#toast { position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%) translateY(120px); background: rgba(20, 25, 40, 0.95); color: white; padding: 13px 22px; border-radius: 14px; font-size: 14px; font-weight: 700; z-index: 9998; border: 1.5px solid rgba(74, 222, 128, 0.35); transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1); max-width: 90vw; text-align: center; backdrop-filter: blur(20px); box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5); }
 #toast.show { transform: translateX(-50%) translateY(0); }
 
-/* ЮРИДИЧЕСКАЯ */
-.legal-content {
-    width: 100%;
-    background: rgba(20, 25, 40, 0.7);
-    border: 1px solid rgba(74, 222, 128, 0.15);
-    border-radius: 20px; padding: 22px;
-    max-height: 70vh; overflow-y: auto; -webkit-overflow-scrolling: touch;
-    backdrop-filter: blur(20px);
-    font-size: 13px; line-height: 1.7; color: #cbd5e1;
-}
+.legal-content { width: 100%; background: rgba(20, 25, 40, 0.7); border: 1px solid rgba(74, 222, 128, 0.15); border-radius: 20px; padding: 22px; max-height: 70vh; overflow-y: auto; backdrop-filter: blur(20px); font-size: 13px; line-height: 1.7; color: #cbd5e1; }
 .legal-content h2 { font-size: 18px; color: #4ade80; margin-bottom: 12px; font-weight: 900; }
 .legal-content h3 { font-size: 12px; color: #22d3ee; margin: 14px 0 6px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
 .legal-content p { margin-bottom: 8px; }
@@ -369,50 +325,55 @@ h1 {
 </head>
 <body>
 
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+
 <div id="countdown"><span id="countdown-text"></span></div>
 <div id="toast"></div>
 
-<!-- МЕНЮ -->
 <div id="menuScreen" class="screen active">
-    <div class="user-chip" id="userChip">
-        <div class="av" id="userAvatar">?</div>
-        <span>Привет, <span class="nm" id="userName">игрок</span></span>
+    <div class="hero-card">
+        <div class="hero-top">
+            <div class="hero-avatar" id="userAvatar">?</div>
+            <div class="hero-name">
+                <div class="hero-greet">Привет, игрок!</div>
+                <div class="hero-nick" id="userName">Гость</div>
+            </div>
+            <div class="hero-level-badge" id="levelBadge">Ур. 1</div>
+        </div>
+        <div class="hero-stats">
+            <div class="hero-stat"><div class="v" id="statBest">0</div><div class="l">Рекорд</div></div>
+            <div class="hero-stat"><div class="v" id="statGames">0</div><div class="l">Игр</div></div>
+            <div class="hero-stat"><div class="v" id="statTotal">0</div><div class="l">Всего</div></div>
+        </div>
+        <div class="hero-progress">
+            <div class="hero-progress-info">
+                <span id="xpText">0 / 100 XP</span>
+                <span id="xpNext">до Ур. 2</span>
+            </div>
+            <div class="hero-progress-bar"><div class="hero-progress-fill" id="xpFill" style="width:0%"></div></div>
+        </div>
     </div>
-    <h1>ЗМЕЙКА</h1>
-    <div class="subtitle">BATTLE</div>
 
-    <button class="btn-hero" onclick="startGame()">
-        <span class="icon">▶</span>
+    <div class="logo-wrap">
+        <h1>ЗМЕЙКА</h1>
+        <div class="logo-sub">BATTLE</div>
+    </div>
+
+    <button class="btn-play" onclick="startGame()">
+        <div class="play-icon">▶</div>
         <span>ИГРАТЬ</span>
     </button>
 
     <div class="grid-2">
-        <button class="btn-tile premium" onclick="showScreen('shopScreen')">
-            <span class="ti">⭐</span>
-            <span class="tt">Магазин</span>
-        </button>
-        <button class="btn-tile" onclick="showScreen('leaderboardScreen')">
-            <span class="ti">🏆</span>
-            <span class="tt">Рейтинг</span>
-        </button>
-        <button class="btn-tile" onclick="shareScore()">
-            <span class="ti">📤</span>
-            <span class="tt">Друзьям</span>
-        </button>
-        <button class="btn-tile" onclick="showLegal()">
-            <span class="ti">📜</span>
-            <span class="tt">Условия</span>
-        </button>
-    </div>
-
-    <div class="record-bar">
-        <span class="ico">🏅</span>
-        <span class="lbl">Рекорд</span>
-        <span class="val" id="menuHigh">0</span>
+        <button class="btn-tile premium" onclick="showScreen('shopScreen')"><div class="ti-wrap">⭐</div><div class="tt">Магазин</div></button>
+        <button class="btn-tile" onclick="showScreen('leaderboardScreen')"><div class="ti-wrap">🏆</div><div class="tt">Рейтинг</div></button>
+        <button class="btn-tile" onclick="shareScore()"><div class="ti-wrap">📤</div><div class="tt">Друзьям</div></button>
+        <button class="btn-tile" onclick="showScreen('legalScreen')"><div class="ti-wrap">📜</div><div class="tt">Условия</div></button>
     </div>
 </div>
 
-<!-- ИГРА -->
 <div id="gameScreen" class="screen">
     <div id="hud">
         <div class="hud-item" id="scoreHud">🎯 0</div>
@@ -430,7 +391,6 @@ h1 {
     </div>
 </div>
 
-<!-- GAME OVER -->
 <div id="overScreen" class="screen">
     <div id="overTitle">ИГРА ОКОНЧЕНА</div>
     <div id="overScore">0</div>
@@ -443,7 +403,6 @@ h1 {
     <button class="btn-wide" onclick="showScreen('menuScreen')">🏠 В меню</button>
 </div>
 
-<!-- РЕЙТИНГ -->
 <div id="leaderboardScreen" class="screen">
     <div id="lbTitle">🏆 ТОП ИГРОКОВ</div>
     <div id="lbRules">1️⃣ больше очков · 2️⃣ меньше возрождений · 3️⃣ меньше времени</div>
@@ -454,12 +413,12 @@ h1 {
     <button class="btn-wide" onclick="showScreen('menuScreen')">🏠 В меню</button>
 </div>
 
-<!-- МАГАЗИН -->
 <div id="shopScreen" class="screen">
     <div id="shopTitle">⭐ МАГАЗИН</div>
-    <div id="shopSub">Поддержи игру и получи бонусы</div>
+    <div id="shopSub">Открывай, собирай, поддерживай</div>
     <div id="shopTabs">
         <button class="shop-tab active" data-tab="skins" onclick="switchTab('skins')"><span class="icon">🎨</span>Скины</button>
+        <button class="shop-tab" data-tab="sets" onclick="switchTab('sets')"><span class="icon">📦</span>Наборы</button>
         <button class="shop-tab" data-tab="boosters" onclick="switchTab('boosters')"><span class="icon">⚡</span>Бусты</button>
         <button class="shop-tab" data-tab="premium" onclick="switchTab('premium')"><span class="icon">👑</span>Премиум</button>
         <button class="shop-tab" data-tab="support" onclick="switchTab('support')"><span class="icon">💚</span>Донат</button>
@@ -468,7 +427,6 @@ h1 {
     <button class="btn-wide" style="margin-top:10px" onclick="showScreen('menuScreen')">🏠 В меню</button>
 </div>
 
-<!-- ЮРИДИЧЕСКАЯ -->
 <div id="legalScreen" class="screen">
     <div class="legal-content">
         <h2>📜 Условия использования</h2>
@@ -500,14 +458,13 @@ h1 {
 </div>
 
 <script>
-// Безопасный логгер ошибок — игнорируем CORS-ошибки сторонних скриптов
 window.addEventListener('error', function(e) {
     if (e.message === 'Script error.' || !e.message) return;
     var box = document.createElement('div');
-    box.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#ef4444;color:#fff;padding:8px;font-size:11px;z-index:99999;word-break:break-all;';
-    box.textContent = '⚠ ' + e.message + ' (стр. ' + e.lineno + ')';
+    box.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#ef4444;color:#fff;padding:8px;font-size:11px;z-index:99999;';
+    box.textContent = '⚠ ' + e.message;
     document.body.appendChild(box);
-    setTimeout(function() { box.remove(); }, 5000);
+    setTimeout(function() { box.remove(); }, 4000);
 });
 
 var BIN_ID = '6aa93256ac6210605acffcdf';
@@ -520,38 +477,75 @@ var scoresCache = null, scoresCacheTime = 0, lastSubmitTime = 0;
 var SUBMIT_COOLDOWN = 5000;
 
 var SKINS = [
-    { id: 'classic', name: 'Классик',  req: 0,    type: 'score', head: '#4ade80', body: '#22c55e', glow: '#4ade80', emoji: '🐍' },
-    { id: 'ocean',   name: 'Океан',    req: 50,   type: 'score', head: '#22d3ee', body: '#0891b2', glow: '#22d3ee', emoji: '🌊' },
-    { id: 'violet',  name: 'Фиолет',   req: 150,  type: 'score', head: '#a78bfa', body: '#7c3aed', glow: '#a78bfa', emoji: '🔮' },
-    { id: 'fire',    name: 'Огонь',    req: 300,  type: 'score', head: '#f87171', body: '#dc2626', glow: '#f87171', emoji: '🔥' },
-    { id: 'gold',    name: 'Золото',   req: 500,  type: 'score', head: '#facc15', body: '#f59e0b', glow: '#facc15', emoji: '⭐' },
-    { id: 'rainbow', name: 'Радуга',   req: 1000, type: 'score', head: 'rainbow', body: 'rainbow', glow: '#8b5cf6', emoji: '🌈' },
-    { id: 'cosmos',  name: 'Космос',   price: 50,  type: 'stars', head: '#e879f9', body: '#7c3aed', glow: '#e879f9', emoji: '🌌' },
-    { id: 'neon',    name: 'Неон',     price: 75,  type: 'stars', head: '#22ff88', body: '#00ccff', glow: '#22ff88', emoji: '💚' },
-    { id: 'aurora',  name: 'Аврора',   price: 100, type: 'stars', head: '#a78bfa', body: '#22d3ee', glow: '#a78bfa', emoji: '✨' }
+    { id: 'classic', name: 'Классик',  req: 0,    type: 'score', rarity: 'common',    head: '#4ade80', body: '#22c55e', glow: '#4ade80', emoji: '🐍' },
+    { id: 'ocean',   name: 'Океан',    req: 50,   type: 'score', rarity: 'rare',      head: '#22d3ee', body: '#0891b2', glow: '#22d3ee', emoji: '🌊' },
+    { id: 'violet',  name: 'Фиолет',   req: 150,  type: 'score', rarity: 'rare',      head: '#a78bfa', body: '#7c3aed', glow: '#a78bfa', emoji: '🔮' },
+    { id: 'fire',    name: 'Огонь',    req: 300,  type: 'score', rarity: 'epic',      head: '#f87171', body: '#dc2626', glow: '#f87171', emoji: '🔥' },
+    { id: 'gold',    name: 'Золото',   req: 500,  type: 'score', rarity: 'epic',      head: '#facc15', body: '#f59e0b', glow: '#facc15', emoji: '⭐' },
+    { id: 'rainbow', name: 'Радуга',   req: 1000, type: 'score', rarity: 'legendary', head: 'rainbow', body: 'rainbow', glow: '#8b5cf6', emoji: '🌈' },
+    { id: 'cosmos',  name: 'Космос',   price: 50,  type: 'stars', rarity: 'epic',      head: '#e879f9', body: '#7c3aed', glow: '#e879f9', emoji: '🌌' },
+    { id: 'neon',    name: 'Неон',     price: 75,  type: 'stars', rarity: 'epic',      head: '#22ff88', body: '#00ccff', glow: '#22ff88', emoji: '💚' },
+    { id: 'aurora',  name: 'Аврора',   price: 100, type: 'stars', rarity: 'legendary', head: '#a78bfa', body: '#22d3ee', glow: '#a78bfa', emoji: '✨' }
+];
+
+var SETS = [
+    { id: 'nature', name: 'Природа', emoji: '🌿', desc: 'Набор для новичков', cls: '', skins: ['classic', 'ocean', 'rainbow'], reward: '50 очков к рекорду' },
+    { id: 'cosmos', name: 'Космос', emoji: '🌌', desc: 'Только за звёзды', cls: 'cosmos', skins: ['cosmos', 'neon', 'aurora'], reward: 'Бейдж 🌌 в топе' },
+    { id: 'legend', name: 'Легенда', emoji: '👑', desc: 'Все 6 базовых скинов', cls: 'legend', skins: ['classic','ocean','violet','fire','gold','rainbow'], reward: 'Уникальный титул' }
 ];
 
 var selectedSkinId = localStorage.getItem('snakeSkin') || 'classic';
 var ownedStarsSkins = JSON.parse(localStorage.getItem('ownedStarsSkins') || '[]');
+var completedSets = JSON.parse(localStorage.getItem('snakeSets') || '[]');
 var isPremium = localStorage.getItem('snakePremium') === '1';
 var activeBoost = false;
 var activeShield = false;
 
-function getSkin() {
-    for (var i = 0; i < SKINS.length; i++) if (SKINS[i].id === selectedSkinId) return SKINS[i];
-    return SKINS[0];
-}
+var stats = JSON.parse(localStorage.getItem('snakeStats') || '{"games":0,"total":0,"xp":0}');
+
+function getSkinById(id) { for (var i = 0; i < SKINS.length; i++) if (SKINS[i].id === id) return SKINS[i]; return SKINS[0]; }
+function getSkin() { return getSkinById(selectedSkinId); }
 function isSkinUnlocked(skin) {
     if (skin.type === 'stars') return isPremium || ownedStarsSkins.indexOf(skin.id) !== -1;
     return highScore >= skin.req;
 }
+function isSetComplete(set) {
+    for (var i = 0; i < set.skins.length; i++) {
+        var s = getSkinById(set.skins[i]);
+        if (!s || !isSkinUnlocked(s)) return false;
+    }
+    return true;
+}
+function checkSets() {
+    for (var i = 0; i < SETS.length; i++) {
+        var s = SETS[i];
+        if (isSetComplete(s) && completedSets.indexOf(s.id) === -1) {
+            completedSets.push(s.id);
+            localStorage.setItem('snakeSets', JSON.stringify(completedSets));
+            (function(name){ setTimeout(function() { showToast('🏆 Набор «' + name + '» собран!', 3000); }, 500); })(s.name);
+        }
+    }
+}
+function levelFromXp(xp) { return Math.floor(Math.sqrt(xp / 50)) + 1; }
+function xpForLevel(lvl) { return Math.pow(lvl - 1, 2) * 50; }
+
+function updateHero() {
+    document.getElementById('statBest').textContent = highScore;
+    document.getElementById('statGames').textContent = stats.games;
+    document.getElementById('statTotal').textContent = stats.total;
+    var lvl = levelFromXp(stats.xp);
+    var curXp = stats.xp - xpForLevel(lvl);
+    var nextXp = xpForLevel(lvl + 1) - xpForLevel(lvl);
+    var pct = Math.min(100, (curXp / nextXp) * 100);
+    document.getElementById('levelBadge').textContent = 'Ур. ' + lvl;
+    document.getElementById('xpText').textContent = curXp + ' / ' + nextXp + ' XP';
+    document.getElementById('xpNext').textContent = 'до Ур. ' + (lvl + 1);
+    document.getElementById('xpFill').style.width = pct + '%';
+}
 
 var tg = window.Telegram ? window.Telegram.WebApp : null;
 var tgUser = null;
-if (tg) {
-    try { tg.ready(); tg.expand(); tgUser = tg.initDataUnsafe && tg.initDataUnsafe.user; }
-    catch(e) { console.warn(e); }
-}
+if (tg) { try { tg.ready(); tg.expand(); tgUser = tg.initDataUnsafe && tg.initDataUnsafe.user; } catch(e) { console.warn(e); } }
 
 var GRID = 20, BASE_SPEED = 200, MIN_SPEED = 70, SPEED_STEP = 4;
 var canvas, ctx, cellSize, dpr, canvasSize;
@@ -570,7 +564,7 @@ function initCanvas() {
     ctx = canvas.getContext('2d');
     dpr = Math.min(window.devicePixelRatio || 1, 3);
     var availW = window.innerWidth - 28;
-    var availH = window.innerHeight - 340;
+    var availH = window.innerHeight - 400;
     var size = Math.min(availW, availH, 500);
     size = Math.floor(size / GRID) * GRID;
     canvasSize = size;
@@ -584,10 +578,10 @@ function initCanvas() {
 
 function setupUser() {
     if (!tgUser) return;
-    document.getElementById('userChip').classList.add('show');
     var name = tgUser.first_name || tgUser.username || 'игрок';
     document.getElementById('userName').textContent = name;
     document.getElementById('userAvatar').textContent = name.charAt(0).toUpperCase();
+    document.querySelector('.hero-greet').textContent = 'Привет, игрок!';
 }
 
 function formatTime(sec) {
@@ -603,8 +597,6 @@ function showToast(msg, ms) {
     setTimeout(function() { t.classList.remove('show'); }, ms || 2200);
 }
 
-function showLegal() { showScreen('legalScreen'); }
-
 function spawnScorePopup(worldX, worldY, text, golden) {
     if (!canvas) return;
     var rect = canvas.getBoundingClientRect();
@@ -617,7 +609,6 @@ function spawnScorePopup(worldX, worldY, text, golden) {
     setTimeout(function() { popup.remove(); }, 1000);
 }
 
-// API
 function fetchScores(forceRefresh) {
     var now = Date.now();
     if (!forceRefresh && scoresCache && (now - scoresCacheTime) < CACHE_TTL) return Promise.resolve(scoresCache);
@@ -694,7 +685,6 @@ function submitScore(finalScore, finalTime, finalRevives) {
     });
 }
 
-// LEADERBOARD
 function renderLeaderboard(forceRefresh) {
     var listEl = document.getElementById('lbList');
     var podiumEl = document.getElementById('podium');
@@ -714,12 +704,8 @@ function renderLeaderboard(forceRefresh) {
         cacheEl.textContent = '✅ обновлено';
     }).catch(function(e) {
         console.warn(e);
-        if (scoresCache) {
-            drawLeaderboard(scoresCache);
-            cacheEl.textContent = '⚠ оффлайн, кэш';
-        } else {
-            listEl.innerHTML = '<div id="lbStatus">⚠ Не удалось загрузить</div>';
-        }
+        if (scoresCache) { drawLeaderboard(scoresCache); cacheEl.textContent = '⚠ оффлайн, кэш'; }
+        else { listEl.innerHTML = '<div id="lbStatus">⚠ Не удалось загрузить</div>'; }
     });
 }
 
@@ -727,11 +713,7 @@ function drawLeaderboard(scores) {
     var listEl = document.getElementById('lbList');
     var podiumEl = document.getElementById('podium');
     podiumEl.innerHTML = '';
-
-    if (!scores.length) {
-        listEl.innerHTML = '<div id="lbStatus">Пока никто не играл.<br>Стань первым! 🐍</div>';
-        return;
-    }
+    if (!scores.length) { listEl.innerHTML = '<div id="lbStatus">Пока никто не играл.<br>Стань первым! 🐍</div>'; return; }
     sortScores(scores);
     var myId = tgUser ? String(tgUser.id) : null;
 
@@ -741,10 +723,7 @@ function drawLeaderboard(scores) {
         for (var k = 0; k < 3; k++) {
             var idx = order[k];
             var s = scores[idx];
-            if (!s) {
-                html += '<div class="podium-place podium-' + (idx+1) + '" style="visibility:hidden"></div>';
-                continue;
-            }
+            if (!s) { html += '<div class="podium-place podium-' + (idx+1) + '" style="visibility:hidden"></div>'; continue; }
             var isMe = myId && s.id === myId;
             var safeName = String(s.name || 'игрок').replace(/[<>&]/g, '').substring(0, 9);
             var initial = safeName.charAt(0).toUpperCase();
@@ -753,17 +732,12 @@ function drawLeaderboard(scores) {
                 '<div class="podium-avatar">' + initial + crown + '</div>' +
                 '<div class="podium-name">' + safeName + (isMe ? ' ★' : '') + '</div>' +
                 '<div class="podium-score">' + s.score + '</div>' +
-                '<div class="podium-bar">' + (idx+1) + '</div>' +
-                '</div>';
+                '<div class="podium-bar">' + (idx+1) + '</div></div>';
         }
         podiumEl.innerHTML = html;
     }
-
     var rest = scores.slice(3, 10);
-    if (!rest.length) {
-        listEl.innerHTML = '<div id="lbStatus" style="padding:20px">Остальные места свободны 🎯</div>';
-        return;
-    }
+    if (!rest.length) { listEl.innerHTML = '<div id="lbStatus" style="padding:20px">Остальные места свободны 🎯</div>'; return; }
     var html2 = '';
     for (var i = 0; i < rest.length; i++) {
         var s = rest[i];
@@ -774,28 +748,21 @@ function drawLeaderboard(scores) {
         var crown = s.premium ? '👑 ' : '';
         html2 += '<div class="lbRow' + (isMe ? ' me' : '') + '">' +
             '<div class="lbRank">#' + (i + 4) + '</div>' +
-            '<div class="lbMain">' +
-                '<div class="lbName">' + crown + safeName + (isMe ? ' •ты' : '') + '</div>' +
-                '<div class="lbSub">⏱ ' + timeStr + ' · ' + revStr + '</div>' +
-            '</div>' +
-            '<div class="lbScore">' + s.score + '</div>' +
-            '</div>';
+            '<div class="lbMain"><div class="lbName">' + crown + safeName + (isMe ? ' •ты' : '') + '</div>' +
+            '<div class="lbSub">⏱ ' + timeStr + ' · ' + revStr + '</div></div>' +
+            '<div class="lbScore">' + s.score + '</div></div>';
     }
     listEl.innerHTML = html2;
 }
 
-// SCREENS
 function showScreen(id) {
     var all = document.querySelectorAll('.screen');
     for (var i = 0; i < all.length; i++) all[i].classList.remove('active');
     document.getElementById(id).classList.add('active');
     leaderboardOpen = (id === 'leaderboardScreen');
     if (lbInterval) { clearInterval(lbInterval); lbInterval = null; }
-    if (id === 'menuScreen') document.getElementById('menuHigh').textContent = highScore;
-    if (id === 'leaderboardScreen') {
-        renderLeaderboard(false);
-        lbInterval = setInterval(function() { if (leaderboardOpen) renderLeaderboard(false); }, CACHE_TTL);
-    }
+    if (id === 'menuScreen') { document.getElementById('menuHigh').textContent = highScore; updateHero(); }
+    if (id === 'leaderboardScreen') { renderLeaderboard(false); lbInterval = setInterval(function() { if (leaderboardOpen) renderLeaderboard(false); }, CACHE_TTL); }
     if (id === 'shopScreen') renderShop();
 }
 
@@ -806,20 +773,17 @@ function shareScore() {
     else alert(text + ' ' + url);
 }
 
-// SHOP
 var currentTab = 'skins';
-
 function switchTab(tab) {
     currentTab = tab;
     var tabs = document.querySelectorAll('.shop-tab');
     for (var i = 0; i < tabs.length; i++) tabs[i].classList.toggle('active', tabs[i].dataset.tab === tab);
-    renderShop();
-    haptic('light');
+    renderShop(); haptic('light');
 }
-
 function renderShop() {
     var c = document.getElementById('shopContent');
     if (currentTab === 'skins') c.innerHTML = renderSkinsTab();
+    else if (currentTab === 'sets') c.innerHTML = renderSetsTab();
     else if (currentTab === 'boosters') c.innerHTML = renderBoostersTab();
     else if (currentTab === 'premium') c.innerHTML = renderPremiumTab();
     else if (currentTab === 'support') c.innerHTML = renderSupportTab();
@@ -834,26 +798,42 @@ function renderSkinsTab() {
         var cls = 'shop-card';
         if (selected) cls += ' selected';
         if (!unlocked) cls += ' locked';
-
         var desc, priceHtml;
-        if (unlocked) {
-            desc = selected ? '✓ Выбран' : 'Разблокирован';
-            priceHtml = '<div class="shop-owned">✓</div>';
-        } else if (s.type === 'stars') {
-            desc = isPremium ? 'Включён в Премиум' : 'Эксклюзив';
-            priceHtml = '<div class="shop-price-value">' + s.price + '⭐</div><div class="shop-price-label">купить</div>';
-        } else {
-            desc = 'Нужен рекорд ' + s.req;
-            priceHtml = '<div class="shop-price-value">' + s.req + '</div><div class="shop-price-label">рекорд</div>';
-        }
-
+        if (unlocked) { desc = selected ? '✓ Выбран' : 'Разблокирован'; priceHtml = '<div class="shop-owned">✓</div>'; }
+        else if (s.type === 'stars') { desc = isPremium ? 'Включён в Премиум' : 'Эксклюзив'; priceHtml = '<div class="shop-price-value">' + s.price + '⭐</div><div class="shop-price-label">купить</div>'; }
+        else { desc = 'Нужен рекорд ' + s.req; priceHtml = '<div class="shop-price-value">' + s.req + '</div><div class="shop-price-label">рекорд</div>'; }
         var iconBg = s.head === 'rainbow' ? 'linear-gradient(135deg, #f87171, #facc15, #22d3ee)' : 'linear-gradient(135deg, ' + s.head + '33, ' + s.body + '33)';
-
         html += '<button class="' + cls + '" onclick="selectSkin(\'' + s.id + '\')">' +
+            '<div class="rarity ' + s.rarity + '">' + s.rarity + '</div>' +
             '<div class="shop-icon" style="background:' + iconBg + '">' + s.emoji + '</div>' +
             '<div class="shop-info"><div class="shop-name">' + s.name + '</div><div class="shop-desc">' + desc + '</div></div>' +
-            '<div class="shop-price">' + priceHtml + '</div>' +
-            '</button>';
+            '<div class="shop-price">' + priceHtml + '</div></button>';
+    }
+    return html;
+}
+
+function renderSetsTab() {
+    var html = '';
+    for (var i = 0; i < SETS.length; i++) {
+        var set = SETS[i];
+        var done = completedSets.indexOf(set.id) !== -1;
+        var unlockedCount = 0;
+        for (var k = 0; k < set.skins.length; k++) if (isSkinUnlocked(getSkinById(set.skins[k]))) unlockedCount++;
+        var progress = Math.round(unlockedCount / set.skins.length * 100);
+        var cls = 'set-card';
+        if (set.cls) cls += ' ' + set.cls;
+        if (done) cls += ' complete';
+        html += '<div class="' + cls + '"><div class="set-header"><div class="set-emoji">' + set.emoji + '</div>' +
+            '<div class="set-title"><div class="set-name">' + set.name + '</div><div class="set-desc">' + set.desc + '</div></div>' +
+            '<div class="set-progress-text">' + unlockedCount + '/' + set.skins.length + '</div></div>' +
+            '<div class="set-progress-bar"><div class="set-progress-fill" style="width:' + progress + '%"></div></div>' +
+            '<div class="set-items">';
+        for (var k = 0; k < set.skins.length; k++) {
+            var sk = getSkinById(set.skins[k]);
+            var un = isSkinUnlocked(sk);
+            html += '<div class="set-item' + (un ? ' unlocked' : '') + '"><span class="em">' + (un ? sk.emoji : '🔒') + '</span><span>' + sk.name + '</span></div>';
+        }
+        html += '</div><div class="set-reward' + (done ? ' done' : '') + '">' + (done ? '✅' : '🎁') + ' ' + set.reward + '</div></div>';
     }
     return html;
 }
@@ -870,24 +850,20 @@ function renderBoostersTab() {
         html += '<button class="shop-card" onclick="buyItem(\'' + it.id + '\')">' +
             '<div class="shop-icon">' + it.icon + '</div>' +
             '<div class="shop-info"><div class="shop-name">' + it.name + '</div><div class="shop-desc">' + it.desc + '</div></div>' +
-            '<div class="shop-price"><div class="shop-price-value">' + it.price + '⭐</div><div class="shop-price-label">купить</div></div>' +
-            '</button>';
+            '<div class="shop-price"><div class="shop-price-value">' + it.price + '⭐</div><div class="shop-price-label">купить</div></div></button>';
     }
     return html;
 }
 
 function renderPremiumTab() {
     if (isPremium) {
-        return '<div class="shop-card premium" style="cursor:default">' +
-            '<div class="shop-icon">👑</div>' +
+        return '<div class="shop-card premium" style="cursor:default"><div class="shop-icon">👑</div>' +
             '<div class="shop-info"><div class="shop-name">Премиум активен</div><div class="shop-desc">Золотая рамка • +10% очков • все премиум-скины</div></div>' +
             '<div class="shop-owned">✓</div></div>';
     }
-    return '<button class="shop-card premium" onclick="buyItem(\'premium\')">' +
-        '<div class="shop-icon">👑</div>' +
+    return '<button class="shop-card premium" onclick="buyItem(\'premium\')"><div class="shop-icon">👑</div>' +
         '<div class="shop-info"><div class="shop-name">Премиум навсегда</div><div class="shop-desc">👑 Золотая рамка в топе<br>+10% к очкам<br>Все премиум-скины</div></div>' +
-        '<div class="shop-price"><div class="shop-price-value">150⭐</div><div class="shop-price-label">навсегда</div></div>' +
-        '</button>';
+        '<div class="shop-price"><div class="shop-price-value">150⭐</div><div class="shop-price-label">навсегда</div></div></button>';
 }
 
 function renderSupportTab() {
@@ -896,21 +872,19 @@ function renderSupportTab() {
         { id: 'donate_50', icon: '🍕', name: 'Пицца автору', desc: 'Средняя поддержка', price: 50 },
         { id: 'donate_100', icon: '🎁', name: 'Большой подарок', desc: 'Мощная поддержка', price: 100 }
     ];
-    var html = '<div style="color:#94a3b8;font-size:11px;text-align:center;padding:6px 14px 12px;line-height:1.5;">Покупки в этой категории — <b style="color:#f472b6">добровольные пожертвования</b>. Спасибо ❤️</div>';
+    var html = '<div style="color:#94a3b8;font-size:11px;text-align:center;padding:6px 14px 12px;line-height:1.5;">Покупки здесь — <b style="color:#f472b6">добровольные пожертвования</b>. Спасибо ❤️</div>';
     for (var i = 0; i < items.length; i++) {
         var it = items[i];
         html += '<button class="shop-card donate" onclick="buyItem(\'' + it.id + '\')">' +
             '<div class="shop-icon">' + it.icon + '</div>' +
             '<div class="shop-info"><div class="shop-name">' + it.name + '</div><div class="shop-desc">' + it.desc + '</div></div>' +
-            '<div class="shop-price"><div class="shop-price-value">' + it.price + '⭐</div><div class="shop-price-label">донат</div></div>' +
-            '</button>';
+            '<div class="shop-price"><div class="shop-price-value">' + it.price + '⭐</div><div class="shop-price-label">донат</div></div></button>';
     }
     return html;
 }
 
 function selectSkin(id) {
-    var skin = null;
-    for (var i = 0; i < SKINS.length; i++) if (SKINS[i].id === id) { skin = SKINS[i]; break; }
+    var skin = getSkinById(id);
     if (!skin) return;
     if (!isSkinUnlocked(skin)) {
         if (skin.type === 'stars') buyItem('skin_' + skin.id);
@@ -922,6 +896,7 @@ function selectSkin(id) {
     renderShop();
     showToast('✓ Скин «' + skin.name + '» выбран');
     haptic('light');
+    checkSets();
 }
 
 function buyItem(itemType) {
@@ -934,10 +909,7 @@ function buyItem(itemType) {
     })
     .then(function(r) { return r.json(); })
     .then(function(data) {
-        if (!data.ok || !data.invoiceLink) {
-            showToast('⚠ Ошибка: ' + (data.description || data.error || ''));
-            return;
-        }
+        if (!data.ok || !data.invoiceLink) { showToast('⚠ Ошибка: ' + (data.description || data.error || '')); return; }
         tg.openInvoice(data.invoiceLink, function(status) {
             if (status === 'paid') handlePurchase(itemType);
             else if (status === 'cancelled') showToast('Отменено');
@@ -949,38 +921,23 @@ function buyItem(itemType) {
 
 function handlePurchase(itemType) {
     if (itemType === 'extra_life') {
-        if (savedState) {
-            showToast('✓ Оплачено!');
-            startCountdown(function() { reviveSnake(); });
-        } else {
-            showToast('✓ Куплено');
-        }
-    } else if (itemType === 'boost_x2') {
-        activeBoost = true;
-        showToast('⚡ Буст ×2 активирован!');
-    } else if (itemType === 'shield') {
-        activeShield = true;
-        showToast('🛡️ Щит активирован!');
-    } else if (itemType === 'premium') {
-        isPremium = true;
-        localStorage.setItem('snakePremium', '1');
-        showToast('👑 Премиум активирован!');
-        renderShop();
-    } else if (itemType.indexOf('skin_') === 0) {
+        if (savedState) { showToast('✓ Оплачено!'); startCountdown(function() { reviveSnake(); }); }
+        else showToast('✓ Куплено');
+    } else if (itemType === 'boost_x2') { activeBoost = true; showToast('⚡ Буст ×2 активирован!'); }
+    else if (itemType === 'shield') { activeShield = true; showToast('🛡️ Щит активирован!'); }
+    else if (itemType === 'premium') { isPremium = true; localStorage.setItem('snakePremium', '1'); showToast('👑 Премиум активирован!'); renderShop(); checkSets(); }
+    else if (itemType.indexOf('skin_') === 0) {
         var skinId = itemType.replace('skin_', '');
         if (ownedStarsSkins.indexOf(skinId) === -1) ownedStarsSkins.push(skinId);
         localStorage.setItem('ownedStarsSkins', JSON.stringify(ownedStarsSkins));
         selectedSkinId = skinId;
         localStorage.setItem('snakeSkin', skinId);
         showToast('✓ Скин куплен!');
-        renderShop();
-    } else if (itemType.indexOf('donate_') === 0) {
-        showToast('❤️ Спасибо!', 3500);
-    }
+        renderShop(); checkSets();
+    } else if (itemType.indexOf('donate_') === 0) { showToast('❤️ Спасибо!', 3500); }
     if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
 }
 
-// GAME
 function startGame() {
     initCanvas();
     showScreen('gameScreen');
@@ -994,8 +951,7 @@ function startGame() {
     gameStartTime = performance.now();
     gameTime = 0; reviveCount = 0; savedState = null;
     deathAnim = null;
-    placeFood();
-    updateHud();
+    placeFood(); updateHud();
     if (rafId) cancelAnimationFrame(rafId);
     rafId = requestAnimationFrame(loop);
 }
@@ -1035,11 +991,8 @@ function tick() {
     var collision = false;
     if (head.x < 0 || head.x >= GRID || head.y < 0 || head.y >= GRID) collision = true;
     if (!collision) {
-        for (var i = 0; i < snake.length; i++) {
-            if (snake[i].x === head.x && snake[i].y === head.y) { collision = true; break; }
-        }
+        for (var i = 0; i < snake.length; i++) if (snake[i].x === head.x && snake[i].y === head.y) { collision = true; break; }
     }
-
     if (collision) {
         if (activeShield) {
             activeShield = false;
@@ -1051,7 +1004,6 @@ function tick() {
         }
         return endGame();
     }
-
     snake.unshift(head);
     if (head.x === food.x && head.y === food.y) {
         var pts = food.points;
@@ -1060,9 +1012,7 @@ function tick() {
         score += pts;
         foodEaten++;
         speed = Math.max(MIN_SPEED, BASE_SPEED - foodEaten * SPEED_STEP);
-        updateHud();
-        haptic('light');
-
+        updateHud(); haptic('light');
         var cx = food.x * cellSize + cellSize / 2;
         var cy = food.y * cellSize + cellSize / 2;
         spawnParticles(cx, cy, food.golden ? '#facc15' : '#ef4444', food.golden ? 18 : 10);
@@ -1070,7 +1020,7 @@ function tick() {
         canvas.classList.add('shake');
         setTimeout(function() { canvas.classList.remove('shake'); }, 150);
         placeFood();
-    } else { snake.pop(); }
+    } else snake.pop();
 }
 
 function placeFood() {
@@ -1078,11 +1028,7 @@ function placeFood() {
         var f = { x: Math.floor(Math.random() * GRID), y: Math.floor(Math.random() * GRID) };
         var busy = false;
         for (var i = 0; i < snake.length; i++) if (snake[i].x === f.x && snake[i].y === f.y) { busy = true; break; }
-        if (!busy) {
-            f.golden = Math.random() < 0.15;
-            f.points = f.golden ? 5 : 1;
-            food = f; return;
-        }
+        if (!busy) { f.golden = Math.random() < 0.15; f.points = f.golden ? 5 : 1; food = f; return; }
     }
 }
 
@@ -1117,15 +1063,10 @@ function getSnakeColors(i, len) {
 
 function render(progress) {
     var w = canvasSize, h = canvasSize;
-    ctx.fillStyle = '#050510'; ctx.fillRect(0, 0, w, h);
-
+    ctx.fillStyle = '#030308'; ctx.fillRect(0, 0, w, h);
     ctx.strokeStyle = 'rgba(74, 222, 128, 0.04)'; ctx.lineWidth = 1;
     ctx.beginPath();
-    for (var i = 1; i < GRID; i++) {
-        var p = i * cellSize;
-        ctx.moveTo(p, 0); ctx.lineTo(p, h);
-        ctx.moveTo(0, p); ctx.lineTo(w, p);
-    }
+    for (var i = 1; i < GRID; i++) { var p = i * cellSize; ctx.moveTo(p, 0); ctx.lineTo(p, h); ctx.moveTo(0, p); ctx.lineTo(w, p); }
     ctx.stroke();
 
     if (food) {
@@ -1135,18 +1076,22 @@ function render(progress) {
         var fr = (cellSize / 2 - 2) * pulse;
         var isG = food.golden;
 
+        // Частицы вокруг еды
+        for (var a = 0; a < 6; a++) {
+            var ang = (performance.now()/400 + a * Math.PI/3) % (Math.PI * 2);
+            var ox = Math.cos(ang) * (fr + 6);
+            var oy = Math.sin(ang) * (fr + 6);
+            ctx.fillStyle = isG ? 'rgba(250, 204, 21, 0.7)' : 'rgba(239, 68, 68, 0.6)';
+            ctx.beginPath(); ctx.arc(fx + ox, fy + oy, 1.5, 0, Math.PI * 2); ctx.fill();
+        }
+
         ctx.shadowColor = isG ? '#facc15' : '#ef4444';
-        ctx.shadowBlur = 22;
+        ctx.shadowBlur = 25;
         ctx.fillStyle = isG ? '#facc15' : '#ef4444';
         ctx.beginPath(); ctx.arc(fx, fy, fr, 0, Math.PI * 2); ctx.fill();
-
         ctx.shadowBlur = 0;
-        ctx.fillStyle = 'rgba(255,255,255,0.55)';
-        ctx.beginPath(); ctx.arc(fx - fr*0.3, fy - fr*0.3, fr*0.3, 0, Math.PI * 2); ctx.fill();
-
-        ctx.strokeStyle = isG ? 'rgba(250, 204, 21, 0.35)' : 'rgba(239, 68, 68, 0.35)';
-        ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.arc(fx, fy, fr + 4 + Math.sin(performance.now()/300)*2, 0, Math.PI * 2); ctx.stroke();
+        ctx.fillStyle = 'rgba(255,255,255,0.6)';
+        ctx.beginPath(); ctx.arc(fx - fr*0.3, fy - fr*0.3, fr*0.28, 0, Math.PI * 2); ctx.fill();
     }
 
     if (snake) {
@@ -1161,19 +1106,14 @@ function render(progress) {
             var y = oy + (newP.y - oy) * progress;
             var colors = getSnakeColors(i, len);
 
-            if (i === 0) {
-                ctx.shadowColor = colors.glow;
-                ctx.shadowBlur = 18;
-                ctx.fillStyle = colors.head;
-            } else {
+            if (i === 0) { ctx.shadowColor = colors.glow; ctx.shadowBlur = 20; ctx.fillStyle = colors.head; }
+            else {
                 ctx.shadowBlur = i < 3 ? 8 : 0;
                 if (getSkin().id !== 'rainbow') {
                     var t = i / Math.max(1, len);
                     var darkness = 1 - t * 0.45;
                     ctx.fillStyle = shadeColor(colors.body, darkness);
-                } else {
-                    ctx.fillStyle = colors.body;
-                }
+                } else ctx.fillStyle = colors.body;
                 if (i < 3) ctx.shadowColor = colors.glow;
             }
             var pad = i === 0 ? 0.5 : 1.2;
@@ -1183,37 +1123,40 @@ function render(progress) {
             roundRect(ctx, px, py, ps, ps, rad);
             ctx.fill();
 
+            // Глаза на голове
             if (i === 0) {
                 ctx.shadowBlur = 0;
-                ctx.fillStyle = 'rgba(255,255,255,0.3)';
-                ctx.beginPath();
-                ctx.arc(px + ps * 0.3, py + ps * 0.3, ps * 0.12, 0, Math.PI * 2);
-                ctx.fill();
+                var eyeR = ps * 0.16;
+                var eyeOffset = ps * 0.22;
+                var e1x, e1y, e2x, e2y;
+                if (dir.x === 1) { e1x = px + ps - eyeOffset; e2x = e1x; e1y = py + eyeOffset; e2y = py + ps - eyeOffset; }
+                else if (dir.x === -1) { e1x = px + eyeOffset; e2x = e1x; e1y = py + eyeOffset; e2y = py + ps - eyeOffset; }
+                else if (dir.y === 1) { e1y = py + ps - eyeOffset; e2y = e1y; e1x = px + eyeOffset; e2x = px + ps - eyeOffset; }
+                else { e1y = py + eyeOffset; e2y = e1y; e1x = px + eyeOffset; e2x = px + ps - eyeOffset; }
+
+                ctx.fillStyle = '#fff';
+                ctx.beginPath(); ctx.arc(e1x, e1y, eyeR, 0, Math.PI*2); ctx.fill();
+                ctx.beginPath(); ctx.arc(e2x, e2y, eyeR, 0, Math.PI*2); ctx.fill();
+                ctx.fillStyle = '#0a0a14';
+                var pupilR = eyeR * 0.5;
+                var px1 = e1x + dir.x * eyeR * 0.4, py1 = e1y + dir.y * eyeR * 0.4;
+                var px2 = e2x + dir.x * eyeR * 0.4, py2 = e2y + dir.y * eyeR * 0.4;
+                ctx.beginPath(); ctx.arc(px1, py1, pupilR, 0, Math.PI*2); ctx.fill();
+                ctx.beginPath(); ctx.arc(px2, py2, pupilR, 0, Math.PI*2); ctx.fill();
             }
         }
         ctx.shadowBlur = 0;
 
         if (activeShield && snake.length > 0) {
-            var head = snake[0];
-            var hx = head.x * cellSize + cellSize/2;
-            var hy = head.y * cellSize + cellSize/2;
-            ctx.strokeStyle = 'rgba(34, 211, 238, 0.9)';
-            ctx.lineWidth = 2.5;
-            ctx.shadowColor = '#22d3ee';
-            ctx.shadowBlur = 15;
-            ctx.beginPath();
-            ctx.arc(hx, hy, cellSize * 0.75 + Math.sin(performance.now()/150)*2, 0, Math.PI * 2);
-            ctx.stroke();
+            var hd = snake[0];
+            ctx.strokeStyle = 'rgba(34, 211, 238, 0.9)'; ctx.lineWidth = 2.5;
+            ctx.shadowColor = '#22d3ee'; ctx.shadowBlur = 15;
+            ctx.beginPath(); ctx.arc(hd.x * cellSize + cellSize/2, hd.y * cellSize + cellSize/2, cellSize * 0.75 + Math.sin(performance.now()/150)*2, 0, Math.PI * 2); ctx.stroke();
             ctx.shadowBlur = 0;
         }
-
         if (activeBoost) {
-            ctx.strokeStyle = 'rgba(250, 204, 21, 0.5)';
-            ctx.lineWidth = 1.5;
-            ctx.setLineDash([5, 5]);
-            ctx.beginPath();
-            ctx.arc(snake[0].x * cellSize + cellSize/2, snake[0].y * cellSize + cellSize/2, cellSize * 1.1, 0, Math.PI * 2);
-            ctx.stroke();
+            ctx.strokeStyle = 'rgba(250, 204, 21, 0.5)'; ctx.lineWidth = 1.5; ctx.setLineDash([5, 5]);
+            ctx.beginPath(); ctx.arc(snake[0].x * cellSize + cellSize/2, snake[0].y * cellSize + cellSize/2, cellSize * 1.1, 0, Math.PI * 2); ctx.stroke();
             ctx.setLineDash([]);
         }
     }
@@ -1221,13 +1164,10 @@ function render(progress) {
     for (var i = 0; i < particles.length; i++) {
         var p = particles[i];
         ctx.globalAlpha = p.life;
-        ctx.fillStyle = p.color;
-        ctx.shadowColor = p.color;
-        ctx.shadowBlur = 6;
+        ctx.fillStyle = p.color; ctx.shadowColor = p.color; ctx.shadowBlur = 6;
         ctx.beginPath(); ctx.arc(p.x, p.y, p.size * p.life, 0, Math.PI * 2); ctx.fill();
     }
-    ctx.globalAlpha = 1;
-    ctx.shadowBlur = 0;
+    ctx.globalAlpha = 1; ctx.shadowBlur = 0;
 }
 
 function shadeColor(hex, factor) {
@@ -1240,15 +1180,10 @@ function shadeColor(hex, factor) {
 }
 
 function roundRect(ctx, x, y, w, h, r) {
-    ctx.moveTo(x + r, y);
-    ctx.lineTo(x + w - r, y);
-    ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-    ctx.lineTo(x + w, y + h - r);
-    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-    ctx.lineTo(x + r, y + h);
-    ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-    ctx.lineTo(x, y + r);
-    ctx.quadraticCurveTo(x, y, x + r, y);
+    ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y); ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+    ctx.lineTo(x + w, y + h - r); ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    ctx.lineTo(x + r, y + h); ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+    ctx.lineTo(x, y + r); ctx.quadraticCurveTo(x, y, x + r, y);
 }
 
 function updateHud() {
@@ -1262,9 +1197,14 @@ function updateHud() {
 function endGame() {
     running = false;
     haptic('heavy');
-
     gameTime = (performance.now() - gameStartTime) / 1000;
     savedState = { score: score, foodEaten: foodEaten, snakeLen: snake.length };
+
+    // Обновляем статистику
+    stats.games++;
+    stats.total += score;
+    stats.xp += Math.round(score * 1.5);
+    localStorage.setItem('snakeStats', JSON.stringify(stats));
 
     if (snake) {
         for (var i = 0; i < snake.length; i++) {
@@ -1282,12 +1222,12 @@ function endGame() {
     setTimeout(function() {
         deathAnim = null;
         running = false;
-
         var isNewRecord = score > highScore;
         if (isNewRecord) {
             highScore = score;
             localStorage.setItem('snakeHigh', String(highScore));
             if (tg && tg.CloudStorage) tg.CloudStorage.setItem('snakeHighScore', String(highScore), function(){});
+            checkSets();
         }
         document.getElementById('overScore').textContent = score;
         document.getElementById('overInfo').innerHTML =
@@ -1297,6 +1237,7 @@ function endGame() {
         document.getElementById('submitStatus').textContent = '';
         showScreen('overScreen');
         if (score > 0) submitScore(score, gameTime, reviveCount);
+        updateHero();
     }, 800);
 }
 
@@ -1311,9 +1252,7 @@ function setDir(d) {
     haptic('light');
 }
 
-function haptic(type) {
-    try { if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred(type || 'light'); } catch(e){}
-}
+function haptic(type) { try { if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred(type || 'light'); } catch(e){} }
 
 function buyLife() {
     if (isBuyingLife || !savedState) return;
@@ -1321,10 +1260,7 @@ function buyLife() {
     var btn = document.getElementById('buyLifeBtn');
     btn.textContent = '⏳ Создание...';
     buyItem('extra_life');
-    setTimeout(function() {
-        btn.textContent = '💚 Вторая жизнь · 5⭐';
-        isBuyingLife = false;
-    }, 1000);
+    setTimeout(function() { btn.textContent = '💚 Вторая жизнь · 5⭐'; isBuyingLife = false; }, 1000);
 }
 
 function startCountdown(callback) {
@@ -1334,14 +1270,9 @@ function startCountdown(callback) {
     var count = 3;
     function tickCount() {
         txt.textContent = count > 0 ? String(count) : 'GO!';
-        el.classList.remove('pulse');
-        void el.offsetWidth;
-        el.classList.add('pulse');
+        el.classList.remove('pulse'); void el.offsetWidth; el.classList.add('pulse');
         haptic('medium');
-        if (count < 0) {
-            el.classList.remove('show'); el.classList.remove('pulse');
-            callback(); return;
-        }
+        if (count < 0) { el.classList.remove('show'); el.classList.remove('pulse'); callback(); return; }
         count--;
         setTimeout(tickCount, 1000);
     }
@@ -1363,8 +1294,7 @@ function reviveSnake() {
     running = true;
     lastTick = 0; lastFrameTime = 0;
     particles = [];
-    placeFood();
-    updateHud();
+    placeFood(); updateHud();
     showScreen('gameScreen');
     if (rafId) cancelAnimationFrame(rafId);
     rafId = requestAnimationFrame(loop);
@@ -1372,13 +1302,7 @@ function reviveSnake() {
 
 function bindDirButton(el) {
     var pressed = false;
-    function down(e) {
-        e.preventDefault();
-        if (pressed) return;
-        pressed = true;
-        el.classList.add('pressed');
-        setDir(el.dataset.dir);
-    }
+    function down(e) { e.preventDefault(); if (pressed) return; pressed = true; el.classList.add('pressed'); setDir(el.dataset.dir); }
     function up() { pressed = false; el.classList.remove('pressed'); }
     el.addEventListener('touchstart', down, {passive: false});
     el.addEventListener('touchend', up);
@@ -1413,6 +1337,8 @@ document.addEventListener('keydown', function(e) {
 window.addEventListener('resize', function() { if (running) initCanvas(); });
 
 setupUser();
+checkSets();
+updateHero();
 if (tg && tg.CloudStorage) {
     tg.CloudStorage.getItem('snakeHighScore', function(err, val) {
         if (!err && val) {
@@ -1420,12 +1346,12 @@ if (tg && tg.CloudStorage) {
             if (cs > highScore) {
                 highScore = cs;
                 localStorage.setItem('snakeHigh', String(highScore));
-                document.getElementById('menuHigh').textContent = highScore;
+                updateHero();
+                checkSets();
             }
         }
     });
 }
-document.getElementById('menuHigh').textContent = highScore;
 </script>
 </body>
 </html>
